@@ -1,9 +1,28 @@
-/* État d'interface partagé entre les écrans (filtres, onglets, brouillons non persistés) : survit à la navigation, pas au rechargement. */
+/* État d'interface partagé entre les écrans (filtres, onglets, brouillons) : survit à la navigation et au rechargement (localStorage). */
 import { useCallback, useSyncExternalStore } from 'react'
 
-const store = new Map<string, unknown>()
+const UI_KEY = 'equalis-travaux-ui-v1'
+
+const loadStore = (): Map<string, unknown> => {
+  try {
+    const o = JSON.parse(localStorage.getItem(UI_KEY) || 'null') as Record<string, unknown> | null
+    if (o && typeof o === 'object') return new Map(Object.entries(o))
+  } catch { /* stockage indisponible ou corrompu : on repart à vide */ }
+  return new Map()
+}
+
+const store = loadStore()
 const listeners = new Set<() => void>()
-const emit = () => listeners.forEach(l => l())
+let saveTimer: number | undefined
+export const flushUi = () => {
+  window.clearTimeout(saveTimer)
+  try { localStorage.setItem(UI_KEY, JSON.stringify(Object.fromEntries(store))) } catch { /* stockage plein : ignoré */ }
+}
+const emit = () => {
+  window.clearTimeout(saveTimer)
+  saveTimer = window.setTimeout(flushUi, 250)
+  listeners.forEach(l => l())
+}
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l) } }
 
 export const clearUi = () => { store.clear(); emit() }

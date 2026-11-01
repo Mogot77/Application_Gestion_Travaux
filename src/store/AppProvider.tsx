@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import type { AppState } from '../types'
 import { seed } from '../data/seed'
 import { AppContext, type AppCtx, type ModalSpec, type ToastKind } from './context'
-import { clearUi } from './ui'
+import { clearUi, flushUi } from './ui'
 import { Modal } from '../components/ui/Modal'
 import { Toasts, type ToastItem } from '../components/ui/Toasts'
 
@@ -61,14 +61,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const openModal = useCallback((spec: ModalSpec) => setModal(spec), [])
 
   useEffect(() => {
-    const onUnload = () => saveNow()
+    const onUnload = () => { saveNow(); flushUi() }
+    const onVisibility = () => { if (document.visibilityState === 'hidden') onUnload() }
     const onHash = () => setModal(null)
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setModal(null) }
     window.addEventListener('beforeunload', onUnload)
+    window.addEventListener('pagehide', onUnload)
+    document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('hashchange', onHash)
     document.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('beforeunload', onUnload)
+      window.removeEventListener('pagehide', onUnload)
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('hashchange', onHash)
       document.removeEventListener('keydown', onKey)
     }
