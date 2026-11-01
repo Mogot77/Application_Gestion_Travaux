@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { Demande, DraftDemande, SinistreInfo, UrgenceKey } from '@/types'
+import type { AppState, Demande, DraftDemande, SinistreInfo, UrgenceKey } from '@/types'
 import { useApp } from '@/hooks/useApp'
 import { go, useRoute } from '@/hooks/useRoute'
 import Layout from '@/components/Layout'
@@ -24,14 +24,15 @@ const NewRequest = () => {
 
   if (!dr || needInit) return <Layout />
 
-  const upd = (fn: (d: DraftDemande) => void) => mutate(s => { if (s.draft) { fn(s.draft); s.draft.savedAt = now() } })
+  // `fn` s'exécute dans le reducer (Immer) : il ne doit jamais appeler `getS()` (Redux l'interdit), il reçoit l'état `s` à la place.
+  const upd = (fn: (d: DraftDemande, s: AppState) => void) => mutate(s => { if (s.draft) { fn(s.draft, s); s.draft.savedAt = now() } })
   const model = buildNewRequestModel(S, dr)
 
-  const onLog = (id: string) => upd(d => {
+  const onLog = (id: string) => upd((d, st) => {
     d.logementId = id
-    const l = getS().logements.find(x => x.id === id)
+    const l = st.logements.find(x => x.id === id)
     if (l) { d.acces = l.acces || d.acces; d.numCles = l.cles !== '—' ? l.cles : '' }
-    const p = piecesFor(getS(), l)
+    const p = piecesFor(st, l)
     d.lignes.forEach(li => { if (li.piece && ![...p.pieces, ...p.autres].includes(li.piece)) li.piece = '' })
   })
   const setLine = (i: number, k: LineField, v: string) => upd(d => {
