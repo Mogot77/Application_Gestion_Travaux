@@ -49,8 +49,8 @@ partage non-rendu (types/constants/helpers) reste dans `src/<couche>/`.
    default` dans un fichier composant**. C'est l'**`index.ts` qui fournit le
    default** : `export { X as default } from './X'`. Importer via
    `import X from '../X'` (le dossier), jamais le fichier brut. `types.ts` contient
-   le type des props au minimum. Si un fichier serait vraiment vide, le creer
-   quand meme — mais remonter dans `src/<couche>/` partagee tout ce qui sert a un
+   le type des props au minimum. Si un fichier serait vraiment vide, ne pas le creer
+   (pas de fichier `export {}` de remplissage) — mais remonter dans `src/<couche>/` partagee tout ce qui sert a un
    **deuxieme** composant.
 
 2. **Fonctions flechees partout.** Composants, handlers, helpers = consts
