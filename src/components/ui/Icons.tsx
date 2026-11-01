@@ -16,7 +16,6 @@ export const IcList = ({ c }: { c?: string }) => <Svg s={22} c={c} d={<path d="M
 export const IcHome = ({ c }: { c?: string }) => <Svg s={22} c={c} d={<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />} />
 export const IcPlus = ({ c }: { c?: string }) => <Svg s={22} c={c} d={<><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></>} />
 export const IcUser = ({ c }: { c?: string }) => <Svg s={22} c={c} d={<><circle cx="12" cy="8" r="4" /><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6" /></>} />
-export const IcPhone = ({ c = 'currentColor' }: { c?: string }) => <Svg s={15} c={c} d={<><rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" /></>} />
 export const IcNav = ({ c = '#1D4ED8' }: { c?: string }) => <Svg s={18} c={c} d={<path d="M3 11l18-8-8 18-2-8z" />} />
 export const IcTel = ({ c = '#1D4ED8' }: { c?: string }) => <Svg s={18} c={c} d={<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />} />
 export const IcPlay = ({ c = '#fff' }: { c?: string }) => <Svg s={20} c={c} d={<path d="M7 4l13 8-13 8z" />} />

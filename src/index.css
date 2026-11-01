@@ -241,38 +241,6 @@
 
 /* ---------- Mobile ---------- */
 @layer components {
-  .mshell { @apply min-h-screen bg-[#e5e7eb] flex flex-col items-center p-0 sm:p-4; }
-  .mshell-bar { @apply w-[390px] max-w-full flex justify-between items-center mb-2.5 text-[13px] px-3 py-2 sm:p-0; }
-  .phone { @apply w-full sm:w-[390px] max-w-full h-[calc(100vh-40px)] sm:h-[844px] sm:max-h-[calc(100vh-70px)] bg-page sm:rounded-[28px] sm:border-8 border-ink flex flex-col overflow-hidden sm:shadow-[0_20px_50px_rgba(17,24,39,.25)]; }
-  .phone-scroll { @apply flex-1 overflow-y-auto; }
-  .mhead { @apply bg-nav text-white px-4 pt-4 pb-3.5; }
-  .mhead .s { @apply text-xs text-[#c3cad4]; }
-  .mhead h1 { @apply text-xl text-white mt-0.5; }
-  .mhead.white { @apply bg-white text-ink border-b border-line flex items-center gap-3; }
-  .mhead.white h1 { @apply text-ink text-[17px]; }
-  .mhead.white .s { @apply text-muted; }
-  .mback { @apply inline-flex size-9 items-center justify-center rounded-full bg-page no-underline shrink-0; }
-  .mbody { @apply px-4 py-3.5 flex flex-col gap-3; }
-  .days { @apply flex gap-1.5 px-3 py-2.5 bg-white border-b border-line; }
-  .day { @apply flex-1 flex flex-col items-center gap-0.5 py-2 rounded-[10px] text-[11px] text-muted no-underline border-0 bg-transparent cursor-pointer; }
-  .day b { @apply text-base text-ink; }
-  .day.on { @apply bg-brand text-[#dce6fb]; }
-  .day.on b { @apply text-white; }
-  .mc { @apply block bg-white border border-line rounded-xl p-3.5 no-underline text-ink text-[13px] hover:text-ink; }
-  .mc.run { @apply border-2 border-good; }
-  .mc.done { @apply opacity-60; }
-  .mc .r1 { @apply flex justify-between items-center gap-2 mb-1.5; }
-  .msec { @apply bg-white border border-line rounded-xl p-3.5 text-sm; }
-  .msec .k { @apply text-[11px] font-bold tracking-[.04em] text-muted uppercase mb-2; }
-  .mbtn { @apply flex items-center justify-center gap-2 w-full h-[52px] rounded-xl text-base font-bold border-0 bg-brand text-white no-underline cursor-pointer hover:text-white; }
-  .mbtn.green { @apply bg-good; }
-  .mbtn.ghost { @apply bg-white text-danger border border-danger-line h-[46px] text-sm hover:text-danger; }
-  .mbtn.sec { @apply bg-white text-brand border border-field h-[46px] text-sm hover:text-brand; }
-  .mbtn:disabled { @apply opacity-45 cursor-not-allowed; }
-  .tabbar { @apply flex border-t border-line bg-white shrink-0; }
-  .tabbar a { @apply flex-1 flex flex-col items-center gap-[3px] pt-2 pb-3 text-[11px] text-muted no-underline min-h-14; }
-  .tabbar a.on { @apply text-brand font-semibold; }
-  .timer { @apply text-[40px] font-bold tabular-nums; }
   .pnote { @apply flex gap-1.5; }
   .pnote button { @apply flex-1 h-11 border border-field rounded-lg bg-white text-[15px] font-bold cursor-pointer; }
   .pnote button.on { @apply bg-brand border-brand text-white; }
@@ -286,8 +254,6 @@
   .sig { @apply w-full h-[140px] border border-dashed border-faint rounded-lg bg-white touch-none block; }
   .chkrow { @apply flex gap-2.5 items-center py-[7px] text-sm; }
   .chkrow input { @apply size-[18px]; }
-  .ok-hero { @apply flex flex-col items-center gap-1.5 px-4 pt-7 pb-2.5 text-center; }
-  .ok-hero .ic { @apply size-16 rounded-full bg-good-soft flex items-center justify-center; }
 }
 
 /* ---------- Fiche A4 ---------- */

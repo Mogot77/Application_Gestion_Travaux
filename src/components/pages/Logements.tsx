@@ -172,7 +172,7 @@ export function Logements({ id }: { id?: string }) {
               </div>
               <div className="row !gap-2">
                 <button className="btn" onClick={() => setTab('docs')}>Ouvrir le dossier documents</button>
-                <a className="btn" href={`#/m/constat?log=${sel.id}`}>Nouveau constat</a>
+                <a className="btn" href={`#/constat/new?log=${sel.id}`}>Nouveau constat</a>
                 <a className="btn btnp" href={`#/demande/new?log=${sel.id}`}>Nouvelle demande</a>
               </div>
             </div>

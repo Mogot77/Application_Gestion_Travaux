@@ -27,7 +27,7 @@ export function Entreprises() {
           <p className="muted m-0">{S.entreprises.length} entreprises · {totalAttente} devis en attente de dépôt. Chaque entreprise dépose son devis depuis son portail personnel.</p></div>
       </div>
       <div className="row mb-4 !gap-2.5">
-        <label className="flt w-[280px] cursor-text"><IcSearch />
+        <label className="flt w-full cursor-text sm:w-[280px]"><IcSearch />
           <input className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="Nom, ville, activité…" onChange={e => setUi({ q: e.target.value })} />
         </label>
         {FILTERS.map(([k, l]) => <button key={k} className={`btn btn-sm ${ui.f === k ? 'btnp' : ''}`} onClick={() => setUi({ f: k })}>{l}</button>)}

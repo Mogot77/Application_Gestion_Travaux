@@ -82,7 +82,6 @@ export function Ouvriers() {
       if (s.avenir) return toast(`${o.nom} a ${s.avenir} rendez-vous à venir : déplacez-les d'abord dans le planning`, 'err')
       mutate(st => {
         const t = getOuv(st, o.id); if (t) t.actif = false
-        if (st.mobile.ouvrierId === o.id) st.mobile.ouvrierId = ouvActifs(st)[0]?.id || ''
       }, { now: true })
       toast(`${o.nom} désactivé`)
     } else {
@@ -99,7 +98,6 @@ export function Ouvriers() {
       onOk() {
         mutate(st => {
           st.ouvriers = st.ouvriers.filter(x => x.id !== o.id)
-          if (st.mobile.ouvrierId === o.id) st.mobile.ouvrierId = ouvActifs(st)[0]?.id || ''
         }, { now: true })
         toast(`${o.nom} supprimé`)
       },
@@ -110,12 +108,12 @@ export function Ouvriers() {
     <Layout active="ouvriers">
       <div className="pagehead">
         <div><h1 className="mb-1">Ouvriers du service technique</h1>
-          <p className="muted m-0">{actifs.length} actif{actifs.length > 1 ? 's' : ''}{nInactifs ? ` · ${nInactifs} désactivé${nInactifs > 1 ? 's' : ''}` : ''}. Les ouvriers actifs apparaissent dans le planning, la carte des tournées et l'application mobile.</p></div>
+          <p className="muted m-0">{actifs.length} actif{actifs.length > 1 ? 's' : ''}{nInactifs ? ` · ${nInactifs} désactivé${nInactifs > 1 ? 's' : ''}` : ''}. Les ouvriers actifs apparaissent dans le planning et la carte des tournées.</p></div>
         {can && <button className="btn btnp" onClick={() => openForm(null)}>+ Nouvel ouvrier</button>}
       </div>
       {!can && <div className="note mb-4">Lecture seule pour les établissements.</div>}
       <div className="row mb-4 !gap-2.5">
-        <label className="flt w-[280px] cursor-text"><IcSearch />
+        <label className="flt w-full cursor-text sm:w-[280px]"><IcSearch />
           <input className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="Nom, métier, téléphone…" onChange={e => setUi({ q: e.target.value })} />
         </label>
         {nInactifs > 0 && <label className="row s13 !gap-1.5"><input type="checkbox" checked={ui.inactifs} onChange={e => setUi({ inactifs: e.target.checked })} /> Afficher les ouvriers désactivés</label>}

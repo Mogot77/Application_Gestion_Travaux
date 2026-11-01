@@ -33,8 +33,8 @@ export function Constats() {
   return (
     <Layout active="constats">
       <div className="pagehead">
-        <div><h1 className="mb-1">Constats d'état des logements</h1><p className="muted m-0">Déclarés par tout salarié depuis son téléphone. Ils décrivent le logement, jamais le ménage.</p></div>
-        <a className="btn btnp" href="#/m/constat">+ Nouveau constat</a>
+        <div><h1 className="mb-1">Constats d'état des logements</h1><p className="muted m-0">Déclarés par tout salarié. Ils décrivent le logement, jamais le ménage.</p></div>
+        <a className="btn btnp" href="#/constat/new">+ Nouveau constat</a>
       </div>
       <div className="row mb-4 !gap-2">
         {sel('prop', 'Propreté (0 à 6)', [0, 1, 2, 3, 4, 5].map(n => ({ v: n, l: `Propreté ≤ ${n}` })))}

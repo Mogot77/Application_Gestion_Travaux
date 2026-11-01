@@ -111,7 +111,7 @@ export function Demandes() {
         })}
       </nav>
       <div className="row mb-4 !gap-2">
-        <label className="flt w-[280px] cursor-text"><IcSearch />
+        <label className="flt w-full cursor-text sm:w-[280px]"><IcSearch />
           <input id="dq" className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="N°, logement, adresse…" onChange={e => setUi({ q: e.target.value, page: 0 })} />
         </label>
         {S.profil !== 'etab' && fsel('etab', 'Établissement', uniqueEtabs(S))}

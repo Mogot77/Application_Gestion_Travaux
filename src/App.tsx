@@ -3,6 +3,7 @@ import { AppProvider } from './store/AppProvider'
 import { AuthProvider } from './store/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import { Login } from './components/pages/Login'
+import { NouveauConstat } from './components/pages/NouveauConstat'
 import { Utilisateurs } from './components/pages/Utilisateurs'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useRoute } from './hooks/useRoute'
@@ -23,9 +24,6 @@ import { Classement } from './components/pages/Classement'
 import { Referentiels } from './components/pages/Referentiels'
 import { Ouvriers } from './components/pages/Ouvriers'
 import { Carte } from './components/pages/Carte'
-import { MesMissions, MissionDetail } from './components/mobile/Missions'
-import { Terminer } from './components/mobile/Terminer'
-import { ConstatMobile, ProfilMobile, RapportMobile, Supplement } from './components/mobile/Suite'
 
 type Render = (p: string[], q: Record<string, string>) => ReactNode
 
@@ -38,6 +36,7 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/logements$/, () => <Logements />],
   [/^\/logement\/([\w-]+)$/, p => <Logements id={p[0]} />],
   [/^\/constats$/, () => <Constats />],
+  [/^\/constat\/new$/, () => <NouveauConstat />],
   [/^\/tableau$/, () => <Tableau />],
   [/^\/entreprises$/, () => <Entreprises />],
   [/^\/consultation\/([\w-]+)$/, p => <Consultation id={p[0]} />],
@@ -49,13 +48,6 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/ouvriers$/, () => <Ouvriers />],
   [/^\/utilisateurs$/, () => <Utilisateurs />],
   [/^\/carte$/, () => <Carte />],
-  [/^\/m\/missions$/, (_p, q) => <MesMissions sig={q.sig} />],
-  [/^\/m\/mission\/([\w-]+)$/, p => <MissionDetail rid={p[0]} />],
-  [/^\/m\/terminer\/([\w-]+)$/, p => <Terminer rid={p[0]} />],
-  [/^\/m\/supplement\/([\w-]+)$/, p => <Supplement rid={p[0]} />],
-  [/^\/m\/rapport\/([\w-]+)$/, p => <RapportMobile rid={p[0]} />],
-  [/^\/m\/constat$/, () => <ConstatMobile />],
-  [/^\/m\/profil$/, () => <ProfilMobile />],
 ]
 
 function Router() {

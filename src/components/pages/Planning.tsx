@@ -274,10 +274,6 @@ function PanelRdv({ r, setUi }: { r: Rdv; setUi: SetUi }) {
     })
     setUi({ rdvSel: '', demandeId: d.id, ouvrierId: r.ouvrierId, date: r.date, debut: r.debut })
   }
-  const mobile = () => {
-    mutate(s => { s.mobile = { ouvrierId: r.ouvrierId, day: r.date } })
-    go('#/m/mission/' + r.id)
-  }
 
   return (
     <>
@@ -291,7 +287,6 @@ function PanelRdv({ r, setUi }: { r: Rdv; setUi: SetUi }) {
       {r.rapport && <div className="note">Temps passé {fdur(r.rapport.tempsMin)} · {r.rapport.conso.length} consommable(s)</div>}
       <div className="row !gap-2">
         {d && <a className="btn btn-sm" href={`#/fiche/${d.id}`}>{r.rapport ? 'Rapport' : 'Fiche'}</a>}
-        {d && r.etat !== 'imp' && <button className="btn btn-sm" onClick={mobile}>Voir sur mobile</button>}
         {d && r.etat === 'planned' && <button className="btn btn-sm" onClick={move}>Déplacer</button>}
         {r.etat === 'planned' && <button className="btn btn-sm btnd" onClick={cancel}>Annuler</button>}
       </div>

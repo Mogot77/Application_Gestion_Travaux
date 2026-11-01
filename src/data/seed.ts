@@ -1,5 +1,4 @@
 import type { AppState, Constat, Entreprise, Logement, Ouvrier } from '../types'
-import { TODAY } from '../lib/dates'
 import { REF_DEFAULT } from './refs'
 
 const LOGEMENTS_RAW: string[][] = [
@@ -70,7 +69,6 @@ export const seed = (): AppState => {
     histoMois: {},
     draft: null,
     profil: 'coord',
-    mobile: { ouvrierId: 'o1', day: TODAY },
     seq: { di: 0, ce: 233, cs: 0, ft: 0, bc: 0 },
   }
 }

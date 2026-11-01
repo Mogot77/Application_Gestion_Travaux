@@ -308,7 +308,6 @@ export interface AppState {
   histoMois: Record<string, number>
   draft: DraftDemande | null
   profil: ProfilKey
-  mobile: { ouvrierId: string; day: string }
   seq: { di: number; ce: number; cs: number; ft: number; bc: number }
 }
 
