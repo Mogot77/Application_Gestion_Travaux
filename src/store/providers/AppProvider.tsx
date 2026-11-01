@@ -2,17 +2,18 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import Modal from '@/components/Modal'
 import Toasts from '@/components/ui/Toasts'
-import { createAppStore } from './index'
-import { startEffects } from './effects'
+import { createAppStore } from '@/store'
+import { startEffects } from '@/store/listeners'
+import { selectReady, selectSyncFailed, selectToasts } from '@/store/selectors'
 import { useAppSelector } from '@/hooks/useAppStore'
 import { useModal } from '@/hooks/useModal'
-import { closeModal } from '@/helpers/modal'
+import { closeModal } from '@/store/local/modal'
 
 /** Affiche les données une fois chargées, plus la modale et les messages. */
 const Shell = ({ children }: { children: ReactNode }) => {
-  const ready = useAppSelector(s => s.ui.ready)
-  const syncFailed = useAppSelector(s => s.ui.syncFailed)
-  const toasts = useAppSelector(s => s.ui.toasts)
+  const ready = useAppSelector(selectReady)
+  const syncFailed = useAppSelector(selectSyncFailed)
+  const toasts = useAppSelector(selectToasts)
   const modal = useModal()
   return (
     <>

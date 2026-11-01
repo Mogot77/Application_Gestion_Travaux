@@ -1,6 +1,6 @@
 import type { AppState } from '@/types'
 import { ROLES, type Role } from '@/helpers/roles'
-import type { Play } from './authContext'
+import type { Play } from '@/store/providers/authContext'
 
 export type MeInput = { role: Role | null; etab: string; email: string; displayName?: string | null; play: Play | null }
 

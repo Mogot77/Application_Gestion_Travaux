@@ -15,15 +15,14 @@ Application de gestion de travaux (demandes, planning, logements, ouvriers, cons
 ## Structure (`src/`)
 - `App.tsx` : routes (routage par hash via `hooks/useRoute.ts`)
 - `types.ts` : toutes les interfaces du modèle de données
-- `data/` : référentiels (`refs.ts`) et jeu de démo (`seed.ts`)
-- `helpers/` : fonctions partagées par plusieurs composants (domain, dates, csv, photos, carto, docs, planning, firebase, sync, cloudState, users, roles, uiState, modal). Une fonction utilisée par un seul composant va dans le `helpers.ts` de ce composant.
-- `store/` : Redux Toolkit (`appSlice` données métier, `uiSlice` toasts/chargement, `effects` sauvegarde + Firestore + photos, `AppProvider`) ; `AuthProvider`
+- `helpers/` : fonctions partagées par plusieurs composants (domain, dates, csv, photos, carto, docs, planning, cloudState, roles, emptyState...). Une fonction utilisée par un seul composant va dans le `helpers.ts` de ce composant.
+- `store/` : Redux Toolkit : `index` (store), `reducers/` (app, ui), `selectors/`, `thunks/`, `listeners/` (sauvegarde, Firestore, photos, cycle de vie), `queries/` (Firestore, cache local, utilisateurs), `local/` (état d'UI, modale), `providers/` (AppProvider, AuthProvider)
 - `hooks/` : hooks partagés : `useApp` (façade sur le store : `S`, `mutate`, `toast`, `openModal`...), `useAuth`, `useRoute`, `useUiState`, `useModal`, `useAppStore`. Un hook propre à un composant irait dans son dossier.
 - `components/` : un dossier-module par composant (`index.ts`, `<Nom>.tsx`, `types.ts`, `helpers.ts`, `constants.ts`, voir `.claude/skills/react-structure`), noms de composants en anglais, commentaires de code en français ; écrans et composants métier à la racine, petits composants purs dans `ui/`. Import via l'alias `@/` (= `src/`) et le default du dossier.
 - `index.css` : thème Tailwind et classes réutilisables (`card`, `btn`, `chip`, ...)
 
 ## Conventions et points d'attention
-- Clé de stockage local `equalis-travaux-v2` (cache + profil + photos pas encore envoyées), format `{v:1, ...}` : ne pas la changer sans migration. Source de vérité : Firestore (projet `travaux-2975b`, règles dans `firestore.rules`, admin d'origine codé en dur dans les règles et dans `helpers/users.ts`).
+- Clé de stockage local `equalis-travaux-v2` (cache + profil + photos pas encore envoyées), format `{v:1, ...}` : ne pas la changer sans migration. Plus aucun jeu de démo ni référentiel dans le code : tout vient de Firestore (référentiels dans `ref/main`, éditables depuis l'écran Référentiels). Source de vérité : Firestore (projet `travaux-2975b`, règles dans `firestore.rules`, admin d'origine codé en dur dans les règles et dans `store/queries/users.ts`).
 - Photos : `helpers/photos.ts` redimensionne puis envoie sur Cloudinary (preset unsigned `travaux`, cloud `dullbsehq`) ; seule l'URL est stockée dans Firestore. Variables `VITE_CLOUDINARY_CLOUD` / `VITE_CLOUDINARY_PRESET` : `.env.local` en dev (voir `.env.example`), *Variables* GitHub Actions en prod. Sans elles, ou hors ligne, la photo reste une data-URL locale, jamais envoyée à Firestore (`cloudState.ts`), puis envoyée par `AppProvider` au chargement et au retour du réseau. Pas de suppression côté Cloudinary (preset unsigned) : les photos orphelines se nettoient à la main.
 - `TODAY = '2026-10-29'` est une date de référence de démo, indépendante de la date réelle.
 - `mutate(fn)` : `fn` mute directement l'état (Immer, auto-freeze désactivé) et ne doit pas dépendre de sa valeur de retour.

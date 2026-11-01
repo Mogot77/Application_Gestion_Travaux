@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import { getUi, patchUi, subscribeUi } from '@/helpers/uiState'
+import { getUi, patchUi, subscribeUi } from '@/store/local/uiState'
 
 /** État d'interface persistant (filtres, onglets, brouillons) lié à une clé : survit à la navigation et au rechargement. */
 export const useUiState = <T extends object>(key: string, initial: T): [T, (patch: Partial<T> | ((cur: T) => Partial<T>)) => void] => {

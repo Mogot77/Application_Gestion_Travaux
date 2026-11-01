@@ -2,7 +2,7 @@ import { useEffect, type DragEvent } from 'react'
 import { useApp } from '@/hooks/useApp'
 import { go, useRoute } from '@/hooks/useRoute'
 import { useUiState } from '@/hooks/useUiState'
-import { getUi, patchUi } from '@/helpers/uiState'
+import { getUi, patchUi } from '@/store/local/uiState'
 import Layout from '@/components/Layout'
 import Empty from '@/components/ui/Empty'
 import {

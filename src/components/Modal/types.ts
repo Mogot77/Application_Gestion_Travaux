@@ -1,3 +1,3 @@
-import type { ModalSpec } from '@/store/context'
+import type { ModalSpec } from '@/store/types'
 
 export type ModalProps = { spec: ModalSpec; onClose: () => void }

@@ -1,7 +1,7 @@
 import { collection, doc, onSnapshot, writeBatch, type DocumentData } from 'firebase/firestore'
-import type { AppState } from '../types'
-import { db } from './firebase'
-import { ALL_COLS, canon, pruneTo, removeDoc, toDocs, upsertDoc } from './cloudState'
+import type { AppState } from '@/types'
+import { db } from '@/store/queries/firebase'
+import { ALL_COLS, canon, pruneTo, removeDoc, toDocs, upsertDoc } from '@/helpers/cloudState'
 
 export type SyncOptions = {
   /** État local courant (importé dans Firestore si la base est vide). */

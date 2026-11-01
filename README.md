@@ -82,8 +82,8 @@ flowchart LR
 ### Flux de données
 
 1. **Connexion** : Google via Firebase Auth ; l'e-mail doit figurer dans la collection `users` (liste blanche, vérifiée par `firestore.rules`).
-2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/effects` démarre `helpers/sync`, qui s'abonne en temps réel (`onSnapshot`) aux collections Firestore.
-3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Le listener middleware sauvegarde le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits (par lots).
+2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/listeners` démarre `store/queries/appSync`, qui s'abonne en temps réel (`onSnapshot`) aux collections Firestore.
+3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Les listeners du store sauvegardent le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits (par lots).
 4. **Photos** : `helpers/photos` redimensionne l'image et l'envoie à Cloudinary ; seule l'URL est stockée dans Firestore, donc partagée entre appareils. Hors ligne (ou sans configuration), la photo reste une data-URL locale, jamais envoyée à Firestore, puis envoyée au chargement suivant ou au retour du réseau.
 
 ### Collections Firestore
@@ -96,12 +96,11 @@ flowchart LR
 src/
 ├── App.tsx            routes (hash)
 ├── types.ts           types du modèle de données
-├── data/              référentiels (refs.ts) et jeu de démo (seed.ts)
 ├── helpers/           fonctions partagées par plusieurs composants (domain, dates, csv, photos,
-│                      carto, docs, planning, firebase, sync, cloudState, users, roles ...)
-├── store/             Redux Toolkit : appSlice (données), uiSlice (toasts, chargement),
-│                      effects (sauvegarde, Firestore, photos), AppProvider ;
-│                      AuthProvider
+│                      carto, docs, planning, cloudState, roles, emptyState ...)
+├── store/             Redux Toolkit : index (store), reducers/ (app, ui), selectors/, thunks/,
+│                      listeners/ (sauvegarde, Firestore, photos, cycle de vie), queries/ (Firestore,
+│                      cache local, utilisateurs), local/ (état d'UI, modale), providers/
 ├── hooks/             hooks partagés : useApp (façade sur le store), useAuth, useRoute,
 │                      useUiState, useModal, useAppStore (hooks Redux typés)
 ├── components/        un dossier par composant : index.ts, <Nom>.tsx, types.ts,

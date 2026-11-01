@@ -1,6 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore'
-import { db } from './firebase'
-import { normRole, type Role } from './roles'
+import { db } from '@/store/queries/firebase'
+import { normRole, type Role } from '@/helpers/roles'
 
 export type { Role }
 

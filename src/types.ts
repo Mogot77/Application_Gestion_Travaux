@@ -41,6 +41,12 @@ export type Referentiels = {
   assureurs: string[]
   motifsAcces: string[]
   suitesSupp: SuiteSuppRef[]
+  /** Coordonnées (latitude, longitude) du centre des villes, en repli quand un logement n'est pas géolocalisé. */
+  villes: Record<string, [number, number]>
+  /** Code département -> libellé du dossier de classement. */
+  depts: Record<string, string>
+  /** Migration ponctuelle des villes/départements du code vers Firestore (voir store/listeners/refsMigration.ts). */
+  refsMigrated?: boolean
 }
 
 export type Logement = {

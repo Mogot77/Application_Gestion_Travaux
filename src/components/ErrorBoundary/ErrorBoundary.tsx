@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo } from 'react'
 import { ReactReduxContext } from 'react-redux'
-import { resetDemo } from '@/store/appSlice'
+import { resetLocal } from '@/store/thunks'
 import type { AppDispatch } from '@/store'
 import type { ErrorBoundaryProps, ErrorBoundaryState } from './types'
 
@@ -22,7 +22,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           <p className="muted">{this.state.error.message}</p>
           <div className="row">
             <button className="btn" onClick={() => { this.setState({ error: null }); location.hash = '#/demandes' }}>Retour aux demandes</button>
-            <button className="btn btnd" onClick={() => { (this.context?.store.dispatch as AppDispatch | undefined)?.(resetDemo()); this.setState({ error: null }); location.hash = '#/demandes' }}>Réinitialiser les données de démo</button>
+            <button className="btn btnd" onClick={() => { (this.context?.store.dispatch as AppDispatch | undefined)?.(resetLocal()); this.setState({ error: null }); location.hash = '#/demandes' }}>Vider le cache local et recharger</button>
           </div>
         </div>
       </main>

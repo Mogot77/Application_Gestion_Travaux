@@ -7,7 +7,6 @@ import Button from '@/components/ui/Button'
 import HousingTree from '@/components/HousingTree'
 import { profilOf } from '@/helpers/domain'
 import { docsFor } from '@/helpers/docs'
-import { DEPTS } from '@/data/refs'
 import { TODAY, diffDays, fdy, slug } from '@/helpers/dates'
 import { RULES, VIEWS } from './constants'
 
@@ -17,7 +16,7 @@ const Documents = () => {
   const logs = S.logements.filter(l => S.profil !== 'etab' || l.etab === profilOf(S).etab)
   const byDept: Record<string, Record<string, Logement[]>> = {}
   logs.forEach(l => {
-    const dk = DEPTS[l.dept] || l.dept
+    const dk = S.ref.depts[l.dept] || l.dept
     byDept[dk] = byDept[dk] || {}
     ;(byDept[dk][slug(l.ville)] = byDept[dk][slug(l.ville)] || []).push(l)
   })

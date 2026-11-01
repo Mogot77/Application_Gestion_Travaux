@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { signInWithGoogle, signOutUser, watchAuth, type AuthUser } from '@/helpers/firebase'
-import { fetchAccess, type Role } from '@/helpers/users'
-import { AuthContext, type AuthCtx, type Play } from './authContext'
+import { signInWithGoogle, signOutUser, watchAuth, type AuthUser } from '@/store/queries/firebase'
+import { fetchAccess, type Role } from '@/store/queries/users'
+import { AuthContext, type AuthCtx, type Play } from '@/store/providers/authContext'
 
 const message = (e: unknown): string => {
   const code = (e as { code?: string })?.code

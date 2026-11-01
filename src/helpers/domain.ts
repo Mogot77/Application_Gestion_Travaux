@@ -3,7 +3,6 @@ import type {
   AppState, Demande, DemandeStatut, Entreprise, Ligne, Logement, Ouvrier, ProfilInfo, ProfilKey, Rdv, Tone, UrgenceKey,
 } from '../types'
 import { TODAY, addDays, diffDays, now, toMin, toTime } from './dates'
-import { VILLES } from '../data/refs'
 
 /* ---------- Accès ---------- */
 export const getD = (S: AppState, id?: string) => S.demandes.find(d => d.id === id)
@@ -103,6 +102,5 @@ export const batiCls = (b: string): Tone => b === 'Bon' ? 'ok' : b === 'Moyen' ?
 
 /* ---------- Divers ---------- */
 export const rapportDate = (d: Demande) => addDays(d.recueLe.slice(0, 10), 80)
-export const villeCoords = (ville: string) => VILLES[ville]
 export const uniqueEtabs = (S: AppState) => [...new Set(S.logements.map(l => l.etab))]
 export const tomorrowOf = (day: string, dow: number) => addDays(day, dow === 5 ? 3 : 1)

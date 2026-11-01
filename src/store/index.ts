@@ -1,15 +1,12 @@
-import { combineReducers, configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
+import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { setAutoFreeze } from 'immer'
-import app, { mutated, remoteApplied } from './appSlice'
-import ui from './uiSlice'
-import { loadState } from './persistence'
+import { rootReducer, mutated, remoteApplied } from '@/store/reducers'
+import { loadState } from '@/store/queries/localCache'
 
 // L'ancien état n'était jamais gelé : on garde ce comportement (certains écrans trient/modifient des copies de l'état).
 setAutoFreeze(false)
 
-const rootReducer = combineReducers({ app, ui })
-
-export type RootState = ReturnType<typeof rootReducer>
+export type { RootState } from '@/store/reducers'
 
 /** Un store par session connectée : l'état de départ est le cache local, Firestore le met ensuite à jour. */
 export const createAppStore = () => {

@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
-import { AppProvider } from './store/AppProvider'
-import { AuthProvider } from './store/AuthProvider'
+import { AppProvider } from '@/store/providers/AppProvider'
+import { AuthProvider } from '@/store/providers/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import Login from '@/components/Login'
 import NewInspection from '@/components/NewInspection'

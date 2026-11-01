@@ -1,5 +1,6 @@
 /* Découpage de l'état de l'application en documents Firestore (logique pure, sans accès réseau). */
-import type { AppState } from '../types'
+import type { AppState } from '@/types'
+import { emptyRef } from './emptyState'
 
 /** Collections dont chaque élément (champ `id`) devient un document. */
 export const ITEM_COLS = ['logements', 'ouvriers', 'entreprises', 'demandes', 'rdvs', 'constats', 'consultations'] as const
@@ -98,7 +99,7 @@ export function graftPhotos(target: unknown, source: unknown): void {
 /** Applique un document distant (ajout/modification) à l'état. */
 export function upsertDoc(s: AppState, col: string, data: Rec): void {
   const { _i, ...item } = data
-  if (col === 'ref') { graftPhotos(item, s.ref); s.ref = item as unknown as AppState['ref']; return }
+  if (col === 'ref') { graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as unknown as AppState['ref']; return }
   if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = item.seq as AppState['seq']; return }
   if (!(ITEM_COLS as readonly string[]).includes(col)) return
   const arr = s[col as ItemCol] as unknown as { id: string }[]

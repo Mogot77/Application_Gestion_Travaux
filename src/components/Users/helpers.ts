@@ -1,7 +1,7 @@
 import { deleteDoc, doc, onSnapshot, serverTimestamp, setDoc, collection } from 'firebase/firestore'
-import { db } from '@/helpers/firebase'
+import { db } from '@/store/queries/firebase'
 import { normRole, type Role } from '@/helpers/roles'
-import { normEmail } from '@/helpers/users'
+import { normEmail } from '@/store/queries/users'
 import { COL } from './constants'
 import type { AppUser } from './types'
 

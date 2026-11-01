@@ -1,4 +1,4 @@
-import type { ListDef } from './types'
+import type { EditResult, ListDef } from './types'
 
 // [clé, titre, qui renseigne, type] — list : tableau de chaînes, obj : tableau {k,l,d}, group : objet de listes
 export const LISTS: ListDef[] = [
@@ -6,10 +6,12 @@ export const LISTS: ListDef[] = [
   ['urgences', "Niveau d'urgence", 'Établissement · requalifiable par la coordination', 'obj'],
   ['piecesLogement', 'Pièces du logement', 'Établissement · filtrées selon la typologie (T2 : sans chambre 2 · T4 : ajoute chambre 3)', 'list'],
   ['piecesAutres', 'Pièces : autres', 'Établissement', 'list'],
+  ['piecesBureau', 'Pièces : bureaux', 'Établissement · pour les locaux de type bureau', 'list'],
   ['lots', 'Lots de travaux et natures', "Établissement · liste en cascade, alignée si possible sur les lots de l'accord-cadre", 'group'],
   ['cles', 'Mise à disposition des clés', 'Établissement', 'list'],
   ['imputations', 'Imputation de la charge', 'Coordination · par ligne', 'list'],
   ['circuits', "Circuit d'exécution", 'Coordination · par ligne', 'obj'],
+  ['suitesSupp', 'Suite des travaux supplémentaires', 'Ouvrier sur place · décision après constat', 'obj'],
   ['natSinistre', 'Nature du sinistre', 'Établissement · suivi par la coordination et la gestion locative', 'list'],
   ['assureurs', 'Assureur concerné', 'Coordination', 'list'],
   ['motifsRenvoi', 'Motifs de renvoi (à compléter)', 'Coordination · obligatoire pour renvoyer', 'list'],
@@ -18,3 +20,11 @@ export const LISTS: ListDef[] = [
   ['signalements', 'Signalements du constat', 'Tout salarié · cases à cocher, plusieurs choix', 'group'],
   ['motifsAcces', 'Motifs « accès impossible »', 'Ouvrier sur place · photo obligatoire', 'list'],
 ]
+
+/** Message affiché quand une modification est refusée. */
+export const REFUS: Record<Exclude<EditResult, 'ok'>, string> = {
+  empty: 'La valeur ne peut pas être vide',
+  dup: 'Cette valeur existe déjà',
+  last: 'La liste doit garder au moins une valeur',
+  invalid: 'Valeur invalide',
+}

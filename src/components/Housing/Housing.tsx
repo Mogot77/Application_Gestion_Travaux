@@ -11,7 +11,6 @@ import InspectionsTable from '@/components/InspectionsTable'
 import { useApp } from '@/hooks/useApp'
 import { useUiState } from '@/hooks/useUiState'
 import { CLOSED, batiCls, getLog, logAdr, piecesFor, profilOf, propCls, typoLabel } from '@/helpers/domain'
-import { DEPTS } from '@/data/refs'
 import { TODAY, diffDays, fdy, slug } from '@/helpers/dates'
 import { docsFor } from '@/helpers/docs'
 import { INIT } from './constants'
@@ -151,7 +150,7 @@ const Housing = ({ id }: HousingProps) => {
           {tab === 'constats' && <div className="card tbl-wrap"><InspectionsTable list={cs} withLog={false} /></div>}
           {tab === 'docs' && (
             <>
-              <div className="tree"><div className="text-[#94A3B8]">Travaux – Logements / {DEPTS[sel.dept]} / {slug(sel.ville)} /</div><HousingTree l={sel} open /></div>
+              <div className="tree"><div className="text-[#94A3B8]">Travaux – Logements / {S.ref.depts[sel.dept]} / {slug(sel.ville)} /</div><HousingTree l={sel} open /></div>
               <p className="muted small">Dossiers et noms créés par l'outil, jamais à la main. <a href="#/classement">Voir le plan de classement complet</a></p>
             </>
           )}

@@ -1,4 +1,4 @@
-import type { ToastKind } from '@/store/context'
+import type { ToastKind } from '@/store/types'
 
 export type ToastItem = { id: number; msg: string; kind: ToastKind }
 

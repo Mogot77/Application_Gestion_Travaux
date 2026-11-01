@@ -1,6 +1,6 @@
 import { createContext } from 'react'
-import type { AuthUser } from '@/helpers/firebase'
-import type { Role } from '@/helpers/users'
+import type { AuthUser } from '@/store/queries/firebase'
+import type { Role } from '@/store/queries/users'
 
 /** Rôle « joué » par un directeur pour voir l'application comme un autre profil. */
 export type Play = { role: Role; etab: string; ouvrierId: string }
