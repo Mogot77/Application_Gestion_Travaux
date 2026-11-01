@@ -1,31 +1,33 @@
-import { useEffect, type ReactNode } from 'react'
+import { Suspense, lazy, useEffect, type ReactNode } from 'react'
 import { AppProvider } from '@/store/providers/AppProvider'
 import { AuthProvider } from '@/store/providers/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import Login from '@/components/Login'
-import NewInspection from '@/components/NewInspection'
-import Users from '@/components/Users'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { go, useRoute } from './hooks/useRoute'
-import Requests from '@/components/Requests'
-import NewRequest from '@/components/NewRequest'
-import Qualification from '@/components/Qualification'
-import Planning from '@/components/Planning'
-import Tours from '@/components/Tours'
-import Housing from '@/components/Housing'
-import Inspections from '@/components/Inspections'
-import Dashboard from '@/components/Dashboard'
-import Consultation from '@/components/Consultation'
-import Companies from '@/components/Companies'
-import Quotes from '@/components/Quotes'
-import Portal from '@/components/Portal'
-import JobSheet from '@/components/JobSheet'
-import Documents from '@/components/Documents'
-import ReferenceData from '@/components/ReferenceData'
-import Workers from '@/components/Workers'
-import MapPage from '@/components/MapPage'
-import MySchedule from '@/components/MySchedule'
 import { ROLES, canSee, sectionOf } from '@/helpers/roles'
+
+// Chaque écran est chargé à la demande : le premier chargement ne télécharge que la connexion et le gabarit.
+const NewInspection = lazy(() => import('@/components/NewInspection'))
+const Users = lazy(() => import('@/components/Users'))
+const Requests = lazy(() => import('@/components/Requests'))
+const NewRequest = lazy(() => import('@/components/NewRequest'))
+const Qualification = lazy(() => import('@/components/Qualification'))
+const Planning = lazy(() => import('@/components/Planning'))
+const Tours = lazy(() => import('@/components/Tours'))
+const Housing = lazy(() => import('@/components/Housing'))
+const Inspections = lazy(() => import('@/components/Inspections'))
+const Dashboard = lazy(() => import('@/components/Dashboard'))
+const Consultation = lazy(() => import('@/components/Consultation'))
+const Companies = lazy(() => import('@/components/Companies'))
+const Quotes = lazy(() => import('@/components/Quotes'))
+const Portal = lazy(() => import('@/components/Portal'))
+const JobSheet = lazy(() => import('@/components/JobSheet'))
+const Documents = lazy(() => import('@/components/Documents'))
+const ReferenceData = lazy(() => import('@/components/ReferenceData'))
+const Workers = lazy(() => import('@/components/Workers'))
+const MapPage = lazy(() => import('@/components/MapPage'))
+const MySchedule = lazy(() => import('@/components/MySchedule'))
 
 type Render = (p: string[], q: Record<string, string>) => ReactNode
 
@@ -78,6 +80,9 @@ function Router() {
   return <ErrorBoundary key={path}><Requests /></ErrorBoundary>
 }
 
+/** Affiche l'écran demandé, avec un message le temps de son chargement. */
+const Screen = ({ children }: { children: ReactNode }) => <Suspense fallback={<p className="p-6 text-sm text-[#6b7280]">Chargement…</p>}>{children}</Suspense>
+
 /** Tout l'accès est réservé aux comptes Google de la liste blanche ; les données ne se chargent qu'après connexion. */
 function Gate() {
   const { user, access } = useAuth()
@@ -85,7 +90,7 @@ function Gate() {
   if (user === null || access !== 'ok') return <Login />
   return (
     <AppProvider>
-      <Router />
+      <Screen><Router /></Screen>
     </AppProvider>
   )
 }
