@@ -11,6 +11,8 @@ export type SyncOptions = {
   apply: (fn: (s: AppState) => void) => void
   onReady: () => void
   onError: (e: unknown) => void
+  /** Appelé quand une écriture réussit après un échec. */
+  onRecovered?: () => void
 }
 
 export type Sync = {
@@ -20,6 +22,9 @@ export type Sync = {
 }
 
 const BATCH = 400
+/** Une écriture refusée est retentée avec un délai croissant, puis abandonnée (ex. droits insuffisants). */
+const RETRY_MAX = 5
+const retryDelay = (n: number) => Math.min(2000 * 2 ** n, 30000)
 
 /** Synchronise l'état partagé avec Firestore.
  *  - Lecture complète (premier lancement, cache effacé, ou plus d'un jour depuis la dernière) : on écoute toutes les collections.
@@ -43,6 +48,9 @@ export function startSync(o: SyncOptions): Sync {
     for (const [p, json] of toDocs(cached, order)) known.set(p, json)
   } else order.clear()
 
+  const failedDel = new Set<string>() // suppressions dont l'écriture a échoué : à rejouer
+  let failures = 0
+  let retryTimer: number | undefined
   const missingStamp = new Set<string>() // documents sans `updatedAt` (écrits avant la synchro incrémentale)
   const waiting = new Set<string>(ALL_COLS)
   let ready = false
@@ -64,7 +72,17 @@ export function startSync(o: SyncOptions): Sync {
         }
         await b.commit()
       }
-    } catch (e) { o.onError(e) }
+      if (failures) { failures = 0; o.onRecovered?.() }
+    } catch (e) {
+      // On « oublie » ces écritures : le prochain envoi recalcule les différences et les rejoue.
+      for (const [p] of set) known.delete(p)
+      for (const p of del) failedDel.add(p)
+      o.onError(e)
+      if (failures < RETRY_MAX) {
+        window.clearTimeout(retryTimer)
+        retryTimer = window.setTimeout(() => push(o.local()), retryDelay(failures++))
+      }
+    }
   }
 
   /** Donne un `updatedAt` aux documents qui n'en ont pas, pour qu'ils soient vus par les lectures incrémentales. */
@@ -85,7 +103,8 @@ export function startSync(o: SyncOptions): Sync {
     const next = toDocs(S, order)
     const set: [string, string][] = []
     for (const [p, json] of next) if (known.get(p) !== json) { set.push([p, json]); known.set(p, json) }
-    const del: string[] = []
+    const del: string[] = [...failedDel]
+    failedDel.clear()
     for (const p of [...known.keys()]) if (!next.has(p)) { del.push(p); known.delete(p); order.delete(p) }
     if (set.length || del.length) { void write(set, del); saveCursor() }
   }
@@ -154,6 +173,6 @@ export function startSync(o: SyncOptions): Sync {
 
   return {
     push,
-    stop: () => { stopped = true; unsubs.forEach(u => u()) },
+    stop: () => { stopped = true; window.clearTimeout(retryTimer); unsubs.forEach(u => u()) },
   }
 }

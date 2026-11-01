@@ -15,7 +15,12 @@ export const syncEffect = (ctx: EffectContext): (() => void) => {
       if (errored) return
       errored = true
       store.dispatch(syncFailedSet(true))
-      store.dispatch(toast('Synchronisation impossible : vos changements ne sont pas enregistrés en ligne', 'err'))
+      store.dispatch(toast('Synchronisation impossible : nouvelle tentative automatique, vos changements restent sur cet appareil', 'err'))
+    },
+    onRecovered: () => {
+      errored = false
+      store.dispatch(syncFailedSet(false))
+      store.dispatch(toast('Synchronisation rétablie', 'ok'))
     },
   })
   return () => { cloud.sync?.stop(); cloud.sync = null }

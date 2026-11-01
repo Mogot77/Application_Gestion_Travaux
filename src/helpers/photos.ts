@@ -7,6 +7,9 @@ import { forEachPhotoString, mapPhotoStrings } from './cloudState'
 const CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD as string | undefined
 const PRESET = import.meta.env.VITE_CLOUDINARY_PRESET as string | undefined
 
+/** Émis quand une photo n'a pas pu être envoyée en ligne et reste sur cet appareil. */
+export const PHOTO_LOCAL_EVENT = 'photos:local'
+
 export const cloudinaryEnabled = !!CLOUD && !!PRESET
 export const isLocalPhoto = (p: unknown): p is string => typeof p === 'string' && p.startsWith('data:')
 
@@ -48,7 +51,10 @@ const upload = async (b: Blob): Promise<string> => {
 /** Redimensionne puis envoie la photo ; en cas d'échec réseau, renvoie une miniature locale. */
 export const readPhoto = async (file: File): Promise<string> => {
   if (cloudinaryEnabled) {
-    try { return await upload(await resize(file, 1280, 0.8)) } catch { /* repli local ci-dessous */ }
+    try { return await upload(await resize(file, 1280, 0.8)) } catch {
+      // Repli local ci-dessous ; on prévient l'utilisateur (voir listeners/photos.ts)
+      window.dispatchEvent(new Event(PHOTO_LOCAL_EVENT))
+    }
   }
   return toDataUrl(await resize(file, 640, 0.72))
 }
