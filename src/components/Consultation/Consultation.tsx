@@ -14,9 +14,10 @@ import { draftOf, newDraft } from './helpers'
 import type { ConsultationProps, TextField } from './types'
 import StepHeader from '@/components/ui/StepHeader'
 import Crumb from '@/components/ui/Crumb'
+import { reserveIds } from '@/store/queries/counters'
 
 const Consultation = ({ id }: ConsultationProps) => {
-  const { S, mutate, toast, openModal } = useApp()
+  const { S, mutate, getS, toast, openModal } = useApp()
   const d = getD(S, id)
   const existing = d?.consultationId && getCs(S, d.consultationId)
   const c = d ? draftOf(S, d.id) : undefined
@@ -67,11 +68,12 @@ const Consultation = ({ id }: ConsultationProps) => {
       onOk(fd) { upd(x => { if (x.mode !== 'devis') x.entreprises = []; x.entreprises.push(String(fd.get('e'))) }) },
     })
   }
-  const send = () => {
+  const send = async () => {
     if (!c.lignes.length) return toast('Sélectionnez au moins un poste à chiffrer', 'err')
     if (!c.entreprises.length) return toast('Sélectionnez au moins une entreprise', 'err')
     if (c.mode === 'unique' && !c.motifUnique.trim()) return toast('Motif obligatoire pour une entreprise unique', 'err')
     if (sumCrit !== 100) return toast('Les critères doivent totaliser 100 %', 'err')
+    await reserveIds(getS(), c.mode === 'accord' ? ['cs', 'bc'] : ['cs'])
     let csId = ''
     let msg = ''
     mutate(s => {

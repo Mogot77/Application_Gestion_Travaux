@@ -3,6 +3,7 @@ import type {
   AppState, Demande, DemandeStatut, Entreprise, Ligne, Logement, Ouvrier, ProfilInfo, ProfilKey, Rdv, Tone, UrgenceKey,
 } from '../types'
 import { TODAY, addDays, diffDays, now, toMin, toTime } from './dates'
+import { fallbackSuffix, formatId, takeReserved, type SeqKind } from './ids'
 
 /* ---------- Accès ---------- */
 export const getD = (S: AppState, id?: string) => S.demandes.find(d => d.id === id)
@@ -12,10 +13,12 @@ export const getEnt = (S: AppState, id?: string) => S.entreprises.find(e => e.id
 export const getCs = (S: AppState, id?: string) => S.consultations.find(c => c.id === id)
 export const ouvActifs = (S: AppState): Ouvrier[] => S.ouvriers.filter(o => o.actif !== false)
 
-export const nextId = (S: AppState, kind: keyof AppState['seq']) => {
-  const n = ++S.seq[kind]
-  const p = { di: 'DI', ce: 'CE', cs: 'CS', ft: 'FT', bc: 'BC' }[kind]
-  return `${p}-${TODAY.slice(0, 4)}-${String(n).padStart(4, '0')}`
+/** Numéro suivant d'un type. Il vient d'une réservation faite juste avant (`reserveIds`) ; sans réservation (hors ligne), un numéro de secours unique. */
+export const nextId = (S: AppState, kind: SeqKind) => {
+  const n = takeReserved(kind)
+  if (n === undefined) return formatId(kind, TODAY.slice(0, 4), fallbackSuffix())
+  S.seq[kind] = Math.max(S.seq[kind], n)
+  return formatId(kind, TODAY.slice(0, 4), n)
 }
 export const hist = (obj: { historique: { at: string; t: string }[] }, t: string) => { obj.historique.unshift({ at: now(), t }) }
 

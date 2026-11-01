@@ -9,9 +9,10 @@ import { TODAY, fday, fdur, toMin, toTime, weekStart } from '@/helpers/dates'
 import CardTag from './CardTag'
 import { fdurS, startSlots } from './helpers'
 import type { PlanPanelProps } from './types'
+import { reserveIds } from '@/store/queries/counters'
 
 const PlanPanel = ({ d, ui, setUi }: PlanPanelProps) => {
-  const { S, mutate, toast } = useApp()
+  const { S, mutate, getS, toast } = useApp()
   const [cnom, setCnom] = useState('')
   const [cqte, setCqte] = useState('1')
   const [corg, setCorg] = useState('Stock')
@@ -38,9 +39,10 @@ const PlanPanel = ({ d, ui, setUi }: PlanPanelProps) => {
     upd(x => { x.consommables.push({ nom, qte: Number(cqte) || 1, origine: corg, pris: false }) })
     setCnom(''); setCqte('1')
   }
-  const planifier = () => {
+  const planifier = async () => {
     const o = getOuv(S, ui.ouvrierId)
     if (!o || !ui.date || !ui.debut) return toast('Choisissez un ouvrier, une date et un créneau', 'err')
+    if (!getD(getS(), d.id)?.ft) await reserveIds(getS(), ['ft'])
     let rdv: Rdv | undefined
     mutate(s => {
       const x = getD(s, d.id)

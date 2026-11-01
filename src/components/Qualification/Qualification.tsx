@@ -20,9 +20,10 @@ import { TODAY, addDays, diffDays, fd, fday, fdt, fdur, ftime, now } from '@/hel
 import { readPhotos } from '@/helpers/photos'
 import type { QualificationProps } from './types'
 import Crumb from '@/components/ui/Crumb'
+import { reserveIds } from '@/store/queries/counters'
 
 const Qualification = ({ id }: QualificationProps) => {
-  const { S, mutate, toast, openModal } = useApp()
+  const { S, mutate, getS, toast, openModal } = useApp()
   const d = getD(S, id)
   const isEtab = S.profil === 'etab'
 
@@ -49,8 +50,9 @@ const Qualification = ({ id }: QualificationProps) => {
   const upd = (fn: (x: Demande) => void, persistNow = false) => mutate(s => { const x = getD(s, id); if (x) fn(x) }, { now: persistNow })
   const simple = (fn: (x: Demande) => void, msg?: string, kind: 'ok' | '' = '') => { upd(fn, true); if (msg) toast(msg, kind) }
 
-  const valider = () => {
+  const valider = async () => {
     if (d.lignes.some(l => !l.circuit)) return toast('Choisissez un circuit pour chaque ligne', 'err')
+    if (d.lignes.some(l => l.circuit === 'ST') && !getD(getS(), id)?.ft) await reserveIds(getS(), ['ft'])
     let dest = ''
     let msg = ''
     mutate(s => {
@@ -111,7 +113,8 @@ const Qualification = ({ id }: QualificationProps) => {
   const relancerBailleur = () => simple(x => hist(x, 'Relance envoyée au bailleur'), 'Relance envoyée au bailleur')
   const presteFait = () => simple(x => { x.statut = 'realisee'; x.dateIntervention = x.dateIntervention || TODAY; x.lignes.forEach(l => { l.statut = 'realisee' }); hist(x, 'Intervention du prestataire réalisée · à réceptionner') })
   const declaration = () => simple(x => hist(x, "Déclaration de sinistre envoyée à l'assureur"), 'Déclaration enregistrée')
-  const sinistreTravaux = () => {
+  const sinistreTravaux = async () => {
+    if (!getD(getS(), id)?.ft) await reserveIds(getS(), ['ft'])
     mutate(s => { const x = getD(s, id); if (!x) return; x.lignes.forEach(l => { l.circuit = 'ST' }); x.ft = x.ft || nextId(s, 'ft'); x.statut = 'a_planifier'; hist(x, 'Indemnisation actée · travaux confiés au service technique') }, { now: true })
     go('#/planning?sel=' + id)
   }

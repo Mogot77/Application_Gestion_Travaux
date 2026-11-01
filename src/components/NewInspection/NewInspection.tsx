@@ -19,11 +19,12 @@ import { readPhotos } from '@/helpers/photos'
 import { INIT, KEY } from './constants'
 import type { ConstatUi } from './types'
 import PageHead from '@/components/ui/PageHead'
+import { reserveIds } from '@/store/queries/counters'
 
 
 /** Saisie d'un constat d'état (ouvert à tout salarié). */
 const NewInspection = () => {
-  const { S, mutate, toast } = useApp()
+  const { S, mutate, getS, toast } = useApp()
   const { query: q } = useRoute()
   const [c, patch] = useUiState<ConstatUi>(KEY, INIT)
   const needReset = !!q.log && c.logementId !== q.log
@@ -35,13 +36,14 @@ const NewInspection = () => {
   const contexte = c.contexte || S.ref.contextes[0]
   const n = c.signalements.length
 
-  const save = (andCreate: boolean) => {
+  const save = async (andCreate: boolean) => {
     if (!c.logementId) return toast('Choisissez le logement', 'err')
     if (c.proprete == null) return toast('Note de propreté obligatoire', 'err')
     if (!c.bati) return toast('État du bâti obligatoire', 'err')
     const danger = c.signalements.some(s => /Chauffage d'appoint|électrique dangereuse/.test(s))
     const low = c.proprete <= 2
     const proprete = c.proprete
+    await reserveIds(getS(), ['ce'])
     let ceId = ''
     mutate(s => {
       const id = nextId(s, 'ce'); ceId = id

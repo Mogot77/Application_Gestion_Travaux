@@ -132,6 +132,7 @@ export function startSync(o: SyncOptions): Sync {
       const changes = [...snap.docChanges()].sort((a, b) => ((a.doc.data()._i as number) ?? 0) - ((b.doc.data()._i as number) ?? 0))
       if (import.meta.env.DEV) console.info(`[sync] ${incremental ? 'incrémentale' : 'complète'} ${name} : ${changes.length} document(s)`)
       for (const ch of changes) {
+        if (name === 'meta' && ch.doc.id !== 'main') continue // meta/counters : compteurs, pas des données de l'application
         // Après le chargement, les écritures locales en attente sont déjà dans l'état : on les ignore.
         if (ready && ch.doc.metadata.hasPendingWrites) continue
         const path = `${name}/${ch.doc.id}`

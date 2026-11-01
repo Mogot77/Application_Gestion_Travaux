@@ -20,6 +20,7 @@ import { URG_ON } from './constants'
 import { check, emptyLine, getCe, logLabel, newDraft } from './helpers'
 import StepHeader from '@/components/ui/StepHeader'
 import Crumb from '@/components/ui/Crumb'
+import { reserveIds } from '@/store/queries/counters'
 
 
 const NewRequest = () => {
@@ -66,8 +67,9 @@ const NewRequest = () => {
     body: <p className="m-0">Les informations et photos saisies seront perdues.</p>,
     onOk() { mutate(s => { s.draft = null }, { now: true }); go('#/demandes') },
   })
-  const send = () => {
+  const send = async () => {
     if (!ck.ok) return
+    await reserveIds(getS(), ['di'])
     let newId = ''
     mutate(s => {
       const x = s.draft

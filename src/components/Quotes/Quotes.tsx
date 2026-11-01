@@ -11,11 +11,12 @@ import { scoreCs, validerDecision } from './helpers'
 import type { DecisionResult, QuotesProps } from './types'
 import Kpi from '@/components/ui/Kpi'
 import Crumb from '@/components/ui/Crumb'
+import { reserveIds } from '@/store/queries/counters'
 
 const Muted = () => <span className="muted">—</span>
 
 const Quotes = ({ id }: QuotesProps) => {
-  const { S, mutate, toast } = useApp()
+  const { S, mutate, getS, toast } = useApp()
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const c = getCs(S, id)
   if (!c) return <Layout active="demandes"><div className="card pad empty">Consultation introuvable</div></Layout>
@@ -42,7 +43,7 @@ const Quotes = ({ id }: QuotesProps) => {
     x.decision[k] = v
   })
 
-  const soumettre = () => {
+  const soumettre = async () => {
     if (!dec.entrepriseId) return toast('Choisissez une entreprise', 'err')
     if (!sc.res[dec.entrepriseId]?.retenable) return toast('Entreprise non retenable : documents ou postes incomplets', 'err')
     if (!dec.motif.trim()) return toast('Le motif du choix est obligatoire', 'err')
@@ -51,14 +52,16 @@ const Quotes = ({ id }: QuotesProps) => {
       upd((x, s) => { x.decision = { ...dec }; x.decision.statut = 'a_valider'; hist(x, `Choix soumis à la direction : ${getEnt(s, dec.entrepriseId)?.nom} (${feur(r.montantHT)} HT)`) }, true)
       toast('Soumis à la validation de la direction', 'ok')
     } else {
+      await reserveIds(getS(), ['bc'])
       let res: DecisionResult | null = null
       mutate(s => { const x = getCs(s, c.id); if (x) { x.decision = { ...dec }; res = validerDecision(s, c.id, true) } }, { now: true })
       const done = res as DecisionResult | null
       if (done) toast(`Bon de commande ${done.bc} envoyé à ${done.ent}`, 'ok')
     }
   }
-  const validerDirection = () => {
+  const validerDirection = async () => {
     if (S.profil !== 'dir') return
+    await reserveIds(getS(), ['bc'])
     let res: DecisionResult | null = null
     mutate(s => { res = validerDecision(s, c.id, false) }, { now: true })
     const done = res as DecisionResult | null
