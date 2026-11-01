@@ -10,6 +10,7 @@ Application de gestion de travaux (demandes, planning, logements, ouvriers, cons
 - `npm run build` : `tsc -b` puis build Vite
 - `npm run lint` : ESLint
 - `npm run preview` : prévisualise le build
+- `npm run storybook` / `npm run build-storybook` : Storybook (`.storybook/`, stories `*.stories.tsx` à côté des composants) ; publié avec le site dans `/storybook` par le workflow de déploiement
 - Sous PowerShell, si `npm` est bloqué : utiliser `npm.cmd` ou `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## Structure (`src/`)

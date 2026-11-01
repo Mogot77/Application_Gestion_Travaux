@@ -4,6 +4,8 @@ Application web responsive (PC et téléphone) de gestion de travaux : demandes,
 
 🔗 **Démo en ligne : https://mogot77.github.io/Application_Gestion_Travaux/**
 
+📚 **Storybook (composants) : https://mogot77.github.io/Application_Gestion_Travaux/storybook/**
+
 ## Technologies
 
 | Domaine | Technologie |
@@ -17,6 +19,7 @@ Application web responsive (PC et téléphone) de gestion de travaux : demandes,
 | Authentification | **Firebase Auth** (connexion Google) |
 | Base de données | **Cloud Firestore** (temps réel, projet `travaux-2975b`) |
 | Photos | **Cloudinary** (envoi direct, preset *unsigned* ; l'URL est stockée dans Firestore) |
+| Composants | **Storybook 10** (catalogue des composants, publié dans `/storybook`) |
 | Qualité | **ESLint 10** (flat config, `typescript-eslint`, `react-hooks`, `react-refresh`) |
 | Déploiement | **GitHub Pages** via **GitHub Actions** (`.github/workflows/deploy.yml`) |
 | Stockage local | `localStorage` (cache des données, photos pas encore envoyées, état d'UI) |
@@ -162,6 +165,8 @@ npm run dev       # http://localhost:5173
 | `npm run build` | `tsc -b` puis build Vite |
 | `npm run lint` | ESLint |
 | `npm run preview` | prévisualise le build |
+| `npm run storybook` | Storybook en local (http://localhost:6006) |
+| `npm run build-storybook` | construit le Storybook statique |
 
 > Sous PowerShell, si `npm` est bloqué : utiliser `npm.cmd` ou `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
