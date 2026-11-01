@@ -9,3 +9,5 @@ export type HousingProps = { id?: string }
 export type InterventionsTableProps = { ds: Demande[] }
 
 export type LocationCardProps = { sel: Logement }
+
+export type HousingFormProps = { etabs: string[] }

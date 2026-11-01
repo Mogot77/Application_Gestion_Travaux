@@ -9,20 +9,23 @@ import Photo from '@/components/Photo'
 import HousingTree from '@/components/HousingTree'
 import InspectionsTable from '@/components/InspectionsTable'
 import { useApp } from '@/hooks/useApp'
+import { go } from '@/hooks/useRoute'
 import { useUiState } from '@/hooks/useUiState'
-import { CLOSED, batiCls, getLog, logAdr, piecesFor, profilOf, propCls, typoLabel } from '@/helpers/domain'
+import { CLOSED, batiCls, getLog, logAdr, piecesFor, profilOf, propCls, typoLabel, uniqueEtabs } from '@/helpers/domain'
+import { buildLogement, checkLogement, type NewLogement } from '@/helpers/logements'
 import { TODAY, diffDays, fdy, slug } from '@/helpers/dates'
 import { docsFor } from '@/helpers/docs'
 import { INIT } from './constants'
 import { resume } from './helpers'
 import LocationCard from './LocationCard'
+import HousingForm from './HousingForm'
 import InterventionsTable from './InterventionsTable'
 import type { LogTab, LogUi, HousingProps } from './types'
 import SearchBox from '@/components/ui/SearchBox'
 import Tabs from '@/components/ui/Tabs'
 
 const Housing = ({ id }: HousingProps) => {
-  const { S } = useApp()
+  const { S, mutate, getS, toast, openModal } = useApp()
   const [ui, setUi] = useUiState<LogUi>('log', INIT)
   const q = ui.q.toLowerCase()
   const list = S.logements.filter(l =>
@@ -32,6 +35,25 @@ const Housing = ({ id }: HousingProps) => {
   const tab: LogTab = sel && ui.tabFor === sel.id ? ui.tab : 'synthese'
   const setTab = (t: LogTab) => sel && setUi({ tab: t, tabFor: sel.id })
 
+  const openNew = () => openModal({
+    title: 'Nouveau logement', okLabel: 'Créer le logement', wide: true,
+    body: <HousingForm etabs={uniqueEtabs(S)} />,
+    onOk(fd) {
+      const g = (k: string) => String(fd.get(k) || '').trim()
+      const data: NewLogement = {
+        typo: g('typo') || 'T2', surface: Number(fd.get('surface')) || 0, adresse: g('adresse'), bat: g('bat'), etage: g('etage'), apt: g('apt'),
+        cp: g('cp'), ville: g('ville'), etab: g('etab'), section: g('section'), cgl: g('cgl'), dispositif: g('dispositif'),
+        menage: g('menage'), secteur: g('secteur'), cles: g('cles'), acces: g('acces'),
+      }
+      const err = checkLogement(data)
+      if (err) { toast(err, 'err'); return false }
+      const created = buildLogement(getS(), data)
+      mutate(s => { s.logements.push(buildLogement(s, data)) }, { now: true })
+      toast(`${created.id} créé`, 'ok')
+      go(`#/logement/${created.id}`)
+    },
+  })
+
   const groups: Record<string, Logement[]> = {}
   list.forEach(l => { const k = `${l.dept} › ${l.ville.toUpperCase()}`; (groups[k] = groups[k] || []).push(l) })
 
@@ -39,7 +61,7 @@ const Housing = ({ id }: HousingProps) => {
   const left = (
     <aside className="card min-w-[260px] self-stretch" style={{ flex: '0 1 330px' }}>
       <div className="flex flex-col gap-2.5 border-b border-line2 p-3.5">
-        <div><strong>Logements</strong> <span className="muted">· {S.logements.filter(l => l.actif).length} actifs</span></div>
+        <div className="row between"><span><strong>Logements</strong> <span className="muted">· {S.logements.filter(l => l.actif).length} actifs</span></span>{S.profil !== 'etab' && <button type="button" className="btn btnp btn-sm" onClick={openNew}>+ Nouveau</button>}</div>
         <SearchBox value={ui.q} placeholder="N°, adresse, ville, ID Crypto" onChange={q => setUi({ q })} />
         <div className="row !gap-1.5">
           <select className={`flt${ui.dept ? ' on' : ''}`} value={ui.dept} onChange={e => setUi({ dept: e.target.value })}><Opts list={['77', '91']} placeholder="Dépt" /></select>
