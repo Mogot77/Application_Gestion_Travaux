@@ -9,15 +9,17 @@ Application web responsive (PC et téléphone) de gestion de travaux : demandes,
 | Domaine | Technologie |
 |---|---|
 | Framework UI | **React 19** |
+| État global | **Redux Toolkit** + `react-redux` (Immer, listener middleware) |
 | Langage | **TypeScript 6** (mode strict) |
 | Build / dev server | **Vite 8** + `@vitejs/plugin-react` |
 | Styles | **Tailwind CSS 4** (`@tailwindcss/vite`) + classes réutilisables dans `index.css` |
 | Cartographie | **Leaflet** (fonds de carte en ligne) |
 | Authentification | **Firebase Auth** (connexion Google) |
 | Base de données | **Cloud Firestore** (temps réel, projet `travaux-2975b`) |
+| Photos | **Cloudinary** (envoi direct, preset *unsigned* ; l'URL est stockée dans Firestore) |
 | Qualité | **ESLint 10** (flat config, `typescript-eslint`, `react-hooks`, `react-refresh`) |
 | Déploiement | **GitHub Pages** via **GitHub Actions** (`.github/workflows/deploy.yml`) |
-| Stockage local | `localStorage` (cache, photos, profil) |
+| Stockage local | `localStorage` (cache des données, photos pas encore envoyées, état d'UI) |
 
 ## Architecture logicielle
 
@@ -32,23 +34,26 @@ flowchart TB
         Main["main.tsx"]:::entry
         Router["App.tsx<br/>routage par hash<br/>hooks/useRoute"]:::entry
 
-        subgraph UI["Présentation — components/"]
+        subgraph UI["Présentation — components/ (un dossier-module par composant)"]
             direction LR
-            Layout["layout/<br/>Layout"]:::ui
-            Pages["pages/<br/>Tableau · Demandes · Planning · Tournées<br/>Logements · Ouvriers · Entreprises · Devis<br/>Constats · Carte · Utilisateurs · Login"]:::ui
-            Widgets["ui/<br/>Modal · Fields · MapView · Photo · Toasts"]:::ui
+            Layout["Layout<br/>ErrorBoundary"]:::ui
+            Pages["Écrans<br/>Dashboard · Requests · Planning · Tours<br/>Housing · Workers · Companies · Quotes<br/>Inspections · MapPage · Users · Login …"]:::ui
+            Feat["Composants métier<br/>Photo · Modal · MapView<br/>InspectionsTable · StatusChip · UrgencyChip · HousingTree"]:::ui
+            Prims["ui/ — petits composants purs<br/>Button · Card · Chip · Field · Empty · Note<br/>Kv · Seg · Opts · Icon · Toasts · Ext · AddPhoto"]:::ui
         end
 
-        subgraph Store["État — store/ + hooks/"]
+        subgraph Store["État — store/ (Redux Toolkit) + hooks/"]
             direction LR
             AuthP["AuthProvider<br/>useAuth"]:::state
-            AppP["AppProvider<br/>useApp"]:::state
-            UIs["ui.ts<br/>état d'UI partagé"]:::state
+            RTK["Store Redux<br/>appSlice · uiSlice<br/>hooks/useApp = façade"]:::state
+            Eff["effects<br/>listener middleware :<br/>sauvegarde · sync · photos"]:::state
+            UIs["helpers/uiState · helpers/modal<br/>état d'UI local"]:::state
         end
 
-        subgraph Lib["Logique métier pure — lib/"]
+        subgraph Lib["Fonctions partagées — helpers/"]
             direction LR
-            Dom["domain · planning · dates<br/>entreprises · carto · docs · csv · photos"]:::logic
+            Dom["domain · planning · dates<br/>carto · docs · csv · roles"]:::logic
+            Ph["photos<br/>redimensionne + envoie"]:::logic
             Cs["cloudState<br/>état ⇄ documents"]:::logic
             Sy["sync<br/>temps réel + écritures différentielles"]:::logic
             Us["users"]:::logic
@@ -56,19 +61,22 @@ flowchart TB
         end
 
         Data["data/ refs · seed<br/>types.ts"]:::data
-        LS[("localStorage<br/>equalis-travaux-v2<br/>cache · photos · profil")]:::data
+        LS[("localStorage<br/>equalis-travaux-v2<br/>cache · photos locales")]:::data
     end
 
     Browser --> Main --> Router --> Layout --> Pages
-    Pages --> Widgets
+    Pages --> Feat
+    Pages --> Prims
+    Feat --> Prims
     Pages --> AuthP
-    Pages --> AppP
+    Pages --> RTK
     Pages --> UIs
-    AppP --> Dom
-    AppP --> Cs
-    AppP --> Sy
-    AppP --> Data
-    AppP <--> LS
+    RTK --> Dom
+    RTK --> Data
+    Eff --> RTK
+    Eff --> Sy
+    Eff --> Ph
+    Eff <--> LS
     AuthP --> Us
     AuthP --> Fbl
     Sy --> Cs
@@ -104,12 +112,13 @@ flowchart LR
     end
 
     subgraph Ext["Services externes"]
+        Cloud["Cloudinary<br/>hébergement des photos"]:::ext
         Google["Google Sign-In<br/>(OAuth)"]:::ext
         OSM["OpenStreetMap<br/>tuiles de carte (Leaflet)"]:::ext
         Fonts["Google Fonts<br/>police Inter"]:::ext
     end
 
-    LS[("localStorage<br/>photos · cache · profil")]:::local
+    LS[("localStorage<br/>cache · photos pas encore envoyées")]:::local
 
     Dev -- "git push" --> Repo
     Repo -- "déclenche" --> Actions
@@ -121,6 +130,7 @@ flowchart LR
     SPA <-- "onSnapshot / writeBatch" --> FS
     FS --- Rules
     Auth -. "jeton + e-mail vérifié" .-> Rules
+    SPA -- "upload (preset unsigned)" --> Cloud
     SPA -- "tuiles" --> OSM
     SPA -- "CSS" --> Fonts
     SPA <-- "lecture / écriture" --> LS
@@ -137,9 +147,9 @@ flowchart LR
 ### Flux de données
 
 1. **Connexion** : Google via Firebase Auth ; l'e-mail doit figurer dans la collection `users` (liste blanche, vérifiée par `firestore.rules`).
-2. **Chargement** : `AppProvider` affiche d'abord le cache `localStorage`, puis `lib/sync` s'abonne en temps réel (`onSnapshot`) aux collections Firestore.
-3. **Modification** : l'état est mis à jour localement ; `lib/cloudState` le découpe en documents et seuls les documents modifiés sont écrits (par lots).
-4. **Photos** : jamais envoyées à Firestore, elles restent dans le `localStorage` de l'appareil.
+2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/effects` démarre `helpers/sync`, qui s'abonne en temps réel (`onSnapshot`) aux collections Firestore.
+3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Le listener middleware sauvegarde le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits (par lots).
+4. **Photos** : `helpers/photos` redimensionne l'image et l'envoie à Cloudinary ; seule l'URL est stockée dans Firestore, donc partagée entre appareils. Hors ligne (ou sans configuration), la photo reste une data-URL locale, jamais envoyée à Firestore, puis envoyée au chargement suivant ou au retour du réseau.
 
 ### Collections Firestore
 
@@ -150,19 +160,37 @@ flowchart LR
 ```
 src/
 ├── App.tsx            routes (hash)
-├── types.ts           interfaces du modèle de données
+├── types.ts           types du modèle de données
 ├── data/              référentiels (refs.ts) et jeu de démo (seed.ts)
-├── lib/               logique métier pure (domain, dates, csv, photos, carto, docs,
-│                      planning, entreprises, firebase, sync, cloudState, users)
-├── store/             AppProvider, AuthProvider, contextes, état d'UI
-├── hooks/             useApp, useAuth, useRoute
-├── components/
-│   ├── ui/            modale, champs, carte, photos, toasts...
-│   ├── layout/        gabarit général
-│   └── pages/         écrans
+├── helpers/           fonctions partagées par plusieurs composants (domain, dates, csv, photos,
+│                      carto, docs, planning, firebase, sync, cloudState, users, roles ...)
+├── store/             Redux Toolkit : appSlice (données), uiSlice (toasts, chargement),
+│                      effects (sauvegarde, Firestore, photos), AppProvider ;
+│                      AuthProvider
+├── hooks/             hooks partagés : useApp (façade sur le store), useAuth, useRoute,
+│                      useUiState, useModal, useAppStore (hooks Redux typés)
+├── components/        un dossier par composant : index.ts, <Nom>.tsx, types.ts,
+│   │                  helpers.ts, constants.ts (alias d'import @/ = src/) ; les fonctions
+│   │                  propres à un composant vivent dans son helpers.ts
+│   ├── <Écran>/       Requests, Planning, Housing, Qualification, MapPage, Login ...
+│   ├── Layout/ Modal/ Photo/ MapView/ InspectionsTable/ ...   composants métier
+│   └── ui/            petits composants purs : Button, Card, Chip, Field, Empty,
+│                      Note, Kv, Seg, Opts, Icon, Toasts, Ext, AddPhoto
 └── index.css          thème Tailwind et classes réutilisables
 firestore.rules        règles de sécurité Firestore
+.claude/skills/        skills Claude Code du projet
 ```
+
+## Skills Claude Code
+
+Skills utilisés pour travailler sur ce projet avec Claude Code. Un skill est un jeu d'instructions que Claude charge quand la demande correspond (ou via `/nom`).
+
+| Skill | Emplacement | Ce qu'il fait |
+|---|---|---|
+| `react-structure` | `.claude/skills/` (dans le repo) | Structure ou refactore les composants React : un dossier par composant (`index.ts`, `<Nom>.tsx`, `helpers.ts`, `constants.ts`, `types.ts`), petites primitives partagées dans `components/ui/`, fonctions fléchées, `type` plutôt que `interface`, alias `@/`, état au sommet. |
+| `commit-push` | personnel (`~/.claude/skills/`) | Commit puis push du travail en cours : message en anglais, Conventional Commits, sans trailer de co-auteur ni de session. |
+| `storybook-story` | personnel | Écrit une story Storybook (CSF3 + React + TypeScript) qui montre un vrai code d'usage plutôt que du JSX reconstruit depuis les args. |
+| `project-edit` | personnel | Modifie le code d'un projet du dashboard `all` depuis n'importe quel dossier : retrouve le repo local et GitHub, édite, vérifie avec les scripts du projet, commit/push seulement sur demande. |
 
 ## Démarrage
 
@@ -183,6 +211,7 @@ npm run dev       # http://localhost:5173
 ## Points d'attention
 
 - Clé de stockage local `equalis-travaux-v2` (format `{v:1, ...}`) : ne pas la changer sans migration.
+- Photos : `VITE_CLOUDINARY_CLOUD` et `VITE_CLOUDINARY_PRESET` (voir `.env.example`) en local ; variables GitHub Actions pour le site en ligne.
 - `TODAY = '2026-10-29'` est une date de référence de démo, indépendante de la date réelle.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
 - Le bundle dépasse 500 kB (avertissement Vite non bloquant).
