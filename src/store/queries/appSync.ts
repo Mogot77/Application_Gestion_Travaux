@@ -1,7 +1,7 @@
 import { collection, doc, onSnapshot, writeBatch, type DocumentData } from 'firebase/firestore'
 import type { AppState } from '@/types'
 import { db } from '@/store/queries/firebase'
-import { ALL_COLS, canon, pruneTo, removeDoc, toDocs, upsertDoc } from '@/helpers/cloudState'
+import { ALL_COLS, canon, pruneTo, removeDoc, toDocs, upsertDoc, type OrderMap } from '@/helpers/cloudState'
 
 export type SyncOptions = {
   /** État local courant (importé dans Firestore si la base est vide). */
@@ -23,6 +23,7 @@ const BATCH = 400
 /** Synchronise l'état partagé avec Firestore : lecture temps réel, écriture des seuls documents modifiés. */
 export function startSync(o: SyncOptions): Sync {
   const known = new Map<string, string>() // chemin → JSON canonique connu de la base
+  const order: OrderMap = new Map() // chemin → clé d'ordre du document
   const waiting = new Set<string>(ALL_COLS)
   let ready = false
   let metaFound = false
@@ -43,11 +44,11 @@ export function startSync(o: SyncOptions): Sync {
 
   const push = (S: AppState) => {
     if (!ready || stopped) return
-    const next = toDocs(S)
+    const next = toDocs(S, order)
     const set: [string, string][] = []
     for (const [p, json] of next) if (known.get(p) !== json) { set.push([p, json]); known.set(p, json) }
     const del: string[] = []
-    for (const p of [...known.keys()]) if (!next.has(p)) { del.push(p); known.delete(p) }
+    for (const p of [...known.keys()]) if (!next.has(p)) { del.push(p); known.delete(p); order.delete(p) }
     if (set.length || del.length) void write(set, del)
   }
 
@@ -64,6 +65,7 @@ export function startSync(o: SyncOptions): Sync {
   const unsubs = ALL_COLS.map(name => onSnapshot(collection(db, name), snap => {
     const first = waiting.has(name)
     const ops: ((s: AppState) => void)[] = []
+    const keyOf = (id: string) => order.get(`${name}/${id}`)
     const changes = [...snap.docChanges()].sort((a, b) => ((a.doc.data()._i as number) ?? 0) - ((b.doc.data()._i as number) ?? 0))
     for (const ch of changes) {
       // Après le chargement, les écritures locales en attente sont déjà dans l'état : on les ignore.
@@ -73,10 +75,11 @@ export function startSync(o: SyncOptions): Sync {
         if (known.delete(path)) ops.push(s => removeDoc(s, name, ch.doc.id))
       } else {
         const data = ch.doc.data()
+        if (typeof data._i === 'number') order.set(path, data._i)
         const json = canon(data)
         if (known.get(path) === json) continue
         known.set(path, json)
-        ops.push(s => upsertDoc(s, name, data))
+        ops.push(s => upsertDoc(s, name, data, keyOf))
       }
     }
     if (name === 'meta' && !snap.empty) metaFound = true

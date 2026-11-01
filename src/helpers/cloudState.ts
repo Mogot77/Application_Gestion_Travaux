@@ -58,13 +58,46 @@ export const canon = (v: unknown): string => {
   return JSON.stringify(v) ?? 'null'
 }
 
-/** Documents (chemin → JSON canonique) correspondant à l'état partagé. L'index `_i` conserve l'ordre des listes. */
-export function toDocs(S: AppState): Map<string, string> {
+/** Clés d'ordre des éléments de liste : chemin (`col/id`) → clé. Une clé est attribuée une fois, à la création du document. */
+export type OrderMap = Map<string, number>
+
+/** Complète les clés manquantes (`undefined`) d'après leurs voisines : un nouvel élément en tête reçoit une clé plus petite,
+ *  en queue plus grande, au milieu une valeur intermédiaire. Les clés déjà attribuées ne changent jamais, donc insérer en tête
+ *  n'oblige plus à réécrire tous les autres documents. */
+export function fillOrder(keys: (number | undefined)[]): number[] {
+  const out = [...keys]
+  for (let i = 0; i < out.length;) {
+    if (out[i] !== undefined) { i++; continue }
+    let j = i
+    while (j < out.length && out[j] === undefined) j++
+    const run = j - i
+    const prev = i > 0 ? out[i - 1] : undefined
+    const next = j < out.length ? out[j] : undefined
+    for (let t = 0; t < run; t++) {
+      out[i + t] = prev === undefined && next === undefined ? t
+        : prev === undefined ? (next as number) - run + t
+        : next === undefined ? prev + 1 + t
+        : prev + ((next - prev) * (t + 1)) / (run + 1)
+    }
+    i = j
+  }
+  return out as number[]
+}
+
+/** Documents (chemin → JSON canonique) correspondant à l'état partagé. La clé `_i` conserve l'ordre des listes ;
+ *  `order` est complété pour les nouveaux éléments (les clés existantes sont conservées). */
+export function toDocs(S: AppState, order: OrderMap): Map<string, string> {
   const m = new Map<string, string>()
   m.set('ref/main', canon(strip(S.ref)))
   m.set('meta/main', canon({ histoMois: S.histoMois, seq: S.seq }))
   for (const col of ITEM_COLS) {
-    (S[col] as { id: string }[]).forEach((it, i) => m.set(`${col}/${it.id}`, canon({ ...(strip(it) as Rec), _i: i })))
+    const list = S[col] as { id: string }[]
+    const keys = fillOrder(list.map(it => order.get(`${col}/${it.id}`)))
+    list.forEach((it, i) => {
+      const path = `${col}/${it.id}`
+      order.set(path, keys[i])
+      m.set(path, canon({ ...(strip(it) as Rec), _i: keys[i] }))
+    })
   }
   return m
 }
@@ -96,8 +129,8 @@ export function graftPhotos(target: unknown, source: unknown): void {
   }
 }
 
-/** Applique un document distant (ajout/modification) à l'état. */
-export function upsertDoc(s: AppState, col: string, data: Rec): void {
+/** Applique un document distant (ajout/modification) à l'état. `keyOf` donne la clé d'ordre d'un élément déjà présent. */
+export function upsertDoc(s: AppState, col: string, data: Rec, keyOf: (id: string) => number | undefined = () => undefined): void {
   const { _i, ...item } = data
   if (col === 'ref') { graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as unknown as AppState['ref']; return }
   if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = item.seq as AppState['seq']; return }
@@ -105,7 +138,11 @@ export function upsertDoc(s: AppState, col: string, data: Rec): void {
   const arr = s[col as ItemCol] as unknown as { id: string }[]
   const idx = arr.findIndex(x => x.id === item.id)
   if (idx >= 0) { graftPhotos(item, arr[idx]); arr[idx] = item as unknown as { id: string } }
-  else arr.splice(Math.min(typeof _i === 'number' ? _i : arr.length, arr.length), 0, item as unknown as { id: string })
+  else {
+    // insertion avant le premier élément de clé supérieure (en queue si la clé est inconnue)
+    const pos = typeof _i === 'number' ? arr.findIndex(x => (keyOf(x.id) ?? -Infinity) > _i) : -1
+    arr.splice(pos < 0 ? arr.length : pos, 0, item as unknown as { id: string })
+  }
 }
 
 export function removeDoc(s: AppState, col: string, id: string): void {
