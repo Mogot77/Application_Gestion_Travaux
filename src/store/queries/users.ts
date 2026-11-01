@@ -1,4 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '@/store/queries/firebase'
 import { normRole, type Role } from '@/helpers/roles'
 
@@ -19,4 +19,17 @@ export async function fetchAccess(email: string): Promise<{ role: Role; etab?: s
   if (!snap.exists()) return null
   const d = snap.data()
   return { role: normRole(d.role), etab: typeof d.etab === 'string' && d.etab ? d.etab : undefined }
+}
+
+/** Comptes de la liste blanche (adresses des échelons à informer). Repli sur l'administrateur d'origine si la lecture est refusée. */
+export async function fetchRecipients(): Promise<{ email: string; role: Role; etab?: string }[]> {
+  const boot = { email: BOOTSTRAP_ADMIN, role: 'directeur' as Role }
+  try {
+    const snap = await getDocs(collection(db, COL))
+    const list = snap.docs.map(d => {
+      const etab = d.data().etab
+      return { email: d.id, role: normRole(d.data().role), etab: typeof etab === 'string' && etab ? etab : undefined }
+    })
+    return list.some(u => u.email === BOOTSTRAP_ADMIN) ? list : [...list, boot]
+  } catch { return [boot] }
 }

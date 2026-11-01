@@ -4,10 +4,12 @@ import { go, useRoute } from '@/hooks/useRoute'
 import { useUiState } from '@/hooks/useUiState'
 import { setUi as resetUiKey } from '@/store/local/uiState'
 import { reserveIds } from '@/store/queries/counters'
+import { fetchRecipients } from '@/store/queries/users'
 import Layout from '@/components/Layout'
 import { nextId, profilOf } from '@/helpers/domain'
 import { TODAY } from '@/helpers/dates'
 import { readPhotos } from '@/helpers/photos'
+import { destinataires, mailto } from '@/helpers/constatSuites'
 import { INIT, KEY } from './constants'
 import { buildNewInspectionModel } from './helpers'
 import NewInspectionView from './NewInspectionView'
@@ -37,12 +39,20 @@ const NewInspection = () => {
     let ceId = ''
     mutate(s => {
       const id = nextId(s, 'ce'); ceId = id
-      s.constats.unshift({ id, date: TODAY, logementId: c.logementId, auteur: pf.nom, fonction: pf.fonction, contexte, proprete, bati: c.bati, signalements: c.signalements.slice(), photos: c.photos.slice(), commentaire: c.commentaire, suite: danger || low ? 'alerte' : '' })
+      s.constats.unshift({ id, date: TODAY, logementId: c.logementId, auteur: pf.nom, fonction: pf.fonction, contexte, proprete, bati: c.bati, signalements: c.signalements.slice(), photos: c.photos.slice(), commentaire: c.commentaire, suite: danger || low ? 'alerte' : '', actions: c.actions.slice(), informes: c.echelons.slice() })
     }, { now: true })
+    const creer = andCreate || c.actions.includes('intervention')
+    const cs = c.echelons.length ? getS().constats.find(x => x.id === ceId) : undefined
+    if (cs) {
+      const log = getS().logements.find(l => l.id === c.logementId)
+      const to = destinataires(await fetchRecipients(), c.echelons, log)
+      window.location.href = mailto(to, cs, log, getS())
+      if (!to.length) toast('Aucune adresse trouvée pour ces échelons : complétez le destinataire dans votre messagerie', 'err')
+    }
     resetUiKey(KEY, null)
     toast(`Constat ${ceId} enregistré${danger ? ' · alerte sécurité envoyée à la coordination' : low ? ' · coordination alertée' : ''}`, danger || low ? 'err' : 'ok')
-    if (c.signalements.some(s => / HS$/.test(s)) && !andCreate) window.setTimeout(() => toast("Équipement hors service : pensez à créer une demande d'intervention"), 600)
-    go(andCreate ? `#/demande/new?log=${c.logementId}&constat=${ceId}` : '#/constats')
+    if (c.signalements.some(s => / HS$/.test(s)) && !creer) window.setTimeout(() => toast("Équipement hors service : pensez à créer une demande d'intervention"), 600)
+    go(creer ? `#/demande/new?log=${c.logementId}&constat=${ceId}` : '#/constats')
   }
 
   return (

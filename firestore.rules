@@ -22,8 +22,10 @@ service cloud.firestore {
 
     // Liste blanche : un document par e-mail Google (id = e-mail en minuscules).
     match /users/{email} {
-      allow get: if verified() && (email == mail() || isAdmin());
-      allow list, create, update, delete: if isAdmin();
+      allow get: if verified() && (email == mail() || isMember());
+      // Liste lisible par les membres (adresses des échelons à informer par courriel) ; écriture réservée aux administrateurs.
+      allow list: if isMember();
+      allow create, update, delete: if isAdmin();
     }
 
     // Données de l'application : accessibles à tous les comptes autorisés.

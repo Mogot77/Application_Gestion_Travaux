@@ -34,4 +34,6 @@ export type Referentiels = {
   depts: Record<string, string>
   /** Migration ponctuelle des villes/départements du code vers Firestore (voir store/listeners/refsMigration.ts). */
   refsMigrated?: boolean
+  /** Migration ponctuelle : ajout de « Drogues (interdit) » aux signalements (voir store/listeners/refsMigration.ts). */
+  constatDefaults?: boolean
 }

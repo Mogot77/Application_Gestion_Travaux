@@ -3,6 +3,8 @@ import Empty from '@/components/ui/Empty'
 import { PhotoView } from '@/components/Photo'
 import { batiCls, propCls } from '@/helpers/domain'
 import { fd } from '@/helpers/dates'
+import { SUITES } from '@/helpers/constatSuites'
+import { ROLES, type Role } from '@/helpers/roles'
 import type { InspectionsTableViewProps } from './types'
 
 /** Tableau des constats d'état (présentation seule : les lignes sont préparées par le conteneur). */
@@ -44,6 +46,8 @@ const InspectionsTableView = ({ rows, withLog, onOpenPhoto, onNoFollowUp }: Insp
                       </div>
                     </>
                   )}
+              {!!c.actions?.length && <div className="mt-1">{c.actions.map(k => <span key={k} className="tag">{SUITES.find(s => s.key === k)?.label ?? k}</span>)}</div>}
+              {!!c.informes?.length && <small>Informé : {c.informes.map(r => ROLES[r as Role]?.label ?? r).join(', ')}</small>}
             </td>
           </tr>
         ))}

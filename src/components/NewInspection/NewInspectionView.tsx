@@ -7,6 +7,7 @@ import Seg from '@/components/ui/Seg'
 import AddPhoto from '@/components/ui/AddPhoto'
 import PageHead from '@/components/ui/PageHead'
 import { PhotoView } from '@/components/Photo'
+import Followups from './Followups'
 import type { NewInspectionViewProps } from './types'
 
 /** Formulaire de saisie d'un constat d'état (présentation seule : brouillon, listes et actions viennent du conteneur). */
@@ -38,6 +39,7 @@ const NewInspectionView = ({ model, onPatch, onSave, onAddFiles, onOpenPhoto }: 
           <div className="row !gap-2">{c.photos.map((ph, j) => <PhotoView key={j} src={ph} w={72} h={72} onOpen={onOpenPhoto} onDelete={() => onPatch({ photos: c.photos.filter((_x, k) => k !== j) })} />)}
             <AddPhoto label="+" w={72} h={72} onFiles={onAddFiles} /></div></div>
         <Field label="Commentaire" htmlFor="cm"><textarea className="in" id="cm" value={c.commentaire} placeholder="Décrire le logement" onChange={e => onPatch({ commentaire: e.target.value })} /></Field>
+        <Followups model={model} onPatch={onPatch} />
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
           <Button onClick={() => onSave(true)}>Enregistrer et créer une demande</Button>
           <Button variant="primary" onClick={() => onSave(false)}>Enregistrer le constat</Button>

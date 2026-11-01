@@ -38,4 +38,8 @@ export type Constat = {
   commentaire: string
   suite: string
   demandeId?: string
+  /** Suites retenues (clés de SUITES dans helpers/constatSuites.ts) : intervention, menages, prevention, fin_pec. */
+  actions?: string[]
+  /** Échelons (rôles) informés par courriel. */
+  informes?: string[]
 }
