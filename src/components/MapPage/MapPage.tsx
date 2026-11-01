@@ -16,11 +16,11 @@ import type { CrtUi } from './types'
 const MapPage = () => {
   const { S } = useApp()
   const [ui, setUi] = useUiState<CrtUi>('crt', INIT)
-  const list = S.logements.filter(l => l.actif !== false
+  const list = useMemo(() => S.logements.filter(l => l.actif !== false
     && (S.profil !== 'etab' || l.etab === profilOf(S).etab || l.typo === 'BUR')
     && (!ui.dept || l.dept === ui.dept)
     && (!ui.etab || l.etab === ui.etab)
-    && (ui.mode === 'tous' || (ui.mode === 'urgent' ? info(S, l).urgent : info(S, l).ds.length > 0)))
+    && (ui.mode === 'tous' || (ui.mode === 'urgent' ? info(S, l).urgent : info(S, l).ds.length > 0))), [S, ui.dept, ui.etab, ui.mode])
   const withD = list.filter(l => info(S, l).ds.length)
   const nUrg = list.filter(l => info(S, l).urgent).length
   const nApprox = list.filter(l => approx(l)).length
@@ -37,8 +37,7 @@ const MapPage = () => {
       })
     })
     return { markers }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [S, ui.dept, ui.etab, ui.mode])
+  }, [S, list])
 
   return (
     <Layout active="carte">

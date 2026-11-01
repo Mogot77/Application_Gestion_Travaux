@@ -18,7 +18,7 @@ import type { TourUi } from './types'
 const Tours = () => {
   const { S } = useApp()
   const [ui, setUi] = useUiState<TourUi>(TOUR_KEY, TOUR_INIT)
-  const ouvs = ouvActifs(S)
+  const ouvs = useMemo(() => ouvActifs(S), [S])
   const ouvId = ouvs.some(x => x.id === ui.ouv) ? ui.ouv : (ouvs.length ? ouvs[0].id : '')
   const o = ouvs.find(x => x.id === ouvId) || { id: '', nom: 'Aucun ouvrier actif', metier: '', color: '#9AA3B0' }
   const tourList = rdvsOf(S, o.id, TODAY).filter(r => r.demandeId)
@@ -29,9 +29,7 @@ const Tours = () => {
     nearest = ouvs.filter(x => chargeOf(S, x.id, TODAY) < DAY_MAX).map(x => ({ o: x, km: dist(teamState(S, x).pos, p) })).sort((a, b) => a.km - b.km)[0]
   }
 
-  const spec = useMemo(() => mapSpec(S, ouvs, ui.hide, ouvId, id => setUi({ ouv: id })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [S, ui.hide, ouvId])
+  const spec = useMemo(() => mapSpec(S, ouvs, ui.hide, ouvId, id => setUi({ ouv: id })), [S, ouvs, ui.hide, ouvId, setUi])
 
   const toggle = (id: string) => setUi({ hide: ui.hide.includes(id) ? ui.hide.filter(x => x !== id) : [...ui.hide, id] })
   const affecter = (demandeId: string, ouvrierId: string) => {
