@@ -8,6 +8,7 @@ const NAV: [string, string, string][] = [
   ['demandes', 'Demandes', '#/demandes'],
   ['planning', 'Planning', '#/planning'],
   ['ouvriers', 'Ouvriers', '#/ouvriers'],
+  ['entreprises', 'Entreprises', '#/entreprises'],
   ['logements', 'Logements', '#/logements'],
   ['carte', 'Carte', '#/carte'],
   ['constats', 'Constats', '#/constats'],

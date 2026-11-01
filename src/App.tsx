@@ -11,6 +11,7 @@ import { Logements } from './components/pages/Logements'
 import { Constats } from './components/pages/Constats'
 import { Tableau } from './components/pages/Tableau'
 import { Consultation } from './components/pages/Consultation'
+import { Entreprises } from './components/pages/Entreprises'
 import { Devis } from './components/pages/Devis'
 import { Portail } from './components/pages/Portail'
 import { Fiche } from './components/pages/Fiche'
@@ -34,6 +35,7 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/logement\/([\w-]+)$/, p => <Logements id={p[0]} />],
   [/^\/constats$/, () => <Constats />],
   [/^\/tableau$/, () => <Tableau />],
+  [/^\/entreprises$/, () => <Entreprises />],
   [/^\/consultation\/([\w-]+)$/, p => <Consultation id={p[0]} />],
   [/^\/devis\/([\w-]+)$/, p => <Devis id={p[0]} />],
   [/^\/portail\/([\w-]+)(?:\/([\w-]+))?$/, p => <Portail csId={p[0]} eid={p[1]} />],
