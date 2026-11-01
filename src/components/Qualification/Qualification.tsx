@@ -151,8 +151,10 @@ const Qualification = ({ id }: QualificationProps) => {
   }
 
   const setLine = (i: number, k: 'imputation' | 'circuit' | 'urgence', v: string) => upd(x => {
-    const l = x.lignes[i] as unknown as Record<string, string>
-    l[k] = v
+    const l = x.lignes[i]
+    if (k === 'imputation') l.imputation = v
+    else if (k === 'circuit') l.circuit = v as Ligne['circuit']
+    else l.urgence = v as Ligne['urgence']
     if (k === 'circuit' && v === 'bailleur') x.lignes[i].imputation = 'Bailleur propriétaire'
   })
   const addPhotos = (i: number, files: FileList) => readPhotos(files).then(ph => upd(x => { x.lignes[i].photos.push(...ph); hist(x, `${ph.length} photo(s) ajoutée(s) à la ligne ${i + 1}`) }, true))

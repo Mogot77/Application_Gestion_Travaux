@@ -94,7 +94,7 @@ export function toDocs(S: AppState, order: OrderMap): Map<string, string> {
   m.set('ref/main', canon(strip(S.ref)))
   m.set('meta/main', canon({ histoMois: S.histoMois, seq: S.seq }))
   for (const col of ITEM_COLS) {
-    const list = S[col] as { id: string }[]
+    const list = listOf(S, col)
     const keys = fillOrder(list.map(it => order.get(`${col}/${it.id}`)))
     list.forEach((it, i) => {
       const path = `${col}/${it.id}`
@@ -104,6 +104,12 @@ export function toDocs(S: AppState, order: OrderMap): Map<string, string> {
   }
   return m
 }
+
+type Item = { id: string }
+/** Liste d'éléments d'une collection (tous ont un `id`). */
+const listOf = (s: AppState, col: ItemCol): Item[] => s[col]
+/** Remplace la liste d'une collection : seul endroit où TypeScript ne peut pas relier `col` au type de sa liste. */
+const setList = (s: AppState, col: ItemCol, list: Item[]): void => { (s as Record<ItemCol, Item[]>)[col] = list }
 
 const isEmpty = (v: unknown) => v === undefined || v === '' || (Array.isArray(v) ? v.length === 0 : isRec(v) && Object.keys(v).length === 0)
 
@@ -135,28 +141,27 @@ export function graftPhotos(target: unknown, source: unknown): void {
 /** Applique un document distant (ajout/modification) à l'état. `keyOf` donne la clé d'ordre d'un élément déjà présent. */
 export function upsertDoc(s: AppState, col: string, data: Rec, keyOf: (id: string) => number | undefined = () => undefined): void {
   const { _i, ...item } = data
-  if (col === 'ref') { graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as unknown as AppState['ref']; return }
+  if (col === 'ref') { graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as AppState['ref']; return }
   if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = item.seq as AppState['seq']; return }
   if (!(ITEM_COLS as readonly string[]).includes(col)) return
-  const arr = s[col as ItemCol] as unknown as { id: string }[]
+  const arr = listOf(s, col as ItemCol)
   const idx = arr.findIndex(x => x.id === item.id)
-  if (idx >= 0) { graftPhotos(item, arr[idx]); arr[idx] = item as unknown as { id: string } }
+  if (idx >= 0) { graftPhotos(item, arr[idx]); arr[idx] = item as Item }
   else {
     // insertion avant le premier élément de clé supérieure (en queue si la clé est inconnue)
     const pos = typeof _i === 'number' ? arr.findIndex(x => (keyOf(x.id) ?? -Infinity) > _i) : -1
-    arr.splice(pos < 0 ? arr.length : pos, 0, item as unknown as { id: string })
+    arr.splice(pos < 0 ? arr.length : pos, 0, item as Item)
   }
 }
 
 export function removeDoc(s: AppState, col: string, id: string): void {
   if (!(ITEM_COLS as readonly string[]).includes(col)) return
-  const key = col as ItemCol
-  ;(s[key] as unknown as { id: string }[]) = (s[key] as unknown as { id: string }[]).filter(x => x.id !== id)
+  setList(s, col as ItemCol, listOf(s, col as ItemCol).filter(x => x.id !== id))
 }
 
 /** Retire de l'état les éléments absents de la base (premier chargement). */
 export function pruneTo(s: AppState, known: (path: string) => boolean): void {
   for (const col of ITEM_COLS) {
-    (s[col] as unknown as { id: string }[]) = (s[col] as unknown as { id: string }[]).filter(x => known(`${col}/${x.id}`))
+    setList(s, col, listOf(s, col).filter(x => known(`${col}/${x.id}`)))
   }
 }
