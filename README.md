@@ -21,72 +21,117 @@ Application web responsive (PC et téléphone) de gestion de travaux : demandes,
 
 ## Architecture logicielle
 
+### Schéma 1 — Architecture du front (React)
+
 ```mermaid
 flowchart TB
-    subgraph Client["Navigateur (SPA React + Vite)"]
+    Browser(["🌐 Navigateur<br/>PC / téléphone"]):::ext
+
+    subgraph Front["Application React 19 + TypeScript + Vite"]
         direction TB
+        Main["main.tsx"]:::entry
+        Router["App.tsx<br/>routage par hash<br/>hooks/useRoute"]:::entry
 
-        subgraph UI["Présentation — src/components"]
-            Pages["pages/<br/>Tableau, Demandes, Planning, Tournées,<br/>Logements, Ouvriers, Entreprises, Devis,<br/>Constats, Carte, Utilisateurs, Login..."]
-            Layout["layout/Layout"]
-            Widgets["ui/<br/>Modal, Fields, MapView, Photo, Toasts..."]
+        subgraph UI["Présentation — components/"]
+            direction LR
+            Layout["layout/<br/>Layout"]:::ui
+            Pages["pages/<br/>Tableau · Demandes · Planning · Tournées<br/>Logements · Ouvriers · Entreprises · Devis<br/>Constats · Carte · Utilisateurs · Login"]:::ui
+            Widgets["ui/<br/>Modal · Fields · MapView · Photo · Toasts"]:::ui
         end
 
-        Router["App.tsx + hooks/useRoute<br/>(routage par hash)"]
-
-        subgraph State["État global — src/store + src/hooks"]
-            Auth["AuthProvider<br/>(useAuth)"]
-            App["AppProvider<br/>(useApp)"]
-            UIState["ui.ts<br/>(état d'UI partagé)"]
+        subgraph Store["État — store/ + hooks/"]
+            direction LR
+            AuthP["AuthProvider<br/>useAuth"]:::state
+            AppP["AppProvider<br/>useApp"]:::state
+            UIs["ui.ts<br/>état d'UI partagé"]:::state
         end
 
-        subgraph Logic["Logique métier pure — src/lib"]
-            Domain["domain, planning, dates,<br/>entreprises, carto, docs, csv, photos"]
-            Users["users"]
-            Cloud["cloudState<br/>(état ⇄ documents)"]
-            Sync["sync<br/>(onSnapshot + écritures différentielles)"]
-            Fb["firebase<br/>(init SDK)"]
+        subgraph Lib["Logique métier pure — lib/"]
+            direction LR
+            Dom["domain · planning · dates<br/>entreprises · carto · docs · csv · photos"]:::logic
+            Cs["cloudState<br/>état ⇄ documents"]:::logic
+            Sy["sync<br/>temps réel + écritures différentielles"]:::logic
+            Us["users"]:::logic
+            Fbl["firebase<br/>init du SDK"]:::logic
         end
 
-        Data["data/ refs.ts, seed.ts<br/>types.ts"]
-        LS[("localStorage<br/>equalis-travaux-v2<br/>cache + photos + profil")]
+        Data["data/ refs · seed<br/>types.ts"]:::data
+        LS[("localStorage<br/>equalis-travaux-v2<br/>cache · photos · profil")]:::data
     end
 
-    subgraph Firebase["Firebase (projet travaux-2975b)"]
-        FAuth["Authentication<br/>Google"]
-        FS[("Cloud Firestore")]
-        Rules["firestore.rules<br/>liste blanche + rôles"]
+    Browser --> Main --> Router --> Layout --> Pages
+    Pages --> Widgets
+    Pages --> AuthP
+    Pages --> AppP
+    Pages --> UIs
+    AppP --> Dom
+    AppP --> Cs
+    AppP --> Sy
+    AppP --> Data
+    AppP <--> LS
+    AuthP --> Us
+    AuthP --> Fbl
+    Sy --> Cs
+    Sy --> Fbl
+
+    classDef ext fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef entry fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef ui fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef state fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef logic fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef data fill:#fce7f3,stroke:#db2777,color:#831843
+```
+
+### Schéma 2 — Écosystème : services autour de l'application
+
+```mermaid
+flowchart LR
+    Dev(["👨‍💻 Développeur<br/>VS Code · Node · npm"]):::dev
+    User(["👤 Utilisateur<br/>navigateur PC / mobile"]):::user
+
+    subgraph GitHub["GitHub"]
+        Repo["Dépôt Git<br/>Mogot77/Application_Gestion_Travaux"]:::gh
+        Actions["GitHub Actions<br/>lint · build Vite"]:::gh
+        Pages["GitHub Pages<br/>hébergement de la SPA"]:::gh
+    end
+
+    SPA{{"Application React<br/>(SPA statique)"}}:::app
+
+    subgraph Firebase["Firebase — projet travaux-2975b"]
+        Auth["Authentication<br/>connexion Google"]:::fb
+        FS[("Cloud Firestore<br/>données partagées<br/>temps réel")]:::fb
+        Rules["firestore.rules<br/>liste blanche + rôles"]:::fb
     end
 
     subgraph Ext["Services externes"]
-        Tiles["Fonds de carte<br/>(tuiles OSM)"]
-        Fonts["Polices Inter"]
+        Google["Google Sign-In<br/>(OAuth)"]:::ext
+        OSM["OpenStreetMap<br/>tuiles de carte (Leaflet)"]:::ext
+        Fonts["Google Fonts<br/>police Inter"]:::ext
     end
 
-    subgraph CI["Déploiement"]
-        GH["GitHub Actions"] --> Pages2["GitHub Pages"]
-    end
+    LS[("localStorage<br/>photos · cache · profil")]:::local
 
-    Pages --> Layout
-    Pages --> Widgets
-    Router --> Pages
-    Pages --> App
-    Pages --> Auth
-    Pages --> UIState
-    App --> Domain
-    App --> Cloud
-    App --> Sync
-    Auth --> Users
-    Auth --> Fb
-    Sync --> Cloud
-    Sync --> Fb
-    App --> Data
-    App <--> LS
-    Widgets --> Tiles
-    Fb <--> FAuth
-    Fb <--> FS
+    Dev -- "git push" --> Repo
+    Repo -- "déclenche" --> Actions
+    Actions -- "déploie" --> Pages
+    Pages -- "sert" --> SPA
+    User -- "HTTPS" --> SPA
+    SPA -- "signInWithPopup" --> Auth
+    Auth <--> Google
+    SPA <-- "onSnapshot / writeBatch" --> FS
     FS --- Rules
-    Pages2 -. sert la SPA .-> Client
+    Auth -. "jeton + e-mail vérifié" .-> Rules
+    SPA -- "tuiles" --> OSM
+    SPA -- "CSS" --> Fonts
+    SPA <-- "lecture / écriture" --> LS
+
+    classDef dev fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef user fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef gh fill:#e5e7eb,stroke:#374151,color:#111827
+    classDef app fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:3px
+    classDef fb fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef ext fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef local fill:#fce7f3,stroke:#db2777,color:#831843
 ```
 
 ### Flux de données
