@@ -17,7 +17,7 @@ const newDraft = (S: AppState, logId?: string, constatId?: string): DraftDemande
   const p = profilOf(S)
   const log = getLog(S, logId)
   return {
-    auteur: p.nom, fonction: p.fonction, tel: '', logementId: logId || '', urgence: '', dateSouhaitee: '',
+    auteur: p.nom, auteurEmail: S.moi?.email, fonction: p.fonction, tel: '', logementId: logId || '', urgence: '', dateSouhaitee: '',
     acces: log ? log.acces : '', numCles: log ? log.cles : '', lieuCles: S.ref.cles[0],
     facturation: 'Non', sinistre: 'Non', sinistreInfo: { nature: '', date: '', fuite: '', tiers: '', constat: '' },
     observations: '', lignes: [emptyLine()], canal: S.profil === 'coord' ? 'Mail' : '', constatId: constatId || '', savedAt: now(),
@@ -44,11 +44,12 @@ export function NouvelleDemande() {
   const { S, mutate, getS, toast, openModal } = useApp()
   const { query: q } = useRoute()
   const dr = S.draft
-  const needInit = !dr || (!!q.log && dr.logementId !== q.log)
+  const needInit = !dr || (!!q.log && dr.logementId !== q.log) || (!!S.moi && dr.auteurEmail !== S.moi.email)
 
   useEffect(() => {
-    if (needInit) mutate(s => { s.draft = newDraft(s, q.log, q.constat) })
-  }, [needInit, q.log, q.constat, mutate])
+    // newDraft lit l'identité du compte connecté, absente de la copie passée à mutate : on la prend dans l'état exposé.
+    if (needInit) { const base = getS(); mutate(s => { s.draft = newDraft(base, q.log, q.constat) }) }
+  }, [needInit, q.log, q.constat, mutate, getS])
 
   if (!dr || needInit) return <Layout />
 
@@ -92,7 +93,7 @@ export function NouvelleDemande() {
       const lg = s.logements.find(l => l.id === x.logementId)
       const origine: Demande['origine'] = x.canal === 'Mail' ? 'mail' : x.canal === 'Téléphone' ? 'tel' : 'etab'
       const d: Demande = {
-        id: nextId(s, 'di'), recueLe: now(), logementId: x.logementId, origine, auteur: x.auteur, auteurEmail: getS().moi?.email, fonction: x.fonction, tel: x.tel,
+        id: nextId(s, 'di'), recueLe: now(), logementId: x.logementId, origine, auteur: x.auteur, auteurEmail: x.auteurEmail, fonction: x.fonction, tel: x.tel,
         urgence: x.urgence as UrgenceKey, dateSouhaitee: x.dateSouhaitee, acces: x.acces, numCles: x.numCles, lieuCles: x.lieuCles,
         facturation: x.facturation, sinistre: x.sinistre, sinistreInfo: x.sinistre === 'Oui' ? x.sinistreInfo : null,
         observations: x.observations, message: '', consommables: [], historique: [], statut: 'a_qualifier', ft: '', constatId: x.constatId || '',

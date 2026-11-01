@@ -160,6 +160,8 @@ export interface DraftLigne {
 
 export interface DraftDemande {
   auteur: string
+  /** Compte ayant ouvert le brouillon (un brouillon d'un autre compte est écarté). */
+  auteurEmail?: string
   fonction: string
   tel: string
   logementId: string
