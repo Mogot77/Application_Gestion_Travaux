@@ -61,6 +61,31 @@ export const canon = (v: unknown): string => {
 /** Retire les champs de synchronisation (`updatedAt`, `deleted`) : ils ne font pas partie des données de l'application. */
 export const stripMeta = (d: Rec): Rec => Object.fromEntries(Object.entries(d).filter(([k]) => k !== 'updatedAt' && k !== 'deleted'))
 
+/** Champs de premier niveau modifiés localement depuis `base` (dernière version connue de la base). */
+export const dirtyFields = (local: Rec, base: Rec | undefined): string[] => {
+  if (!base) return []
+  const l = strip(local) as Rec
+  return Object.keys(l).filter(k => k !== '_i' && canon(l[k]) !== canon(base[k]))
+}
+
+/** Fusion à trois voies : on prend la version de la base, mais on garde les champs que l'utilisateur vient de modifier
+ *  et qui ne sont pas encore partis (sinon une mise à jour d'un autre champ par un collègue les écraserait). */
+export function mergeRemote(remote: Rec, local: Rec | undefined, base: Rec | undefined): Rec {
+  if (!local || !base) return remote
+  const out: Rec = { ...remote }
+  for (const k of dirtyFields(local, base)) out[k] = local[k]
+  return out
+}
+
+/** Différence entre deux versions JSON d'un document : champs de premier niveau changés, et champs disparus. */
+export function diffFields(prevJson: string, nextJson: string): { changed: Rec; removed: string[] } {
+  const prev = JSON.parse(prevJson) as Rec
+  const next = JSON.parse(nextJson) as Rec
+  const changed: Rec = {}
+  for (const k of Object.keys(next)) if (canon(next[k]) !== canon(prev[k])) changed[k] = next[k]
+  return { changed, removed: Object.keys(prev).filter(k => !(k in next)) }
+}
+
 /** Clés d'ordre des éléments de liste : chemin (`col/id`) → clé. Une clé est attribuée une fois, à la création du document. */
 export type OrderMap = Map<string, number>
 
@@ -139,14 +164,16 @@ export function graftPhotos(target: unknown, source: unknown): void {
 }
 
 /** Applique un document distant (ajout/modification) à l'état. `keyOf` donne la clé d'ordre d'un élément déjà présent. */
-export function upsertDoc(s: AppState, col: string, data: Rec, keyOf: (id: string) => number | undefined = () => undefined): void {
-  const { _i, ...item } = data
-  if (col === 'ref') { graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as AppState['ref']; return }
+export function upsertDoc(s: AppState, col: string, data: Rec, keyOf: (id: string) => number | undefined = () => undefined, base?: Rec): void {
+  const { _i, ...remote } = data
+  const baseItem = base ? Object.fromEntries(Object.entries(base).filter(([k]) => k !== '_i')) : undefined
+  if (col === 'ref') { const item = mergeRemote(remote, s.ref as Rec, baseItem); graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as AppState['ref']; return }
+  const item = remote
   if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = item.seq as AppState['seq']; return }
   if (!(ITEM_COLS as readonly string[]).includes(col)) return
   const arr = listOf(s, col as ItemCol)
   const idx = arr.findIndex(x => x.id === item.id)
-  if (idx >= 0) { graftPhotos(item, arr[idx]); arr[idx] = item as Item }
+  if (idx >= 0) { const merged = mergeRemote(item, arr[idx] as Rec, baseItem); graftPhotos(merged, arr[idx]); arr[idx] = merged as Item }
   else {
     // insertion avant le premier élément de clé supérieure (en queue si la clé est inconnue)
     const pos = typeof _i === 'number' ? arr.findIndex(x => (keyOf(x.id) ?? -Infinity) > _i) : -1

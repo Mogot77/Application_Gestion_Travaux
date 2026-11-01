@@ -1,7 +1,7 @@
-import { Timestamp, collection, doc, onSnapshot, query, serverTimestamp, where, writeBatch, type DocumentData } from 'firebase/firestore'
+import { Timestamp, collection, deleteField, doc, onSnapshot, query, serverTimestamp, where, writeBatch, type DocumentData } from 'firebase/firestore'
 import type { AppState } from '@/types'
 import { db } from '@/store/queries/firebase'
-import { ALL_COLS, ITEM_COLS, canon, pruneTo, removeDoc, stripMeta, toDocs, upsertDoc, type OrderMap } from '@/helpers/cloudState'
+import { ALL_COLS, ITEM_COLS, canon, diffFields, pruneTo, removeDoc, stripMeta, toDocs, upsertDoc, type OrderMap } from '@/helpers/cloudState'
 import { canResume, loadSync, newer, saveSync, type Cursor } from '@/store/queries/syncCursor'
 
 export type SyncOptions = {
@@ -61,21 +61,31 @@ export function startSync(o: SyncOptions): Sync {
     if (ready) saveSync({ v: 1, fullAt, cursors, order: Object.fromEntries(order) })
   }
 
-  const write = async (set: [string, string][], del: string[]) => {
-    const ops: [string, string | null][] = [...set, ...del.map(p => [p, null] as [string, null])]
+  /** Une écriture : document entier (nouveau), seulement les champs modifiés (existant), ou pierre tombale (suppression).
+   *  Écrire champ par champ évite d'écraser les modifications qu'un collègue a faites en même temps sur d'autres champs. */
+  type Write = { path: string; json: string | null; prev?: string }
+  const stage = (b: ReturnType<typeof writeBatch>, w: Write) => {
+    const ref = doc(db, w.path)
+    if (w.json === null) { b.set(ref, { deleted: true, updatedAt: serverTimestamp() }, { merge: true }); return }
+    if (w.prev === undefined) { b.set(ref, { ...(JSON.parse(w.json) as DocumentData), updatedAt: serverTimestamp() }); return }
+    const { changed, removed } = diffFields(w.prev, w.json)
+    const data: DocumentData = { ...changed, deleted: deleteField(), updatedAt: serverTimestamp() }
+    for (const k of removed) data[k] = deleteField()
+    b.set(ref, data, { mergeFields: Object.keys(data) })
+  }
+
+  const write = async (set: Write[], del: string[]) => {
+    const ops: Write[] = [...set, ...del.map(path => ({ path, json: null }))]
     try {
       for (let i = 0; i < ops.length; i += BATCH) {
         const b = writeBatch(db)
-        for (const [p, json] of ops.slice(i, i + BATCH)) {
-          if (json === null) b.set(doc(db, p), { deleted: true, updatedAt: serverTimestamp() })
-          else b.set(doc(db, p), { ...(JSON.parse(json) as DocumentData), updatedAt: serverTimestamp() })
-        }
+        for (const w of ops.slice(i, i + BATCH)) stage(b, w)
         await b.commit()
       }
       if (failures) { failures = 0; o.onRecovered?.() }
     } catch (e) {
       // On « oublie » ces écritures : le prochain envoi recalcule les différences et les rejoue.
-      for (const [p] of set) known.delete(p)
+      for (const w of set) known.delete(w.path)
       for (const p of del) failedDel.add(p)
       o.onError(e)
       if (failures < RETRY_MAX) {
@@ -101,8 +111,11 @@ export function startSync(o: SyncOptions): Sync {
   const push = (S: AppState) => {
     if (!ready || stopped) return
     const next = toDocs(S, order)
-    const set: [string, string][] = []
-    for (const [p, json] of next) if (known.get(p) !== json) { set.push([p, json]); known.set(p, json) }
+    const set: Write[] = []
+    for (const [p, json] of next) {
+      const prev = known.get(p)
+      if (prev !== json) { set.push({ path: p, json, prev }); known.set(p, json) }
+    }
     const del: string[] = [...failedDel]
     failedDel.clear()
     for (const p of [...known.keys()]) if (!next.has(p)) { del.push(p); known.delete(p); order.delete(p) }
@@ -156,9 +169,12 @@ export function startSync(o: SyncOptions): Sync {
         const data = stripMeta(raw)
         if (typeof data._i === 'number') order.set(path, data._i)
         const json = canon(data)
-        if (known.get(path) === json) continue
+        const before = known.get(path)
+        if (before === json) continue
         known.set(path, json)
-        ops.push(s => upsertDoc(s, name, data, keyOf))
+        // `before` = dernière version connue : sert à garder les champs modifiés ici et pas encore envoyés
+        const base = before ? (JSON.parse(before) as Record<string, unknown>) : undefined
+        ops.push(s => upsertDoc(s, name, data, keyOf, base))
       }
       if (name === 'meta' && !snap.empty) metaFound = true
       if (ops.length) o.apply(s => { for (const op of ops) op(s) })
