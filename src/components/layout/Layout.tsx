@@ -52,13 +52,13 @@ export function Layout({ active = '', children }: { active?: string; children?: 
                 <div className="flex flex-wrap items-center gap-2">
                   <select
                     className="h-8 max-w-full rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] font-medium text-[#e5e7eb]"
-                    aria-label="Jouer un rôle" value={play?.role ?? 'directeur'}
+                    aria-label="Statut de l'utilisateur (test : jouer un rôle)" title="Statut de l'utilisateur · le directeur peut tester les autres rôles" value={play?.role ?? 'directeur'}
                     onChange={e => {
                       const r = e.target.value as Role
                       setPlay(r === 'directeur' ? null : { role: r, etab: ROLES[r].needsEtab ? uniqueEtabs(S)[0] ?? '' : '', ouvrierId: r === 'ouvrier' ? S.ouvriers[0]?.id ?? '' : '' })
                     }}
                   >
-                    {ROLE_LIST.map(r => <option key={r} value={r}>{r === 'directeur' ? 'Directeur (moi)' : 'Jouer : ' + ROLES[r].label}</option>)}
+                    {ROLE_LIST.map(r => <option key={r} value={r}>{r === 'directeur' ? 'Directeur (mon compte)' : 'Test : ' + ROLES[r].label}</option>)}
                   </select>
                   {play && ROLES[play.role].needsEtab && (
                     <select className="h-8 max-w-[200px] rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] text-[#e5e7eb]" aria-label="Établissement joué"
