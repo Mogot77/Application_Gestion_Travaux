@@ -4,6 +4,7 @@ import { seed } from '../data/seed'
 import { AppContext, type AppCtx, type ModalSpec, type ToastKind } from './context'
 import { clearUi, flushUi } from './ui'
 import { startSync, type Sync } from '../lib/sync'
+import { applyUploaded, cloudinaryEnabled, uploadLocalPhotos } from '../lib/photos'
 import { Modal } from '../components/ui/Modal'
 import { Toasts, type ToastItem } from '../components/ui/Toasts'
 import { useAuth } from '../hooks/useAuth'
@@ -105,6 +106,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('keydown', onKey)
     }
   }, [saveNow])
+
+  // Photos encore locales (créées hors ligne ou avant Cloudinary) : envoyées au chargement et au retour du réseau.
+  useEffect(() => {
+    if (!ready || !cloudinaryEnabled) return
+    let busy = false
+    const run = async () => {
+      if (busy) return
+      busy = true
+      try {
+        const done = await uploadLocalPhotos(ref.current)
+        if (done.size) { mutate(s => applyUploaded(s, done), { now: true }); toast(`${done.size} photo(s) envoyée(s) en ligne`, 'ok') }
+      } finally { busy = false }
+    }
+    void run()
+    window.addEventListener('online', run)
+    return () => window.removeEventListener('online', run)
+  }, [ready, mutate, toast])
 
   // Le profil n'est plus choisi à la main : il découle du rôle du compte connecté.
   const { user, role, etab, play } = useAuth()

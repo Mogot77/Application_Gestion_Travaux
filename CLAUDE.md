@@ -1,6 +1,6 @@
 # Application Gestion Travaux
 
-Application de gestion de travaux (demandes, planning, logements, ouvriers, consultation d'entreprises), responsive (PC et téléphone). Authentification Google (Firebase Auth, liste blanche d'e-mails dans Firestore) ; données partagées dans Firestore (photos restées en `localStorage`, non synchronisées).
+Application de gestion de travaux (demandes, planning, logements, ouvriers, consultation d'entreprises), responsive (PC et téléphone). Authentification Google (Firebase Auth, liste blanche d'e-mails dans Firestore) ; données partagées dans Firestore (photos hébergées sur Cloudinary, URL stockée dans Firestore).
 
 ## Stack
 - Vite 8, React 19, TypeScript strict, Tailwind CSS 4 (`@tailwindcss/vite`), ESLint (flat config), Leaflet pour les cartes.

@@ -26,6 +26,9 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+        env:
+          VITE_CLOUDINARY_CLOUD: ${{ vars.VITE_CLOUDINARY_CLOUD }}
+          VITE_CLOUDINARY_PRESET: ${{ vars.VITE_CLOUDINARY_PRESET }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

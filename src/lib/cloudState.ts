@@ -16,11 +16,29 @@ const PHOTO_EMPTY: Record<string, () => unknown> = {
   photos: () => [], photosApres: () => [], photo: () => '', photoImp: () => '', apres: () => ({}),
 }
 
+const isLocal = (v: unknown): v is string => typeof v === 'string' && v.startsWith('data:')
+
+/** Garde les photos déjà hébergées (URL) et écarte les data-URL locales ; `undefined` si rien à garder. */
+const keepHosted = (v: unknown): unknown => {
+  if (typeof v === 'string') return isLocal(v) ? undefined : v
+  if (Array.isArray(v)) return v.map(keepHosted).filter(x => x !== undefined)
+  if (isRec(v)) return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, keepHosted(x) ?? []]))
+  return v
+}
+
+/** Applique `fn` à chaque chaîne des champs photo, en place. */
+export function mapPhotoStrings(v: unknown, fn: (p: string) => string): void {
+  if (Array.isArray(v)) { v.forEach(x => mapPhotoStrings(x, fn)); return }
+  if (!isRec(v)) return
+  const walk = (x: unknown): unknown => typeof x === 'string' ? fn(x) : Array.isArray(x) ? x.map(walk) : isRec(x) ? Object.fromEntries(Object.entries(x).map(([k, y]) => [k, walk(y)])) : x
+  for (const k of Object.keys(v)) { if (k in PHOTO_EMPTY) v[k] = walk(v[k]); else mapPhotoStrings(v[k], fn) }
+}
+
 const strip = (v: unknown): unknown => {
   if (Array.isArray(v)) return v.map(strip)
   if (!isRec(v)) return v
   const o: Rec = {}
-  for (const [k, x] of Object.entries(v)) o[k] = k in PHOTO_EMPTY ? PHOTO_EMPTY[k]() : strip(x)
+  for (const [k, x] of Object.entries(v)) o[k] = k in PHOTO_EMPTY ? keepHosted(x) ?? PHOTO_EMPTY[k]() : strip(x)
   return o
 }
 
@@ -44,11 +62,27 @@ export function toDocs(S: AppState): Map<string, string> {
 
 const isEmpty = (v: unknown) => v === undefined || v === '' || (Array.isArray(v) ? v.length === 0 : isRec(v) && Object.keys(v).length === 0)
 
-/** Recopie dans `target` les photos de `source` (les photos restent locales à l'appareil). */
+/** Fusionne dans `t` les data-URL locales de `s` (photos pas encore envoyées) ; les URL hébergées viennent de la base. */
+const mergeLocal = (t: unknown, s: unknown): unknown => {
+  if (typeof s === 'string') return isLocal(s) && isEmpty(t) ? s : t
+  if (Array.isArray(s)) {
+    const add = s.filter(x => isLocal(x) && !(Array.isArray(t) && t.includes(x)))
+    if (!add.length) return t
+    return Array.isArray(t) ? [...t, ...add] : add
+  }
+  if (isRec(s)) {
+    const o: Rec = isRec(t) ? t : {}
+    for (const k of Object.keys(s)) { const m = mergeLocal(o[k], s[k]); if (m !== undefined) o[k] = m }
+    return isRec(t) || Object.keys(o).length ? o : t
+  }
+  return t
+}
+
+/** Recopie dans `target` les photos locales de `source` non encore envoyées à Cloudinary. */
 export function graftPhotos(target: unknown, source: unknown): void {
   if (!isRec(target) || !isRec(source)) return
   for (const k of Object.keys(source)) {
-    if (k in PHOTO_EMPTY) { if (isEmpty(target[k]) && !isEmpty(source[k])) target[k] = source[k] }
+    if (k in PHOTO_EMPTY) { const m = mergeLocal(target[k], source[k]); if (m !== undefined) target[k] = m }
     else graftPhotos(target[k], source[k])
   }
 }
