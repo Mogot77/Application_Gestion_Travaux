@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { signInWithGoogle, signOutUser, watchAuth, type AuthUser } from '../lib/firebase'
-import { fetchAccess, type Role } from '../lib/users'
+import { signInWithGoogle, signOutUser, watchAuth, type AuthUser } from '@/helpers/firebase'
+import { fetchAccess, type Role } from '@/helpers/users'
 import { AuthContext, type AuthCtx, type Play } from './authContext'
 
 const message = (e: unknown): string => {
@@ -13,7 +13,7 @@ const message = (e: unknown): string => {
   return 'Connexion impossible. Réessayez.'
 }
 
-interface Access { uid: string; state: AuthCtx['access']; role: Role | null; etab: string }
+type Access = { uid: string; state: AuthCtx['access']; role: Role | null; etab: string }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined)

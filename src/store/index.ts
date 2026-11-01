@@ -1,0 +1,30 @@
+import { combineReducers, configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
+import { setAutoFreeze } from 'immer'
+import app, { mutated, remoteApplied } from './appSlice'
+import ui from './uiSlice'
+import { loadState } from './persistence'
+
+// L'ancien état n'était jamais gelé : on garde ce comportement (certains écrans trient/modifient des copies de l'état).
+setAutoFreeze(false)
+
+const rootReducer = combineReducers({ app, ui })
+
+export type RootState = ReturnType<typeof rootReducer>
+
+/** Un store par session connectée : l'état de départ est le cache local, Firestore le met ensuite à jour. */
+export const createAppStore = () => {
+  const listener = createListenerMiddleware()
+  const store = configureStore({
+    reducer: rootReducer,
+    preloadedState: { app: loadState() },
+    middleware: getDefault => getDefault({
+      // Les actions `mutated` / `remoteApplied` portent une fonction ; l'état métier est trop gros pour être vérifié à chaque action.
+      immutableCheck: false,
+      serializableCheck: { ignoredActions: [mutated.type, remoteApplied.type], ignoredActionPaths: ['payload.fn'], ignoredPaths: ['app'] },
+    }).prepend(listener.middleware),
+  })
+  return { store, listener }
+}
+
+export type AppStore = ReturnType<typeof createAppStore>['store']
+export type AppDispatch = AppStore['dispatch']

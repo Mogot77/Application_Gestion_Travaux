@@ -14,14 +14,14 @@ export type DemandeStatut =
   | 'realisee' | 'cloturee' | 'rejetee' | 'bailleur' | 'consultation' | 'prestataire'
   | 'sinistre' | 'annulee'
 
-export interface Option { v: string | number; l: string }
+export type Option = { v: string | number; l: string }
 
-export interface Seuils { troisDevis: number; direction: number; supplementMin: number }
-export interface UrgenceRef { k: UrgenceKey; l: string; d: string }
-export interface CircuitRef { k: CircuitKey; l: string; d: string }
-export interface SuiteSuppRef { k: SuiteSupp; l: string; d: string }
+export type Seuils = { troisDevis: number; direction: number; supplementMin: number }
+export type UrgenceRef = { k: UrgenceKey; l: string; d: string }
+export type CircuitRef = { k: CircuitKey; l: string; d: string }
+export type SuiteSuppRef = { k: SuiteSupp; l: string; d: string }
 
-export interface Referentiels {
+export type Referentiels = {
   seuils: Seuils
   urgences: UrgenceRef[]
   piecesLogement: string[]
@@ -43,7 +43,7 @@ export interface Referentiels {
   suitesSupp: SuiteSuppRef[]
 }
 
-export interface Logement {
+export type Logement = {
   id: string
   typo: string
   surface: number
@@ -69,7 +69,7 @@ export interface Logement {
   lng?: number
 }
 
-export interface Ouvrier {
+export type Ouvrier = {
   id: string
   nom: string
   metier: string
@@ -79,9 +79,9 @@ export interface Ouvrier {
   email?: string
 }
 
-export interface DocsEntreprise { kbis: string; urssaf: string; rc: string; decennale: string }
+export type DocsEntreprise = { kbis: string; urssaf: string; rc: string; decennale: string }
 
-export interface Entreprise {
+export type Entreprise = {
   id: string
   nom: string
   ville: string
@@ -94,10 +94,10 @@ export interface Entreprise {
   docs: DocsEntreprise
 }
 
-export interface Histo { at: string; t: string }
-export interface Consommable { nom: string; qte: number; origine: string; pris: boolean }
+export type Histo = { at: string; t: string }
+export type Consommable = { nom: string; qte: number; origine: string; pris: boolean }
 
-export interface Ligne {
+export type Ligne = {
   piece: string
   lot: string
   nature: string
@@ -113,9 +113,9 @@ export interface Ligne {
   supp?: boolean
 }
 
-export interface SinistreInfo { nature: string; date: string; fuite: string; tiers: string; constat: string }
+export type SinistreInfo = { nature: string; date: string; fuite: string; tiers: string; constat: string }
 
-export interface Demande {
+export type Demande = {
   id: string
   recueLe: string
   logementId: string
@@ -149,7 +149,7 @@ export interface Demande {
   auteurEmail?: string
 }
 
-export interface DraftLigne {
+export type DraftLigne = {
   piece: string
   lot: string
   nature: string
@@ -158,7 +158,7 @@ export interface DraftLigne {
   extra: Record<string, string>
 }
 
-export interface DraftDemande {
+export type DraftDemande = {
   auteur: string
   /** Compte ayant ouvert le brouillon (un brouillon d'un autre compte est écarté). */
   auteurEmail?: string
@@ -180,7 +180,7 @@ export interface DraftDemande {
   savedAt: string
 }
 
-export interface SuppWork {
+export type SuppWork = {
   photo: string
   piece: string
   lot: string
@@ -189,9 +189,9 @@ export interface SuppWork {
   duree: number
   suite: SuiteSupp
 }
-export interface SuppRapport extends SuppWork { suiteLabel: string }
+export type SuppRapport = SuppWork & { suiteLabel: string }
 
-export interface Work {
+export type Work = {
   lignes: Record<number, LigneStatut>
   motifs: Record<number, string>
   apres: Record<number, string[]>
@@ -203,7 +203,7 @@ export interface Work {
   corr: { min: number; motif: string } | null
 }
 
-export interface Rapport {
+export type Rapport = {
   tempsMin: number
   lignes: LigneStatut[]
   motifs: string[]
@@ -215,7 +215,7 @@ export interface Rapport {
   corr: { min: number; motif: string } | null
 }
 
-export interface Rdv {
+export type Rdv = {
   id: string
   ouvrierId: string
   date: string
@@ -232,7 +232,7 @@ export interface Rdv {
   work?: Work
 }
 
-export interface Constat {
+export type Constat = {
   id: string
   date: string
   logementId: string
@@ -248,7 +248,7 @@ export interface Constat {
   demandeId?: string
 }
 
-export interface ReponseDevis {
+export type ReponseDevis = {
   statut: 'attente' | 'recu' | 'decline'
   date?: string
   motif?: string
@@ -264,7 +264,7 @@ export interface ReponseDevis {
   qualite?: number | null
 }
 
-export interface DecisionDevis {
+export type DecisionDevis = {
   entrepriseId: string
   motif: string
   imputation: string
@@ -273,9 +273,9 @@ export interface DecisionDevis {
   at?: string
 }
 
-export interface Question { q: string; a: string; at: string }
+export type Question = { q: string; a: string; at: string }
 
-export interface Consultation {
+export type Consultation = {
   id: string
   demandeId: string
   statut: 'brouillon' | 'envoyee' | 'commande'
@@ -299,7 +299,7 @@ export interface Consultation {
   envoyeeLe?: string
 }
 
-export interface AppState {
+export type AppState = {
   v: 1
   ref: Referentiels
   logements: Logement[]
@@ -316,9 +316,9 @@ export interface AppState {
   seq: { di: number; ce: number; cs: number; ft: number; bc: number }
 }
 
-export interface ProfilInfo { nom: string; label: string; etab?: string; fonction: string }
+export type ProfilInfo = { nom: string; label: string; etab?: string; fonction: string }
 
 /** Utilisateur connecté (non persisté) : identité, rôle et rattachement. */
-export interface Moi extends ProfilInfo { email: string; role: string; portee: 'toutes' | 'etab' | 'siennes'; ouvrierId?: string }
+export type Moi = ProfilInfo & { email: string; role: string; portee: 'toutes' | 'etab' | 'siennes'; ouvrierId?: string }
 
 export type Tone = 'u' | 'h48' | 'pg' | 'rx' | 'ok' | 'gr' | 'tl' | 'ko' | 'bad' | 'wa' | 'mid' | 'bl'

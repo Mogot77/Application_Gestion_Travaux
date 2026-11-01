@@ -1,9 +1,9 @@
-import { createContext, type ReactNode } from 'react'
-import type { AppState } from '../types'
+import type { ReactNode } from 'react'
+import type { AppState } from '@/types'
 
 export type ToastKind = '' | 'ok' | 'err'
 
-export interface ModalSpec {
+export type ModalSpec = {
   title: string
   body: ReactNode
   okLabel?: string
@@ -14,10 +14,11 @@ export interface ModalSpec {
   noFooter?: boolean
 }
 
-export interface AppCtx {
+/** API exposée aux écrans par `useApp()` (façade sur le store Redux). */
+export type AppCtx = {
   /** État courant (immuable : chaque modification produit une nouvelle référence). */
   S: AppState
-  /** Applique une modification sur une copie de l'état puis persiste (immédiatement avec `now`, sinon avec un léger délai). */
+  /** Applique une modification (en mutant l'état reçu) puis persiste (immédiatement avec `now`, sinon avec un léger délai). */
   mutate: (fn: (s: AppState) => void, opts?: { now?: boolean }) => void
   /** Dernière version de l'état, y compris après un `mutate` dans le même gestionnaire. */
   getS: () => AppState
@@ -26,5 +27,3 @@ export interface AppCtx {
   openModal: (spec: ModalSpec) => void
   closeModal: () => void
 }
-
-export const AppContext = createContext<AppCtx | null>(null)
