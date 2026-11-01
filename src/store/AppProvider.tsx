@@ -3,6 +3,7 @@ import type { AppState } from '../types'
 import { seed } from '../data/seed'
 import { AppContext, type AppCtx, type ModalSpec, type ToastKind } from './context'
 import { clearUi, flushUi } from './ui'
+import { startSync, type Sync } from '../lib/sync'
 import { Modal } from '../components/ui/Modal'
 import { Toasts, type ToastItem } from '../components/ui/Toasts'
 
@@ -34,10 +35,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3400)
   }, [])
 
+  const [ready, setReady] = useState(false)
+  const [syncFailed, setSyncFailed] = useState(false)
+  const sync = useRef<Sync | null>(null)
+
   const saveNow = useCallback(() => {
     window.clearTimeout(timer.current)
     try { localStorage.setItem(KEY, JSON.stringify(ref.current)) }
     catch { toast('Stockage local plein : supprimez des photos ou réinitialisez la démo', 'err') }
+    sync.current?.push(ref.current)
+  }, [toast])
+
+  // Données partagées : Firestore est la source de vérité, le localStorage sert de cache et conserve les photos.
+  useEffect(() => {
+    let errored = false
+    const s = startSync({
+      local: () => ref.current,
+      apply: fn => {
+        const next = structuredClone(ref.current)
+        fn(next)
+        ref.current = next
+        setS(next)
+        try { localStorage.setItem(KEY, JSON.stringify(next)) } catch { /* cache local plein : ignoré */ }
+      },
+      onReady: () => setReady(true),
+      onError: () => { if (!errored) { errored = true; setSyncFailed(true); toast("Synchronisation impossible : vos changements ne sont pas enregistrés en ligne", 'err') } },
+    })
+    sync.current = s
+    return () => { s.stop(); sync.current = null }
   }, [toast])
 
   const mutate = useCallback<AppCtx['mutate']>((fn, opts) => {
@@ -83,7 +108,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={value}>
-      {children}
+      {ready ? children : (
+        <p className="p-6 text-sm text-[#6b7280]">
+          {syncFailed ? "Impossible de joindre la base de données. Vérifiez votre connexion puis rechargez la page." : 'Chargement des données…'}
+        </p>
+      )}
       {modal && <Modal spec={modal} onClose={closeModal} />}
       <Toasts items={toasts} />
     </AppContext.Provider>

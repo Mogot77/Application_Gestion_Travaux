@@ -3,6 +3,7 @@ import { AppProvider } from './store/AppProvider'
 import { AuthProvider } from './store/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import { Login } from './components/pages/Login'
+import { Utilisateurs } from './components/pages/Utilisateurs'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useRoute } from './hooks/useRoute'
 import { Demandes } from './components/pages/Demandes'
@@ -46,6 +47,7 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/classement$/, () => <Classement />],
   [/^\/referentiels$/, () => <Referentiels />],
   [/^\/ouvriers$/, () => <Ouvriers />],
+  [/^\/utilisateurs$/, () => <Utilisateurs />],
   [/^\/carte$/, () => <Carte />],
   [/^\/m\/missions$/, (_p, q) => <MesMissions sig={q.sig} />],
   [/^\/m\/mission\/([\w-]+)$/, p => <MissionDetail rid={p[0]} />],
@@ -56,17 +58,9 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/m\/profil$/, () => <ProfilMobile />],
 ]
 
-/** Écrans accessibles sans compte Google : portail entreprises et mobile terrain (liens signés). */
-const PUBLIC = /^\/(portail|m)\//
-
 function Router() {
   const { path, query } = useRoute()
-  const { user } = useAuth()
   useEffect(() => { window.scrollTo(0, 0) }, [path])
-  if (!PUBLIC.test(path)) {
-    if (user === undefined) return <p className="p-6 text-sm text-[#6b7280]">Chargement…</p>
-    if (user === null) return <Login />
-  }
   for (const [re, render] of ROUTES) {
     const m = path.match(re)
     if (m) return <ErrorBoundary key={path}>{render(m.slice(1), query)}</ErrorBoundary>
@@ -74,12 +68,22 @@ function Router() {
   return <ErrorBoundary key={path}><Demandes /></ErrorBoundary>
 }
 
+/** Tout l'accès est réservé aux comptes Google de la liste blanche ; les données ne se chargent qu'après connexion. */
+function Gate() {
+  const { user, access } = useAuth()
+  if (user === undefined || (user && access === 'loading')) return <p className="p-6 text-sm text-[#6b7280]">Chargement…</p>
+  if (user === null || access !== 'ok') return <Login />
+  return (
+    <AppProvider>
+      <Router />
+    </AppProvider>
+  )
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <AppProvider>
-        <Router />
-      </AppProvider>
+      <Gate />
     </AuthProvider>
   )
 }

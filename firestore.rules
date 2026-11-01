@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function verified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function mail() {
+      return request.auth.token.email.lower();
+    }
+    function isBootstrap() {
+      return mail() == 'vallet.morgan@gmail.com';
+    }
+    function isMember() {
+      return verified() && (isBootstrap() ||
+        exists(/databases/$(database)/documents/users/$(mail())));
+    }
+    function isAdmin() {
+      return verified() && (isBootstrap() ||
+        (exists(/databases/$(database)/documents/users/$(mail())) &&
+         get(/databases/$(database)/documents/users/$(mail())).data.role == 'admin'));
+    }
+
+    // Liste blanche : un document par e-mail Google (id = e-mail en minuscules).
+    match /users/{email} {
+      allow get: if verified() && (email == mail() || isAdmin());
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    // Données de l'application : accessibles à tous les comptes autorisés.
+    match /{col}/{id} {
+      allow read, write: if col in ['ref', 'meta', 'logements', 'ouvriers', 'entreprises',
+                                    'demandes', 'rdvs', 'constats', 'consultations'] && isMember();
+    }
+  }
+}

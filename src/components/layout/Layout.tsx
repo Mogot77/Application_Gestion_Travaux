@@ -21,7 +21,8 @@ const NAV: [string, string, string][] = [
 /** Coque commune des écrans bureau : en-tête de navigation + contenu. */
 export function Layout({ active = '', children }: { active?: string; children?: ReactNode }) {
   const { S, mutate, toast } = useApp()
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
+  const nav = isAdmin ? [...NAV, ['utilisateurs', 'Utilisateurs', '#/utilisateurs'] as [string, string, string]] : NAV
   const onProfil = (k: ProfilKey) => {
     mutate(s => { s.profil = k }, { now: true })
     toast('Profil : ' + PROFILS[k].label)
@@ -31,7 +32,7 @@ export function Layout({ active = '', children }: { active?: string; children?: 
       <header className="noprint sticky top-0 z-20 flex flex-wrap items-center gap-x-5 gap-y-2 bg-nav px-4 sm:px-6">
         <a className="py-4 text-[17px] font-bold text-white no-underline hover:text-white" href="#/demandes">Equalis · Travaux</a>
         <nav className="flex flex-1 flex-wrap gap-[18px]" aria-label="Onglets">
-          {NAV.map(([k, l, h]) => (
+          {nav.map(([k, l, h]) => (
             <a
               key={k} href={h}
               className={`border-b-[3px] pb-[15px] pt-[18px] text-sm no-underline hover:text-white ${k === active ? 'border-b-[#60a5fa] font-semibold text-white' : 'border-b-transparent text-[#c3cad4]'}`}
