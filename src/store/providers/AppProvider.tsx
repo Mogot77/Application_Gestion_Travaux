@@ -18,7 +18,7 @@ const Shell = ({ children }: { children: ReactNode }) => {
   return (
     <>
       {ready ? children : (
-        <p className="p-6 text-sm text-[#6b7280]">
+        <p className="p-6 text-sm text-muted">
           {syncFailed ? "Impossible de joindre la base de données. Vérifiez votre connexion puis rechargez la page." : 'Chargement des données…'}
         </p>
       )}

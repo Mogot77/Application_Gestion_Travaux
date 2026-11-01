@@ -12,7 +12,7 @@ Application web responsive (PC et téléphone) de gestion de travaux : demandes,
 | État global | **Redux Toolkit** + `react-redux` (Immer, listener middleware) |
 | Langage | **TypeScript 6** (mode strict) |
 | Build / dev server | **Vite 8** + `@vitejs/plugin-react` |
-| Styles | **Tailwind CSS 4** (`@tailwindcss/vite`) + classes réutilisables dans `index.css` |
+| Styles | **Tailwind CSS 4** (`@tailwindcss/vite`) + classes réutilisables dans `index.css`, thème clair/sombre par jetons CSS |
 | Cartographie | **Leaflet** (fonds OpenStreetMap et satellite, couche cadastre IGN gratuite) |
 | Authentification | **Firebase Auth** (connexion Google) |
 | Base de données | **Cloud Firestore** (temps réel, projet `travaux-2975b`) |

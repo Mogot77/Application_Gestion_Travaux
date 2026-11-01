@@ -11,7 +11,7 @@ const AddPhoto = ({ onFiles, label = '+ Photo', w = 96, h = 72, req = false, mul
   }
   return (
     <label className={`addph${req ? ' req' : ''}`} style={{ width: w, height: h }}>
-      {req && <Icon name="cam" c="#B42318" />}{label}
+      {req && <Icon name="cam" c="var(--color-danger)" />}{label}
       <input type="file" accept="image/*" capture="environment" multiple={multiple} onChange={onChange} />
     </label>
   )

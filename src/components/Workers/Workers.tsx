@@ -23,7 +23,7 @@ const ColorPicker = ({ initial }: ColorPickerProps) => {
       {COLORS.map(c => (
         <label key={c} className="cursor-pointer">
           <input type="radio" name="color" value={c} checked={c === color} onChange={() => setColor(c)} className="absolute opacity-0" />
-          <span className="av !size-7" style={{ background: c, outline: c === color ? '3px solid #111827' : 'none', outlineOffset: 2 }}></span>
+          <span className="av !size-7" style={{ background: c, outline: c === color ? '3px solid var(--color-ink)' : 'none', outlineOffset: 2 }}></span>
         </label>
       ))}
     </div>

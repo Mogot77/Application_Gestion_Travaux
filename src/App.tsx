@@ -81,12 +81,12 @@ function Router() {
 }
 
 /** Affiche l'écran demandé, avec un message le temps de son chargement. */
-const Screen = ({ children }: { children: ReactNode }) => <Suspense fallback={<p className="p-6 text-sm text-[#6b7280]">Chargement…</p>}>{children}</Suspense>
+const Screen = ({ children }: { children: ReactNode }) => <Suspense fallback={<p className="p-6 text-sm text-muted">Chargement…</p>}>{children}</Suspense>
 
 /** Tout l'accès est réservé aux comptes Google de la liste blanche ; les données ne se chargent qu'après connexion. */
 function Gate() {
   const { user, access } = useAuth()
-  if (user === undefined || (user && access === 'loading')) return <p className="p-6 text-sm text-[#6b7280]">Chargement…</p>
+  if (user === undefined || (user && access === 'loading')) return <p className="p-6 text-sm text-muted">Chargement…</p>
   if (user === null || access !== 'ok') return <Login />
   return (
     <AppProvider>

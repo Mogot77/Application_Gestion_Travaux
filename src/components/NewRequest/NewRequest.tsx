@@ -167,7 +167,7 @@ const NewRequest = () => {
               <Field label="Observations" htmlFor="fobs" className="col-span-full"><textarea className="in" id="fobs" value={dr.observations} placeholder="Présence de l'occupant, contraintes horaires…" onChange={e => upd(d => { d.observations = e.target.value })} /></Field>
             </div>
             {dr.sinistre === 'Oui' && (
-              <div className="mt-4 rounded-lg border border-[#DCCCF9] bg-[#FAF7FF] p-3.5">
+              <div className="mt-4 rounded-lg border border-violet-line bg-violet-bg p-3.5">
                 <strong className="s13 text-violet">Sinistre / assurance — informations complémentaires</strong>
                 <div className="grid-auto mt-2.5" style={{ '--min': '220px' } as React.CSSProperties}>
                   <Field label="Nature du sinistre" htmlFor="fsn"><select className={`in${si.nature ? '' : ' miss'}`} id="fsn" value={si.nature} onChange={e => upd(d => { d.sinistreInfo.nature = e.target.value })}><Opts list={S.ref.natSinistre} placeholder="Choisir…" /></select></Field>
@@ -187,7 +187,7 @@ const NewRequest = () => {
               const ok = l.piece && l.lot && l.nature && l.description.trim() && l.photos.length
               const status = !(l.piece && l.lot && l.nature && l.description.trim()) ? <Chip>À compléter</Chip> : !l.photos.length ? <Chip tone="h48">Photo manquante</Chip> : <Chip tone="ok">Complète</Chip>
               return (
-                <div key={i} className={`line ${ok ? '' : '!border-2 !border-[#F2A5A5] !bg-[#FFFBFB]'}`}>
+                <div key={i} className={`line ${ok ? '' : '!border-2 !border-danger-line !bg-danger-wash'}`}>
                   <div className="row between mb-3">
                     <strong className="text-sm">Ligne {i + 1}</strong>
                     <div className="row !gap-2">{status}{dr.lignes.length > 1 && <button className="linkbtn small" onClick={() => upd(d => { d.lignes.splice(i, 1) })}>Supprimer</button>}</div>

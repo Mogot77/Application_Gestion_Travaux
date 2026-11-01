@@ -136,7 +136,7 @@ const Housing = ({ id }: HousingProps) => {
                     {pieces.map(p => {
                       const c = cnt[p]
                       return (
-                        <div key={p} className={`flex min-h-[62px] flex-col gap-1 rounded-lg border p-2.5 text-xs ${c && c.open ? 'border-danger-line bg-[#FFFBFA]' : 'border-line bg-white'}`}>
+                        <div key={p} className={`flex min-h-[62px] flex-col gap-1 rounded-lg border p-2.5 text-xs ${c && c.open ? 'border-danger-line bg-danger-wash' : 'border-line bg-surface'}`}>
                           <span className="font-semibold">{p}</span>
                           <b className={`font-medium ${c ? 'text-ink' : 'text-faint'}`}>{c ? `${c.n} intervention${c.n > 1 ? 's' : ''}${c.open ? ' · en cours' : ''}` : '—'}</b>
                         </div>

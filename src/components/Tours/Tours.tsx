@@ -74,7 +74,7 @@ const Tours = () => {
               )
             })}
           </div>
-          <div className={`card pad ${urgent ? '!border-danger-line !bg-[#FFFBFA]' : ''}`}>
+          <div className={`card pad ${urgent ? '!border-danger-line !bg-danger-wash' : ''}`}>
             {urgent ? (
               <>
                 <strong className="text-danger">Urgence non affectée · {getLog(S, urgent.logementId)?.ville}</strong>

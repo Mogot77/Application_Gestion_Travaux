@@ -1,3 +1,5 @@
+import Icon from '@/components/ui/Icon'
+import { useTheme } from '@/hooks/useTheme'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useApp } from '@/hooks/useApp'
@@ -11,6 +13,7 @@ const Layout = ({ active = '', children }: LayoutProps) => {
   const { user, logout, role, realRole, play, setPlay } = useAuth()
   const { S } = useApp()
   const [open, setOpen] = useState(false)
+  const { theme, toggle: toggleTheme } = useTheme()
   const nav = NAV.filter(([k]) => canSee(role, k))
   return (
     <>
@@ -62,6 +65,11 @@ const Layout = ({ active = '', children }: LayoutProps) => {
                   )}
                 </div>
               ) : role && <span className="max-w-full truncate text-[13px] font-medium text-[#e5e7eb] lg:max-w-[260px]" title={user?.email ?? undefined}>{ROLES[role].label}</span>}
+              <button
+                type="button" className="grid size-8 place-items-center rounded-lg text-[#d1d5db] hover:text-white"
+                aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+                title={theme === 'dark' ? 'Thème clair' : 'Thème sombre'} onClick={toggleTheme}
+              ><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
               {user && (
                 <button
                   type="button" className="text-[13px] text-[#d1d5db] hover:text-white"

@@ -110,7 +110,7 @@ const Portal = ({ csId, eid: eidParam }: PortalProps) => {
             <div className="row !gap-2.5"><Chip tone={closed ? 'gr' : 'h48'}>{`Réponse attendue avant le ${fday(c.dateLimite)} · ${c.heureLimite}`}</Chip><span className="muted s13">Logement {log.typo} occupé · adresse précise communiquée à la visite</span></div></div>
           {r.statut === 'attente' && !closed && <button className="btn" onClick={decline}>Décliner la consultation</button>}
         </div>
-        {r.statut === 'recu' && <div className="note mb-4 !border-[#A7D9B8] !bg-good-soft">Devis déposé le {fd(r.date)} : {feur(r.montantHT)} HT. Merci, la coordination vous informera de sa décision.</div>}
+        {r.statut === 'recu' && <div className="note mb-4 !border-good-line !bg-good-soft">Devis déposé le {fd(r.date)} : {feur(r.montantHT)} HT. Merci, la coordination vous informera de sa décision.</div>}
         {r.statut === 'decline' && <div className="note mb-4">Vous avez décliné cette consultation ({r.motif || ''}).</div>}
         {c.statut === 'commande' && <div className="note info mb-4">Consultation close : {c.decision?.entrepriseId === eid ? 'votre devis a été retenu, le bon de commande vous a été envoyé.' : "votre devis n'a pas été retenu. Merci de votre participation."}</div>}
         <div className="cols">

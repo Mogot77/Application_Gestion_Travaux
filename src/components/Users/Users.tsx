@@ -75,7 +75,7 @@ const Users = () => {
       <ul className="card mb-4 list-none p-4 text-sm">{ROLE_LIST.map(r => <li key={r}><b>{ROLES[r].label}</b> — {ROLES[r].description}</li>)}</ul>
 
       {loadError ? <p className="card p-4 text-sm text-red-600">Impossible de charger la liste.</p>
-        : users === null ? <p className="text-sm text-[#6b7280]">Chargement…</p>
+        : users === null ? <p className="text-sm text-muted">Chargement…</p>
         : (
           <div className="card overflow-x-auto">
             <table className="t">

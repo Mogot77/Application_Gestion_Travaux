@@ -212,7 +212,7 @@ const Qualification = ({ id }: QualificationProps) => {
         <div className="row !gap-2">{bar()}</div>
       </div>
       {d.statut === 'a_completer' && <Note tone="warn" className="mb-4"><span><strong>Renvoyée pour complément :</strong> {d.motifRenvoi || ''}{d.msgRenvoi ? ` — « ${d.msgRenvoi} »` : ''}. Ajoutez les photos ou précisions demandées.</span></Note>}
-      {d.statut === 'a_reactualiser' && <Note className="mb-4 !border-[#DCCCF9] !bg-[#FAF7FF]">Demande de plus de 2 mois sans intervention. Sans réactualisation avant le <strong>{fd(addDays(d.recueLe, 80))}</strong>, elle sera rejetée automatiquement (motif « Non réactualisée »).</Note>}
+      {d.statut === 'a_reactualiser' && <Note className="mb-4 !border-violet-line !bg-violet-bg">Demande de plus de 2 mois sans intervention. Sans réactualisation avant le <strong>{fd(addDays(d.recueLe, 80))}</strong>, elle sera rejetée automatiquement (motif « Non réactualisée »).</Note>}
       {d.statut === 'rejetee' && <Note className="mb-4">Rejetée : {d.motifRejet || ''}</Note>}
       <div className="cols">
         <div className="col-main">

@@ -36,7 +36,7 @@ const Modal = ({ spec, onClose }: ModalProps) => {
       <form
         ref={form} noValidate onSubmit={submit} onKeyDown={trap}
         role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
-        className={`max-h-[calc(100vh-32px)] w-full overflow-auto rounded-xl bg-white shadow-[0_20px_50px_rgba(17,24,39,.3)] ${spec.wide ? 'max-w-[900px]' : 'max-w-[520px]'}`}
+        className={`max-h-[calc(100vh-32px)] w-full overflow-auto rounded-xl bg-surface shadow-[0_20px_50px_rgba(17,24,39,.3)] ${spec.wide ? 'max-w-[900px]' : 'max-w-[520px]'}`}
       >
         <header className="flex items-center justify-between border-b border-line2 px-5 py-4">
           <strong id={titleId} className="text-base">{spec.title}</strong>

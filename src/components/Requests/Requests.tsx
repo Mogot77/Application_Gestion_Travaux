@@ -101,7 +101,7 @@ const Requests = () => {
               const closed = CLOSED.includes(d.statut)
               const l0 = d.lignes[0]
               return (
-                <tr key={d.id} className={reacSt ? 'bg-[#FAF7FF]' : d.urgence === 'urgent' && !closed ? 'bg-[#FFFBFA]' : ''}>
+                <tr key={d.id} className={reacSt ? 'bg-violet-bg' : d.urgence === 'urgent' && !closed ? 'bg-danger-wash' : ''}>
                   <td><input type="checkbox" checked={ui.sel.includes(d.id)} aria-label={`Sélectionner ${d.id}`} onChange={e => toggleSel(d.id, e.target.checked)} /></td>
                   <td><a href={`#/demande/${d.id}`}><strong>{d.id}</strong></a></td>
                   <td>{fd(d.recueLe)}</td>

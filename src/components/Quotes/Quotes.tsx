@@ -139,7 +139,7 @@ const Quotes = ({ id }: QuotesProps) => {
             <h2 className="h2 mb-3.5">Décision</h2>
             {dec.statut === 'validee' ? (
               <>
-                <div className="note !border-[#A7D9B8] !bg-good-soft">Commande {dec.bc} passée à <strong>{getEnt(S, dec.entrepriseId)?.nom}</strong>{chosen && chosen.montantHT ? ` pour ${feur(chosen.montantHT)} HT` : ''}. {dec.motif}</div>
+                <div className="note !border-good-line !bg-good-soft">Commande {dec.bc} passée à <strong>{getEnt(S, dec.entrepriseId)?.nom}</strong>{chosen && chosen.montantHT ? ` pour ${feur(chosen.montantHT)} HT` : ''}. {dec.motif}</div>
                 <p className="muted small mb-0 mt-2.5">Bon de commande envoyé, mission planifiée côté prestataire{d.dateIntervention ? ` (intervention prévue ${fday(d.dateIntervention)})` : ''}, mail automatique aux entreprises non retenues.</p>
                 <a className="btn btn-w mt-3" href={`#/demande/${d.id}`}>Suivre la demande</a>
               </>

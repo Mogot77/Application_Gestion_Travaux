@@ -105,7 +105,7 @@ const MySchedule = () => {
               const lg = getLog(S, d?.logementId)
               const [lib, tone] = RDV_ETAT[r.etat]
               return (
-                <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[#e5e7eb] py-2 first:border-t-0">
+                <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line py-2 first:border-t-0">
                   <b>{r.debut}</b><span className="muted">{fdur(r.duree)}</span>
                   <span className="min-w-[200px] flex-1">{r.label}{lg && <span className="muted"> — {logAdr(lg)}, {lg.ville}</span>}{r.motifImp && <span className="muted"> · {r.motifImp}</span>}</span>
                   <Chip tone={tone}>{lib}</Chip>
