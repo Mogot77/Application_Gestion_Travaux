@@ -1,30 +1,21 @@
-import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
-import Field from '@/components/ui/Field'
-import Icon from '@/components/ui/Icon'
 import { useEffect } from 'react'
 import { useApp } from '@/hooks/useApp'
 import { go, useRoute } from '@/hooks/useRoute'
 import { useUiState } from '@/hooks/useUiState'
 import { setUi as resetUiKey } from '@/store/local/uiState'
+import { reserveIds } from '@/store/queries/counters'
 import Layout from '@/components/Layout'
-import Opts from '@/components/ui/Opts'
-import Seg from '@/components/ui/Seg'
-import AddPhoto from '@/components/ui/AddPhoto'
-import Photo from '@/components/Photo'
-
 import { nextId, profilOf } from '@/helpers/domain'
 import { TODAY } from '@/helpers/dates'
 import { readPhotos } from '@/helpers/photos'
 import { INIT, KEY } from './constants'
+import { buildNewInspectionModel } from './helpers'
+import NewInspectionView from './NewInspectionView'
 import type { ConstatUi } from './types'
-import PageHead from '@/components/ui/PageHead'
-import { reserveIds } from '@/store/queries/counters'
-
 
 /** Saisie d'un constat d'état (ouvert à tout salarié). */
 const NewInspection = () => {
-  const { S, mutate, getS, toast } = useApp()
+  const { S, mutate, getS, toast, openModal } = useApp()
   const { query: q } = useRoute()
   const [c, patch] = useUiState<ConstatUi>(KEY, INIT)
   const needReset = !!q.log && c.logementId !== q.log
@@ -34,7 +25,6 @@ const NewInspection = () => {
 
   const pf = profilOf(S)
   const contexte = c.contexte || S.ref.contextes[0]
-  const n = c.signalements.length
 
   const save = async (andCreate: boolean) => {
     if (!c.logementId) return toast('Choisissez le logement', 'err')
@@ -57,34 +47,13 @@ const NewInspection = () => {
 
   return (
     <Layout active="constats">
-      <PageHead title="Nouveau constat d'état" subtitle="Ouvert à tout salarié. Décrire le logement, jamais le ménage." />
-      <Card className="mx-auto flex max-w-[720px] flex-col gap-5 p-4 sm:p-6">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Logement" htmlFor="cl"><select className="in" id="cl" value={c.logementId} onChange={e => patch({ logementId: e.target.value })}>
-            <Opts placeholder="Choisir…" list={S.logements.filter(l => l.typo !== 'BUR').map(l => ({ v: l.id, l: `${l.id} · ${l.typo} · ${l.ville}` }))} /></select></Field>
-          <Field label="Contexte de la visite" htmlFor="cc"><select className="in" id="cc" value={contexte} onChange={e => patch({ contexte: e.target.value })}><Opts list={S.ref.contextes} /></select></Field>
-        </div>
-        <div><span className="lbl">Propreté · note de 0 à 6</span>
-          <div className="pnote" role="group" aria-label="Note de propreté">{[0, 1, 2, 3, 4, 5, 6].map(i => <button key={i} type="button" className={c.proprete === i ? 'on' + (i <= 2 ? ' low' : '') : ''} onClick={() => patch({ proprete: i })}>{i}</button>)}</div>
-          <div className="row between small muted mt-1.5"><span>0 insalubre</span><strong className="text-ink">{c.proprete == null ? '—' : c.proprete + ' · ' + S.ref.proprete[c.proprete].toLowerCase()}</strong><span>6 impeccable</span></div>
-          {c.proprete != null && c.proprete <= 2 && <p className="small mb-0 mt-1.5 text-danger">Note ≤ 2 : la coordination sera alertée.</p>}</div>
-        <div><span className="lbl">État général du bâti</span><Seg values={['Bon', 'Moyen', 'Dégradé']} sel={c.bati} onPick={v => patch({ bati: v })} /></div>
-        <div><span className="lbl">Signalements</span>
-          <button type="button" className="in text-left" aria-expanded={c.open} onClick={() => patch({ open: !c.open })}>{n ? `${n} sélectionné${n > 1 ? 's' : ''}` : 'Aucun signalement'}<Icon name="chev" /></button>
-          {c.open ? Object.entries(S.ref.signalements).map(([g, arr]) => (
-            <div key={g}><div className="small muted mb-0.5 mt-3 font-bold tracking-[.04em]">{g.toUpperCase()}</div>
-              {arr.map(sg => <label key={sg} className="chkrow"><input type="checkbox" checked={c.signalements.includes(sg)} onChange={e => patch({ signalements: e.target.checked ? [...c.signalements, sg] : c.signalements.filter(x => x !== sg) })} /> {sg}</label>)}</div>
-          )) : (n > 0 && <div className="mt-2">{c.signalements.map(sg => <span key={sg} className="tag">{sg}</span>)}</div>)}
-        </div>
-        <div><span className="lbl">Photos ({c.photos.length}) · pas de personne sur les photos</span>
-          <div className="row !gap-2">{c.photos.map((ph, j) => <Photo key={j} src={ph} w={72} h={72} onDelete={() => patch({ photos: c.photos.filter((_x, k) => k !== j) })} />)}
-            <AddPhoto label="+" w={72} h={72} onFiles={f => readPhotos(f).then(ph => patch({ photos: [...c.photos, ...ph] }))} /></div></div>
-        <Field label="Commentaire" htmlFor="cm"><textarea className="in" id="cm" value={c.commentaire} placeholder="Décrire le logement" onChange={e => patch({ commentaire: e.target.value })} /></Field>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button onClick={() => save(true)}>Enregistrer et créer une demande</Button>
-          <Button variant="primary" onClick={() => save(false)}>Enregistrer le constat</Button>
-        </div>
-      </Card>
+      <NewInspectionView
+        model={buildNewInspectionModel(S, c)}
+        onPatch={patch}
+        onSave={save}
+        onAddFiles={f => readPhotos(f).then(ph => patch({ photos: [...c.photos, ...ph] }))}
+        onOpenPhoto={src => openModal({ title: 'Photo', wide: true, noFooter: true, body: <img src={src} alt="Photo" className="w-full rounded-lg" /> })}
+      />
     </Layout>
   )
 }

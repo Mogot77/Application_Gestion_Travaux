@@ -1,7 +1,7 @@
 import type { AppState, DraftDemande, DraftLigne, Logement } from '@/types'
 import { now } from '@/helpers/dates'
-import { getLog, profilOf } from '@/helpers/domain'
-import type { CheckItem, CheckResult } from './types'
+import { getLog, piecesFor, profilOf } from '@/helpers/domain'
+import type { CheckItem, CheckResult, LogementGroup, NewRequestModel } from './types'
 
 export const emptyLine = (): DraftLigne => ({ piece: '', lot: '', nature: '', description: '', photos: [], extra: {} })
 
@@ -32,3 +32,37 @@ export const check = (S: AppState, dr: DraftDemande): CheckResult => {
 export const getCe = (S: AppState, id?: string) => S.constats.find(c => c.id === id)
 
 export const logLabel = (l?: Logement) => l ? `${l.id} · ${l.typo === 'BUR' ? 'Bureaux' : l.typo} · ${l.adresse}${l.bat ? ', bât. ' + l.bat : ''}${l.apt ? ', apt ' + l.apt : ''} — ${l.ville} (${l.dept})` : ''
+
+/** Logements proposés, groupés par ville ; un établissement ne voit que les siens (et les bureaux). */
+export const logementGroups = (S: AppState): LogementGroup[] => {
+  const villes = [...new Set(S.logements.map(l => l.ville))].sort()
+  return villes.map(v => ({
+    ville: v,
+    items: S.logements
+      .filter(l => l.ville === v && (S.profil !== 'etab' || l.etab === profilOf(S).etab || l.typo === 'BUR'))
+      .map(l => ({ id: l.id, label: logLabel(l) })),
+  }))
+}
+
+/** Modèle d'affichage de la fiche de demande pour un brouillon donné. */
+export const buildNewRequestModel = (S: AppState, dr: DraftDemande): NewRequestModel => {
+  const log = getLog(S, dr.logementId)
+  const pp = piecesFor(S, log)
+  return {
+    dr, log,
+    constat: getCe(S, dr.constatId),
+    check: check(S, dr),
+    isCoord: S.profil === 'coord',
+    service: log ? log.etab : profilOf(S).etab || '—',
+    groups: logementGroups(S),
+    urgences: S.ref.urgences,
+    urgenceDesc: (S.ref.urgences.find(u => u.k === dr.urgence) || { d: 'Urgent : sécurité, fuite active, porte bloquée, panne générale.' }).d,
+    fonctions: S.ref.fonctions,
+    cles: S.ref.cles,
+    natSinistre: S.ref.natSinistre,
+    lots: S.ref.lots,
+    pieces: pp.pieces,
+    autresPieces: pp.autres,
+    arrivee: S.logements.map(x => ({ v: x.id, l: `${x.id} · ${x.ville}` })),
+  }
+}

@@ -1,4 +1,5 @@
 import type { AppState, Consultation as Cs, Demande } from '@/types'
+import type { ConsultationModel } from './types'
 import { getLog } from '@/helpers/domain'
 import { TODAY, addDays } from '@/helpers/dates'
 
@@ -19,3 +20,20 @@ export const newDraft = (S: AppState, d: Demande): Cs => {
   }
 }
 export const draftOf = (S: AppState, demandeId: string) => S.consultations.find(x => x.demandeId === demandeId && x.statut === 'brouillon')
+
+/** Modèle d'affichage du brouillon de consultation pour une demande. */
+export const buildConsultationModel = (S: AppState, d: Demande, c: Cs): ConsultationModel => {
+  const crit = c.criteres
+  const est = Number(c.estimation) || 0
+  return {
+    c, d, log: getLog(S, d.logementId),
+    lots: [...new Set(c.lignes.map(i => d.lignes[i].lot))],
+    shown: S.entreprises.filter(e => c.entreprises.includes(e.id)),
+    sumCrit: crit.prix + crit.delai + crit.qualite,
+    nph: c.lignes.reduce((s, i) => s + d.lignes[i].photos.length, 0),
+    sendLabel: c.mode === 'accord' ? 'Émettre le bon de commande' : `Envoyer la consultation (${c.entreprises.length})`,
+    warn3: c.mode === 'devis' && est > S.ref.seuils.troisDevis && c.entreprises.length < 3,
+    seuilTroisDevis: S.ref.seuils.troisDevis,
+    seuilDirection: S.ref.seuils.direction,
+  }
+}

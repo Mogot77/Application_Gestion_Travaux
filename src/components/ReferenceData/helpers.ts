@@ -1,5 +1,7 @@
-import type { Referentiels as Ref } from '@/types'
-import type { EditResult, GroupKey, ListKey, ObjKey, RowsKey, Target } from './types'
+import type { AppState, Referentiels as Ref } from '@/types'
+import { STAT } from '@/helpers/domain'
+import { LISTS } from './constants'
+import type { EditResult, GroupKey, ListKey, ObjEntry, ObjKey, ReferenceDataModel, RowsKey, SectionModel, Target } from './types'
 
 export const pick = (r: Ref, t: Target): string[] => t.group ? (r[t.key as GroupKey])[t.group] : r[t.key as ListKey]
 
@@ -98,3 +100,24 @@ export const setDept = (r: Ref, old: string | null, code: string, label: string)
 }
 
 export const removeRow = (r: Ref, key: RowsKey, k: string): void => { delete r[key][k] }
+
+/* ---------- modèle de vue ---------- */
+/** Sections de listes, villes, départements, propreté et statuts, prêts à afficher. */
+export const buildReferenceDataModel = (S: AppState): ReferenceDataModel => {
+  const ref = S.ref
+  const sections = LISTS.map((def): SectionModel => {
+    const [, title, who] = def
+    if (def[3] === 'obj') return { type: 'obj', k: def[0], title, who, entries: ref[def[0]] as ObjEntry[] }
+    if (def[3] === 'group') return { type: 'group', k: def[0], title, who, groups: Object.entries(ref[def[0]]) }
+    return { type: 'list', k: def[0], title, who, values: ref[def[0]] }
+  })
+  return {
+    can: S.profil !== 'etab',
+    seuils: ref.seuils,
+    sections,
+    villes: Object.entries(ref.villes).map(([k, v]): [string, string] => [k, v.join(' ; ')]),
+    depts: Object.entries(ref.depts).map(([k, v]): [string, string] => [k, String(v)]),
+    proprete: ref.proprete,
+    statuts: Object.values(STAT),
+  }
+}

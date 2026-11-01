@@ -1,0 +1,32 @@
+import Button from '@/components/ui/Button'
+import Icon from '@/components/ui/Icon'
+import type { LoginViewProps } from './types'
+
+/** Écran de connexion (vue) : connexion Google, ou message de refus quand le compte n'est pas autorisé. */
+const LoginView = ({ theme, email, blocked, error, onLogin, onLogout, onToggleTheme }: LoginViewProps) => (
+  <main className="mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center gap-5 p-6 text-center">
+    <button
+      type="button" className="fixed right-4 top-4 grid size-9 place-items-center rounded-lg border border-field bg-surface text-ink"
+      aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'} onClick={onToggleTheme}
+    ><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
+    <h1 className="text-2xl font-bold">Equalis · Travaux</h1>
+    {blocked ? (
+      <>
+        <p role="alert" className="text-sm text-danger">
+          {blocked === 'denied'
+            ? <>Le compte <b>{email}</b> n'est pas autorisé. Demandez à un administrateur de l'ajouter.</>
+            : "Impossible de vérifier vos droits d'accès. Réessayez plus tard."}
+        </p>
+        <Button onClick={onLogout}>Changer de compte</Button>
+      </>
+    ) : (
+      <>
+        <p className="text-sm text-muted">Connectez-vous avec votre compte Google pour accéder à l'application.</p>
+        <Button variant="primary" onClick={onLogin}>Se connecter avec Google</Button>
+      </>
+    )}
+    {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+  </main>
+)
+
+export default LoginView

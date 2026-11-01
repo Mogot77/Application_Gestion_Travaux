@@ -1,9 +1,10 @@
 import type { AppState, Ouvrier } from '@/types'
+import { DAY_MAX } from '@/helpers/planning'
 import type { MapLine, MapMarker, MapSpec } from '@/components/MapView'
 import { DEPOT, baseHtml, pinHtml, posLog, type LatLng } from '@/helpers/carto'
-import { getD, getLog, logAdr, rdvsOf } from '@/helpers/domain'
+import { chargeOf, getD, getLog, logAdr, rdvsOf } from '@/helpers/domain'
 import { TODAY, esc, ftime, initials, toMin, toTime } from '@/helpers/dates'
-import type { TeamState } from './types'
+import type { TeamState, TourLeg, TourOuv, TourUrgent, ToursModel } from './types'
 import { BUREAU } from './constants'
 
 export const km = (a: LatLng, b: LatLng) => { // distance à vol d'oiseau × 1,3 ≈ distance routière
@@ -74,3 +75,26 @@ export const mapSpec = (S: AppState, ouvs: Ouvrier[], hide: string[], tour: stri
   return { markers, lines }
 }
 
+
+/** Modèle de l'écran : ouvrier sélectionné, équipes, urgence non affectée et trajets du jour. */
+export const buildToursModel = (S: AppState, ouvs: Ouvrier[], selected: string): ToursModel => {
+  const ouvId = ouvs.some(x => x.id === selected) ? selected : (ouvs.length ? ouvs[0].id : '')
+  const o: TourOuv = ouvs.find(x => x.id === ouvId) || { id: '', nom: 'Aucun ouvrier actif', metier: '', color: '#9AA3B0' }
+  const tourList = rdvsOf(S, o.id, TODAY).filter(r => r.demandeId)
+  const u = S.demandes.filter(d => ['a_planifier', 'acces_impossible'].includes(d.statut) && d.urgence === 'urgent')[0]
+  let urgent: TourUrgent | undefined
+  if (u) {
+    const p = posLog(S, u.logementId)
+    const near = ouvs.filter(x => chargeOf(S, x.id, TODAY) < DAY_MAX).map(x => ({ o: x, km: km(teamState(S, x).pos, p) })).sort((a, b) => a.km - b.km)[0]
+    urgent = { id: u.id, ville: getLog(S, u.logementId)?.ville, nature: u.lignes[0].nature, nearest: near && { id: near.o.id, nom: near.o.nom, min: tripMin(near.km) } }
+  }
+  // trajets successifs : dépôt puis chaque mission du jour
+  const legs = tourList.flatMap((r, i): TourLeg[] => {
+    const from = i === 0 ? DEPOT : posLog(S, getD(S, tourList[i - 1].demandeId)?.logementId || '')
+    const k = km(from, posLog(S, getD(S, r.demandeId)?.logementId || ''))
+    const d = getD(S, r.demandeId)
+    if (!d) return []
+    return [{ r, demandeId: d.id, nature: d.lignes[0].nature, ville: getLog(S, d.logementId)?.ville, trip: k > 1 ? `Trajet estimé ${tripMin(k)} min · ${Math.round(k)} km` : 'Même secteur' }]
+  })
+  return { ouvs, ouvId, o, teams: ouvs.map(x => ({ o: x, txt: teamState(S, x).txt, charge: chargeOf(S, x.id, TODAY) })), urgent, legs }
+}

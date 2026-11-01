@@ -109,11 +109,13 @@ src/
 ├── components/        un dossier par composant : index.ts, <Nom>.tsx, types.ts,
 │   │                  helpers.ts, constants.ts (alias d'import @/ = src/) ; les fonctions
 │   │                  propres à un composant vivent dans son helpers.ts
-│   ├── <Écran>/       Requests, Planning, Housing, Qualification, MapPage, Login ...
+│   ├── <Écran>/       Requests, Planning, Housing, Qualification, MapPage, Login ... :
+│   │                  conteneur <Nom>.tsx (store) + vue <Nom>View.tsx (props seules) + stories
 │   ├── Layout/ Modal/ Photo/ MapView/ InspectionsTable/ ...   composants métier
 │   └── ui/            petits composants purs : Button, Card, Chip, Field, Empty,
 │                      Note, Kv, Seg, Opts, Icon, Toasts, Ext, AddPhoto, SearchBox,
 │                      FilterSelect, Kpi, Tabs, PageHead, Crumb, StepHeader
+├── stories/           données factices pour Storybook (jamais utilisées par l'application)
 └── index.css          thème Tailwind et classes réutilisables
 firestore.rules        règles de sécurité Firestore
 .claude/skills/        skills Claude Code du projet

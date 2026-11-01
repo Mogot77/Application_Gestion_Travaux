@@ -1,2 +1,5 @@
 export { default } from './Planning'
+export { default as PlanningView } from './PlanningView'
+export { default as PlanPanelView } from './PlanPanelView'
+export { default as AppointmentPanelView } from './AppointmentPanelView'
 export type * from './types'

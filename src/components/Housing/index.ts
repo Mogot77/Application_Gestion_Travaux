@@ -1,2 +1,5 @@
 export { default } from './Housing'
+export { default as HousingView } from './HousingView'
+export { default as LocationCardView } from './LocationCardView'
+export { default as InterventionsTableView } from './InterventionsTableView'
 export type * from './types'
