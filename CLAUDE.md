@@ -23,7 +23,8 @@ Application de gestion de travaux (demandes, planning, logements, ouvriers, cons
 - `index.css` : thème Tailwind et classes réutilisables (`card`, `btn`, `chip`, ...)
 
 ## Conventions et points d'attention
-- Clé de stockage local `equalis-travaux-v2` (cache + photos + profil), format `{v:1, ...}` : ne pas la changer sans migration. Source de vérité : Firestore (projet `travaux-2975b`, règles dans `firestore.rules`, admin d'origine codé en dur dans les règles et dans `lib/users.ts`).
+- Clé de stockage local `equalis-travaux-v2` (cache + profil + photos pas encore envoyées), format `{v:1, ...}` : ne pas la changer sans migration. Source de vérité : Firestore (projet `travaux-2975b`, règles dans `firestore.rules`, admin d'origine codé en dur dans les règles et dans `lib/users.ts`).
+- Photos : `lib/photos.ts` redimensionne puis envoie sur Cloudinary (preset unsigned `travaux`, cloud `dullbsehq`) ; seule l'URL est stockée dans Firestore. Variables `VITE_CLOUDINARY_CLOUD` / `VITE_CLOUDINARY_PRESET` : `.env.local` en dev (voir `.env.example`), *Variables* GitHub Actions en prod. Sans elles, ou hors ligne, la photo reste une data-URL locale, jamais envoyée à Firestore (`cloudState.ts`), puis envoyée par `AppProvider` au chargement et au retour du réseau. Pas de suppression côté Cloudinary (preset unsigned) : les photos orphelines se nettoient à la main.
 - `TODAY = '2026-10-29'` est une date de référence de démo, indépendante de la date réelle.
 - Garder la logique métier dans `lib/`, les composants restent de la présentation.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
