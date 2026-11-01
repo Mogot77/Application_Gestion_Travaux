@@ -1,7 +1,6 @@
 import { useApp } from '../../hooks/useApp'
 import type { AppState, Demande } from '../../types'
 import { Layout } from '../layout/Layout'
-import { IcPhoto } from '../ui/Icons'
 import { URG, dureeST, getD, getLog, getOuv, logAdr, shortLot } from '../../lib/domain'
 import { TODAY, fd, fday, fdur, fdy, ftime, toMin, toTime } from '../../lib/dates'
 
@@ -41,6 +40,7 @@ function Pages({ S, d }: { S: AppState; d: Demande }) {
   const o = r && getOuv(S, r.ouvrierId)
   const rp = r?.rapport
   const lignes = d.lignes.filter(l => l.circuit === 'ST' || !l.circuit)
+  const photos = lignes.flatMap((l, i) => l.photos.filter(p => p && p !== 'seed').map(src => ({ src, n: i + 1, piece: l.piece })))
   const urg = URG[d.urgence]
   const supps = rp ? rp.supps || [] : []
   const urgColor = d.urgence === 'urgent' ? '#B42318' : '#111'
@@ -72,12 +72,23 @@ function Pages({ S, d }: { S: AppState; d: Demande }) {
             <dt>Durée est.</dt><dd>{fdur(dureeST(d))}</dd></dl></div>
         </div>
         <div><h3>Travaux à réaliser</h3>
-          <table className="mt-2"><thead><tr><th className="w-[30px]">N°</th><th>Pièce · lot · nature</th><th>Description</th><th className="w-[60px]">Durée</th><th className="w-16">Photo</th><th className="w-10">Fait</th></tr></thead><tbody>
+          <table className="mt-2"><thead><tr><th className="w-[30px]">N°</th><th>Pièce · lot · nature</th><th>Description</th><th className="w-[60px]">Durée</th><th className="w-10">Fait</th></tr></thead><tbody>
             {lignes.map((l, i) => (
               <tr key={i}><td>{i + 1}</td><td><strong>{l.piece}</strong><br />{shortLot(l.lot)} · {l.nature}</td><td>{l.description}</td><td>{fdur(l.duree)}</td>
-                <td>{l.photos[0] && l.photos[0] !== 'seed' ? <img src={l.photos[0]} alt="" className="h-[42px] w-14 object-cover" /> : <IcPhoto s={18} />}</td><td><Box on={l.statut === 'realisee'} /></td></tr>
+                <td><Box on={l.statut === 'realisee'} /></td></tr>
             ))}
           </tbody></table></div>
+        {photos.length > 0 && (
+          <div><h3>Photos du demandeur</h3>
+            <div className="mt-2 grid grid-cols-3 gap-2.5">
+              {photos.map((p, i) => (
+                <figure key={i} className="m-0 break-inside-avoid">
+                  <img src={p.src} alt="" className="block h-[170px] w-full rounded border border-line object-cover" />
+                  <figcaption className="mt-0.5 text-[11px] text-muted">Ligne {p.n} · {p.piece}</figcaption>
+                </figure>
+              ))}
+            </div></div>
+        )}
         <div><h3>Consommables à emporter <span className="font-normal normal-case tracking-normal text-muted">· cocher au chargement</span></h3>
           <table className="mt-2"><thead><tr><th className="w-10">Pris</th><th>Désignation</th><th className="w-[50px]">Qté</th><th className="w-[90px]">Origine</th><th className="w-[60px]">Utilisé</th></tr></thead><tbody>
             {d.consommables.map((c, i) => <tr key={i}><td><Box on={c.pris} /></td><td>{c.nom}</td><td>{c.qte}</td><td>{c.origine}</td><td></td></tr>)}
