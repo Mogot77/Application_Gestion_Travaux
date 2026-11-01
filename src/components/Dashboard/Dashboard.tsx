@@ -12,6 +12,8 @@ import { csv, download } from '@/helpers/csv'
 import { INIT, MOIS_C } from './constants'
 import { avg, fj } from './helpers'
 import type { TbUi } from './types'
+import Kpi from '@/components/ui/Kpi'
+import FilterSelect from '@/components/ui/FilterSelect'
 
 const Dashboard = () => {
   const { S } = useApp()
@@ -62,7 +64,7 @@ const Dashboard = () => {
   }).filter(r => r[1] || r[4] != null)
 
   const fsel = (k: 'dept' | 'etab', label: string, opts: OptItem[]) => (
-    <select className={`flt${ui[k] ? ' on' : ''}`} value={ui[k]} onChange={e => setUi({ [k]: e.target.value })}><Opts list={opts} placeholder={label} /></select>
+    <FilterSelect value={ui[k]} onChange={v => setUi({ [k]: v })} label={label} options={opts} />
   )
   const exportCsv = () => {
     const rows: unknown[][] = [['N° demande', 'Reçue le', 'Établissement', 'Département', 'Urgence', 'Circuit', 'Statut', 'Date intervention', 'Délai (j)', 'Lignes', 'Lots']]
@@ -85,12 +87,12 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="kpis">
-        <div className="card kpi"><div className="l">Demandes reçues</div><div className="v">{mois.length}</div><div className="s">dont {urg} urgente{urg > 1 ? 's' : ''}</div></div>
-        <div className="card kpi"><div className="l">Délai demande → intervention ST</div><div className="v">{fj(delST)}</div><div className="s">urgentes : {fj(delUrg)}</div></div>
-        <div className="card kpi"><div className="l">Rapports saisis sous 48 h</div><div className="v">{reported.length ? Math.round(in48 / reported.length * 100) + ' %' : '—'}</div><div className="s">objectif 95 % · {reported.length} rapport(s)</div></div>
-        <div className="card kpi"><div className="l">Heures ST réalisées</div><div className="v">{fdur(heures)}</div><div className="s">coût : [taux horaire à définir] · {imp} accès impossible{imp > 1 ? 's' : ''}</div></div>
-        <div className="card kpi"><div className="l">Refacturable aux usagers</div><div className="v">{refac}</div><div className="s">ligne{refac > 1 ? 's' : ''} imputée{refac > 1 ? 's' : ''} à l'usager</div></div>
-        <div className="card kpi"><div className="l">Demandes hors procédure</div><div className={`v ${hors ? 'text-warn' : 'text-ink'}`}>{hors}</div><div className="s">mail ou téléphone</div></div>
+        <Kpi label="Demandes reçues" value={mois.length} sub={<>dont {urg} urgente{urg > 1 ? 's' : ''}</>} />
+        <Kpi label="Délai demande → intervention ST" value={fj(delST)} sub={<>urgentes : {fj(delUrg)}</>} />
+        <Kpi label="Rapports saisis sous 48 h" value={reported.length ? Math.round(in48 / reported.length * 100) + ' %' : '—'} sub={<>objectif 95 % · {reported.length} rapport(s)</>} />
+        <Kpi label="Heures ST réalisées" value={fdur(heures)} sub={<>coût : [taux horaire à définir] · {imp} accès impossible{imp > 1 ? 's' : ''}</>} />
+        <Kpi label="Refacturable aux usagers" value={refac} sub={<>ligne{refac > 1 ? 's' : ''} imputée{refac > 1 ? 's' : ''} à l'usager</>} />
+        <Kpi label="Demandes hors procédure" value={hors} valueClassName={hors ? 'text-warn' : 'text-ink'} sub="mail ou téléphone" />
       </div>
       <div className="cols mb-4 !gap-4">
         <section className="card pad" style={{ flex: '1 1 520px' }}>

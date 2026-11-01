@@ -3,7 +3,6 @@ import type { Ouvrier } from '@/types'
 import { useApp } from '@/hooks/useApp'
 import { useUiState } from '@/hooks/useUiState'
 import Layout from '@/components/Layout'
-import Icon from '@/components/ui/Icon'
 import Chip from '@/components/ui/Chip'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -14,6 +13,8 @@ import { fdur, initials } from '@/helpers/dates'
 import { COLORS } from './constants'
 import { stats } from './helpers'
 import type { ColorPickerProps, WorkerFormProps } from './types'
+import SearchBox from '@/components/ui/SearchBox'
+import PageHead from '@/components/ui/PageHead'
 
 const ColorPicker = ({ initial }: ColorPickerProps) => {
   const [color, setColor] = useState(initial)
@@ -103,16 +104,15 @@ const Workers = () => {
 
   return (
     <Layout active="ouvriers">
-      <div className="pagehead">
-        <div><h1 className="mb-1">Ouvriers du service technique</h1>
-          <p className="muted m-0">{actifs.length} actif{actifs.length > 1 ? 's' : ''}{nInactifs ? ` · ${nInactifs} désactivé${nInactifs > 1 ? 's' : ''}` : ''}. Les ouvriers actifs apparaissent dans le planning et la carte des tournées.</p></div>
+      <PageHead
+        title="Ouvriers du service technique"
+        subtitle={<>{actifs.length} actif{actifs.length > 1 ? 's' : ''}{nInactifs ? ` · ${nInactifs} désactivé${nInactifs > 1 ? 's' : ''}` : ''}. Les ouvriers actifs apparaissent dans le planning et la carte des tournées.</>}
+      >
         {can && <Button variant="primary" onClick={() => openForm(null)}>+ Nouvel ouvrier</Button>}
-      </div>
+      </PageHead>
       {!can && <Note className="mb-4">Lecture seule pour les établissements.</Note>}
       <div className="row mb-4 !gap-2.5">
-        <label className="flt w-full cursor-text sm:w-[280px]"><Icon name="search" />
-          <input className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="Nom, métier, téléphone…" onChange={e => setUi({ q: e.target.value })} />
-        </label>
+        <SearchBox className="w-full sm:w-[280px]" value={ui.q} placeholder="Nom, métier, téléphone…" onChange={q => setUi({ q })} />
         {nInactifs > 0 && <label className="row s13 !gap-1.5"><input type="checkbox" checked={ui.inactifs} onChange={e => setUi({ inactifs: e.target.checked })} /> Afficher les ouvriers désactivés</label>}
       </div>
       <Card className="tbl-wrap">

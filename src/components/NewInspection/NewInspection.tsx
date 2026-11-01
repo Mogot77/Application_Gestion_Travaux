@@ -18,6 +18,7 @@ import { TODAY } from '@/helpers/dates'
 import { readPhotos } from '@/helpers/photos'
 import { INIT, KEY } from './constants'
 import type { ConstatUi } from './types'
+import PageHead from '@/components/ui/PageHead'
 
 
 /** Saisie d'un constat d'état (ouvert à tout salarié). */
@@ -54,7 +55,7 @@ const NewInspection = () => {
 
   return (
     <Layout active="constats">
-      <div className="pagehead"><div><h1 className="mb-1">Nouveau constat d'état</h1><p className="muted m-0">Ouvert à tout salarié. Décrire le logement, jamais le ménage.</p></div></div>
+      <PageHead title="Nouveau constat d'état" subtitle="Ouvert à tout salarié. Décrire le logement, jamais le ménage." />
       <Card className="mx-auto flex max-w-[720px] flex-col gap-5 p-4 sm:p-6">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Logement" htmlFor="cl"><select className="in" id="cl" value={c.logementId} onChange={e => patch({ logementId: e.target.value })}>

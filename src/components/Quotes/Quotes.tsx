@@ -9,6 +9,8 @@ import { fd, fday, feur, fnum } from '@/helpers/dates'
 import { csv, download } from '@/helpers/csv'
 import { scoreCs, validerDecision } from './helpers'
 import type { DecisionResult, QuotesProps } from './types'
+import Kpi from '@/components/ui/Kpi'
+import Crumb from '@/components/ui/Crumb'
 
 const Muted = () => <span className="muted">—</span>
 
@@ -87,7 +89,7 @@ const Quotes = ({ id }: QuotesProps) => {
 
   return (
     <Layout active="demandes">
-      <div className="crumb"><a href="#/demandes">Demandes</a> › <a href={`#/demande/${d.id}`}>{d.id}</a> › Consultation {c.id}</div>
+      <Crumb items={[{ label: 'Demandes', href: '#/demandes' }, { label: d.id, href: `#/demande/${d.id}` }, { label: `Consultation ${c.id}` }]} />
       <div className="pagehead">
         <div className="t"><h1>Devis reçus et décision</h1>{stChip}<span className="muted s13">{lotsLabel} · {log?.id} · {log?.ville} · clôture des réponses le {fd(c.dateLimite)} à {c.heureLimite}</span></div>
         <div className="row !gap-2">
@@ -96,10 +98,10 @@ const Quotes = ({ id }: QuotesProps) => {
         </div>
       </div>
       <div className="kpis">
-        <div className="card kpi"><div className="l">Entreprises consultées</div><div className="v">{c.entreprises.length}</div><div className="s">mode : {{ devis: 'mise en concurrence', unique: 'entreprise unique', accord: 'accord-cadre' }[c.mode]}</div></div>
-        <div className="card kpi"><div className="l">Devis reçus</div><div className="v">{rec.length}</div><div className="s">{declined ? declined + ' a décliné · ' : ''}{waiting.length} en attente</div></div>
-        <div className="card kpi"><div className="l">Écart entre devis</div><div className="v">{ecart == null ? '—' : ecart + ' %'}</div><div className="s">du moins cher au plus cher</div></div>
-        <div className="card kpi"><div className="l">Estimation interne</div><div className="v">{c.estimation ? feur(c.estimation) : '—'}</div><div className="s">HT</div></div>
+        <Kpi label="Entreprises consultées" value={c.entreprises.length} sub={<>mode : {{ devis: 'mise en concurrence', unique: 'entreprise unique', accord: 'accord-cadre' }[c.mode]}</>} />
+        <Kpi label="Devis reçus" value={rec.length} sub={<>{declined ? declined + ' a décliné · ' : ''}{waiting.length} en attente</>} />
+        <Kpi label="Écart entre devis" value={ecart == null ? '—' : ecart + ' %'} sub={<>du moins cher au plus cher</>} />
+        <Kpi label="Estimation interne" value={c.estimation ? feur(c.estimation) : '—'} sub={<>HT</>} />
       </div>
       <div className="cols !gap-4">
         <section className="card pad min-w-0" style={{ flex: '999 1 700px' }}>

@@ -1,7 +1,6 @@
 import { useApp } from '@/hooks/useApp'
 import { useUiState } from '@/hooks/useUiState'
 import Layout from '@/components/Layout'
-import Opts from '@/components/ui/Opts'
 import type { OptItem } from '@/components/ui/Opts'
 import Card from '@/components/ui/Card'
 import InspectionsTable from '@/components/InspectionsTable'
@@ -10,6 +9,8 @@ import { TODAY, fd } from '@/helpers/dates'
 import { INIT } from './constants'
 import { filterConstats, logementsSansConstat } from './helpers'
 import type { ConstatsFilters } from './types'
+import FilterSelect from '@/components/ui/FilterSelect'
+import PageHead from '@/components/ui/PageHead'
 
 const Inspections = () => {
   const { S } = useApp()
@@ -18,14 +19,13 @@ const Inspections = () => {
   const month = S.constats.filter(c => c.date.slice(0, 7) === TODAY.slice(0, 7))
   const sans = logementsSansConstat(S)
   const sel = (k: keyof ConstatsFilters, label: string, opts: OptItem[]) => (
-    <select className={`flt${ui[k] !== '' ? ' on' : ''}`} value={ui[k]} onChange={e => setUi({ [k]: e.target.value })}><Opts list={opts} placeholder={label} /></select>
+    <FilterSelect value={ui[k]} onChange={v => setUi({ [k]: v })} label={label} options={opts} />
   )
   return (
     <Layout active="constats">
-      <div className="pagehead">
-        <div><h1 className="mb-1">Constats d'état des logements</h1><p className="muted m-0">Déclarés par tout salarié. Ils décrivent le logement, jamais le ménage.</p></div>
+      <PageHead title="Constats d'état des logements" subtitle="Déclarés par tout salarié. Ils décrivent le logement, jamais le ménage.">
         <a className="btn btnp" href="#/constat/new">+ Nouveau constat</a>
-      </div>
+      </PageHead>
       <div className="row mb-4 !gap-2">
         {sel('prop', 'Propreté (0 à 6)', [0, 1, 2, 3, 4, 5].map(n => ({ v: n, l: `Propreté ≤ ${n}` })))}
         {sel('bati', 'État du bâti', ['Bon', 'Moyen', 'Dégradé'])}

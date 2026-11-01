@@ -12,6 +12,8 @@ import { entDocs, getCs, getD, getEnt, getLog, hist, lineLabel, nextId, shortLot
 import { TODAY, fd, feur, fnum, now } from '@/helpers/dates'
 import { draftOf, newDraft } from './helpers'
 import type { ConsultationProps, TextField } from './types'
+import StepHeader from '@/components/ui/StepHeader'
+import Crumb from '@/components/ui/Crumb'
 
 const Consultation = ({ id }: ConsultationProps) => {
   const { S, mutate, toast, openModal } = useApp()
@@ -100,7 +102,7 @@ const Consultation = ({ id }: ConsultationProps) => {
 
   return (
     <Layout active="demandes">
-      <div className="crumb"><a href="#/demandes">Demandes</a> › <a href={`#/demande/${d.id}`}>{d.id}</a> › Consultation</div>
+      <Crumb items={[{ label: 'Demandes', href: '#/demandes' }, { label: d.id, href: `#/demande/${d.id}` }, { label: 'Consultation' }]} />
       <div className="pagehead">
         <div className="t"><h1>Consulter des entreprises</h1><Chip tone="rx">Circuit prestataire</Chip><span className="muted s13">{d.id} · {log?.id} · {log?.typo} · {log?.ville} ({log?.dept})</span></div>
         <div className="row !gap-2"><button className="btn" onClick={() => { mutate(() => { /* persiste l'état courant */ }, { now: true }); toast('Brouillon de consultation enregistré', 'ok') }}>Enregistrer le brouillon</button><button className="btn btnp" onClick={send}>{sendLabel}</button></div>
@@ -108,13 +110,13 @@ const Consultation = ({ id }: ConsultationProps) => {
       <div className="cols">
         <div className="col-main">
           <section className="card pad">
-            <div className="sec-h"><span className="step">1</span><h2 className="h2">Mode d'achat</h2></div>
+            <StepHeader step={1} title="Mode d'achat" />
             <div className="seg tall">{modes.map(([k, l, s]) => <button key={k} type="button" className={c.mode === k ? 'on' : ''} onClick={() => setMode(k)}><strong>{l}</strong><small>{s}</small></button>)}</div>
             {c.mode === 'unique' && <div className="mt-3"><label className="lbl" htmlFor="csmu">Motif du recours à une entreprise unique (obligatoire)</label><input className="in" id="csmu" value={c.motifUnique} placeholder="Urgence, montant faible, spécialité…" onChange={e => setField('motifUnique', e.target.value)} /></div>}
             <p className="muted small mb-0 mt-3">Règle interne : au-delà de {feur(S.ref.seuils.troisDevis)} HT, au moins 3 devis ; au-delà de {feur(S.ref.seuils.direction)} HT, validation de la direction (seuils réglables dans les référentiels). Hors lots couverts par l'accord-cadre.</p>
           </section>
           <section className="card pad">
-            <div className="sec-h"><span className="step">2</span><h2 className="h2">Travaux à chiffrer</h2></div>
+            <StepHeader step={2} title="Travaux à chiffrer" />
             <div className="stack" style={{ '--gap': '8px' } as CSSProperties}>
               {d.lignes.map((l, i) => (
                 <label key={i} className="li-chk"><input type="checkbox" checked={c.lignes.includes(i)} onChange={e => toggleLine(i, e.target.checked)} /><Photo src={l.photos[0]} w={56} h={42} />
@@ -128,7 +130,7 @@ const Consultation = ({ id }: ConsultationProps) => {
             </div>
           </section>
           <section className="card pad">
-            <div className="row between mb-3"><div className="sec-h !m-0"><span className="step">3</span><h2 className="h2">Entreprises consultées</h2></div>
+            <div className="row between mb-3"><StepHeader step={3} title="Entreprises consultées" className="!m-0" />
               <div className="row !gap-1.5"><Chip>Lot : {lots.map(shortLot).join(', ')}</Chip><Chip>Secteur : {log?.secteur}</Chip><button className="btn btn-sm" onClick={addEnt}>+ Ajouter une entreprise</button></div></div>
             <div className="ent hd"><span></span><span>Entreprise</span><span>Documents</span><span>Historique</span><span>Note moyenne</span><span></span></div>
             {shown.map(e => {
@@ -147,7 +149,7 @@ const Consultation = ({ id }: ConsultationProps) => {
         </div>
         <aside className="col-side">
           <section className="card pad">
-            <div className="sec-h"><span className="step">4</span><h2 className="h2">Conditions</h2></div>
+            <StepHeader step={4} title="Conditions" />
             <div className="stack" style={{ '--gap': '14px' } as CSSProperties}>
               <div><span className="lbl">Date limite de remise des devis</span><div className="grid grid-cols-[1fr_100px] gap-2"><input className="in" type="date" id="csdl" value={c.dateLimite} min={TODAY} onChange={e => setField('dateLimite', e.target.value)} /><input className="in" type="time" id="cshl" value={c.heureLimite} onChange={e => setField('heureLimite', e.target.value)} /></div></div>
               <div><span className="lbl">Visite sur place</span><Seg values={[{ k: '1', l: 'Proposée' }, { k: '0', l: 'Sans visite' }]} sel={c.visite ? '1' : '0'} onPick={v => upd(x => { x.visite = v === '1' })} />

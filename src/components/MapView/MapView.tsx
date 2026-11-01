@@ -3,7 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { LatLng } from '@/helpers/carto'
 import { esc } from '@/helpers/dates'
-import { CENTRE, TILES } from './constants'
+import { CENTRE, OVERLAYS, TILES } from './constants'
 import type { MapViewProps, SavedView } from './types'
 
 // Mémoire de la vue (centre / zoom) par carte et du fond choisi, conservées entre deux affichages
@@ -38,7 +38,9 @@ const MapView = ({ spec, mapKey, refitKey = '', focus, height, className = '' }:
     const base: Record<string, L.TileLayer> = {}
     Object.entries(TILES).forEach(([n, [u, o]]) => { base[n] = L.tileLayer(u, o) })
     base[base[baseLayer] ? baseLayer : 'Plan'].addTo(map)
-    L.control.layers(base, undefined, { position: 'topright', collapsed: true }).addTo(map)
+    const overlays: Record<string, L.TileLayer> = {}
+    Object.entries(OVERLAYS).forEach(([n, [u, o]]) => { overlays[n] = L.tileLayer(u, o) })
+    L.control.layers(base, overlays, { position: 'topright', collapsed: true }).addTo(map)
     L.control.scale({ imperial: false }).addTo(map)
     map.on('baselayerchange', e => { baseLayer = e.name })
     map.on('moveend', () => { const c = map.getCenter(); views[mapKey] = { c: [c.lat, c.lng], z: map.getZoom() } })

@@ -19,6 +19,7 @@ import {
 import { TODAY, addDays, diffDays, fd, fday, fdt, fdur, ftime, now } from '@/helpers/dates'
 import { readPhotos } from '@/helpers/photos'
 import type { QualificationProps } from './types'
+import Crumb from '@/components/ui/Crumb'
 
 const Qualification = ({ id }: QualificationProps) => {
   const { S, mutate, toast, openModal } = useApp()
@@ -202,7 +203,7 @@ const Qualification = ({ id }: QualificationProps) => {
 
   return (
     <Layout active="demandes">
-      <div className="crumb"><a href="#/demandes">Demandes</a> › {d.id}</div>
+      <Crumb items={[{ label: 'Demandes', href: '#/demandes' }, { label: d.id }]} />
       <div className="pagehead">
         <div className="t"><h1>{d.id}</h1><UrgencyChip k={d.urgence} /><StatusChip d={d} />{d.ft && <Chip>{d.ft}</Chip>}
           <span className="muted s13">reçue le {fd(d.recueLe)} à {ftime(d.recueLe)} · {age ? `il y a ${age} jour${age > 1 ? 's' : ''}` : "aujourd'hui"}</span></div>

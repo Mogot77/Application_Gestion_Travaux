@@ -1,6 +1,4 @@
-import Icon from '@/components/ui/Icon'
 import Chip from '@/components/ui/Chip'
-import Opts from '@/components/ui/Opts'
 import Layout from '@/components/Layout'
 import StatusChip from '@/components/StatusChip'
 import UrgencyChip from '@/components/UrgencyChip'
@@ -13,6 +11,10 @@ import { csv, download } from '@/helpers/csv'
 import { INIT, ORIGINE_LABEL, PER_PAGE, TABS } from './constants'
 import { actionFor, logShort, visibleDemandes } from './helpers'
 import type { DemUi, FilterKey } from './types'
+import SearchBox from '@/components/ui/SearchBox'
+import FilterSelect from '@/components/ui/FilterSelect'
+import Tabs from '@/components/ui/Tabs'
+import PageHead from '@/components/ui/PageHead'
 
 const Requests = () => {
   const { S, toast } = useApp()
@@ -45,9 +47,7 @@ const Requests = () => {
   const sub = S.profil === 'etab' ? 'Les demandes de votre établissement.' : 'Toutes les demandes, tous circuits. Les établissements ne voient que les leurs.'
 
   const fsel = (k: FilterKey, label: string, list: { v: string; l: string }[] | string[]) => (
-    <select key={k} className={`flt${ui[k] ? ' on' : ''}`} aria-label={label} value={ui[k]} onChange={e => setUi({ [k]: e.target.value, page: 0 })}>
-      <Opts list={list} placeholder={label} />
-    </select>
+    <FilterSelect key={k} value={ui[k]} onChange={v => setUi({ [k]: v, page: 0 })} label={label} options={list} />
   )
 
   const exportCsv = () => {
@@ -64,29 +64,23 @@ const Requests = () => {
 
   return (
     <Layout active="demandes">
-      <div className="pagehead mb-2">
-        <div><h1 className="mb-1">Demandes d'intervention</h1><p className="muted m-0">{sub}</p></div>
+      <PageHead className="mb-2" title="Demandes d'intervention" subtitle={sub}>
         <div className="row">
           <button className="btn" onClick={exportCsv}>Exporter Excel</button>
           <button className="btn" disabled={!ui.sel.length} onClick={() => ui.sel.length && go('#/fiche/' + ui.sel.join(','))}>
             Imprimer les fiches sélectionnées{ui.sel.length ? ` (${ui.sel.length})` : ''}
           </button>
         </div>
-      </div>
-      <nav className="tabs" aria-label="Files">
-        {TABS.map(t => {
-          const n = all.filter(t[2]).length
-          return (
-            <button key={t[0]} className={`tab${ui.tab === t[0] ? ' on' : ''}`} onClick={() => setUi({ tab: t[0], page: 0 })}>
-              {t[1]} {t[0] !== 'cloturees' && <b className={t[0] === 'a_reactualiser' && n ? '!bg-violet-soft !text-violet' : ''}>{n}</b>}
-            </button>
-          )
+      </PageHead>
+      <Tabs
+        label="Files" active={ui.tab} onChange={tab => setUi({ tab, page: 0 })}
+        tabs={TABS.map(([key, label, test]) => {
+          const n = all.filter(test).length
+          return { key, label, badge: key !== 'cloturees' ? n : undefined, badgeClassName: key === 'a_reactualiser' && n ? '!bg-violet-soft !text-violet' : '' }
         })}
-      </nav>
+      />
       <div className="row mb-4 !gap-2">
-        <label className="flt w-full cursor-text sm:w-[280px]"><Icon name="search" />
-          <input id="dq" className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="N°, logement, adresse…" onChange={e => setUi({ q: e.target.value, page: 0 })} />
-        </label>
+        <SearchBox id="dq" className="w-full sm:w-[280px]" value={ui.q} placeholder="N°, logement, adresse…" onChange={q => setUi({ q, page: 0 })} />
         {S.profil !== 'etab' && fsel('etab', 'Établissement', uniqueEtabs(S))}
         {fsel('dept', 'Département', [{ v: '77', l: '77 · Seine-et-Marne' }, { v: '91', l: '91 · Essonne' }])}
         {fsel('lot', 'Lot', Object.keys(S.ref.lots))}

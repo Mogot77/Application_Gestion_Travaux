@@ -10,6 +10,7 @@ import { STAT } from '@/helpers/domain'
 import { LISTS } from './constants'
 import { pick } from './helpers'
 import type { AdderProps, ChipsProps } from './types'
+import PageHead from '@/components/ui/PageHead'
 
 const Chips = ({ arr, target, can }: ChipsProps) => {
   const { mutate, toast } = useApp()
@@ -79,8 +80,9 @@ const ReferenceData = () => {
 
   return (
     <Layout active="referentiels">
-      <div className="pagehead"><div><h1 className="mb-1">Menus déroulants de la fiche travaux</h1><p className="muted m-0">Listes administrables par la direction, sans développement. Chaque menu indique qui le renseigne.</p></div>
-        <div className="row !gap-2"><Button variant="danger" onClick={resetDemo}>Réinitialiser les données de démo</Button></div></div>
+      <PageHead title="Menus déroulants de la fiche travaux" subtitle="Listes administrables par la direction, sans développement. Chaque menu indique qui le renseigne.">
+        <div className="row !gap-2"><Button variant="danger" onClick={resetDemo}>Réinitialiser les données de démo</Button></div>
+      </PageHead>
       {!can && <Note className="mb-4">Lecture seule pour les établissements.</Note>}
       <section className="card pad mb-4"><h2 className="h2">Seuils</h2><p className="muted small mb-3 mt-1">Règles internes d'achat et de travaux sur place (valeurs à définir par la direction).</p>
         <div className="grid-auto" style={{ '--min': '240px' } as React.CSSProperties}>

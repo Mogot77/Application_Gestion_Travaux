@@ -18,6 +18,8 @@ import { getLog, hist, nbPhotos, nextId, piecesFor, profilOf } from '@/helpers/d
 import { readPhotos } from '@/helpers/photos'
 import { URG_ON } from './constants'
 import { check, emptyLine, getCe, logLabel, newDraft } from './helpers'
+import StepHeader from '@/components/ui/StepHeader'
+import Crumb from '@/components/ui/Crumb'
 
 
 const NewRequest = () => {
@@ -99,7 +101,7 @@ const NewRequest = () => {
   return (
     <Layout>
       <div className="pagehead">
-        <div><div className="crumb"><a href="#/demandes">Demandes</a> › Nouvelle demande</div><h1>Fiche de demande d'intervention</h1></div>
+        <div><Crumb items={[{ label: 'Demandes', href: '#/demandes' }, { label: 'Nouvelle demande' }]} /><h1>Fiche de demande d'intervention</h1></div>
         <div className="row !gap-2.5"><Chip>Brouillon</Chip><span className="muted s13">N° attribué à l'envoi · enregistré automatiquement à {ftime(dr.savedAt)}</span></div>
       </div>
       {constat && (
@@ -108,7 +110,7 @@ const NewRequest = () => {
       <div className="cols">
         <div className="col-main">
           <section className="card pad">
-            <div className="sec-h"><span className="step">1</span><h2 className="h2">Auteur et logement concerné</h2></div>
+            <StepHeader step={1} title="Auteur et logement concerné" />
             <div className="grid-auto mb-4 border-b border-line2 pb-4" style={{ '--min': '190px' } as React.CSSProperties}>
               <Field label="Auteur de la demande" htmlFor="fa"><input className="in" id="fa" value={dr.auteur} onChange={e => upd(d => { d.auteur = e.target.value })} /></Field>
               <Field label="Fonction" htmlFor="ff"><select className="in" id="ff" value={dr.fonction} onChange={e => upd(d => { d.fonction = e.target.value })}><Opts list={S.ref.fonctions} /></select></Field>
@@ -143,7 +145,7 @@ const NewRequest = () => {
           </section>
 
           <section className="card pad">
-            <div className="sec-h"><span className="step">2</span><h2 className="h2">Intervention</h2></div>
+            <StepHeader step={2} title="Intervention" />
             <div className="grid-auto !gap-4" style={{ '--min': '300px' } as React.CSSProperties}>
               <div>
                 <span className="lbl">Niveau d'urgence</span>
@@ -179,7 +181,7 @@ const NewRequest = () => {
           </section>
 
           <section className="card pad">
-            <div className="sec-h"><span className="step">3</span><h2 className="h2">Problèmes à traiter</h2><span className="muted s13">une ligne par problème · photo obligatoire</span></div>
+            <StepHeader step={3} title="Problèmes à traiter"><span className="muted s13">une ligne par problème · photo obligatoire</span></StepHeader>
             {dr.lignes.map((l, i) => {
               const natures = l.lot ? S.ref.lots[l.lot] || [] : []
               const ok = l.piece && l.lot && l.nature && l.description.trim() && l.photos.length

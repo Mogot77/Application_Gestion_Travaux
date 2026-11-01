@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react'
 import type { Logement } from '@/types'
-import Icon from '@/components/ui/Icon'
 import Chip from '@/components/ui/Chip'
 import Empty from '@/components/ui/Empty'
 import Kv from '@/components/ui/Kv'
@@ -20,6 +19,8 @@ import { resume } from './helpers'
 import LocationCard from './LocationCard'
 import InterventionsTable from './InterventionsTable'
 import type { LogTab, LogUi, HousingProps } from './types'
+import SearchBox from '@/components/ui/SearchBox'
+import Tabs from '@/components/ui/Tabs'
 
 const Housing = ({ id }: HousingProps) => {
   const { S } = useApp()
@@ -40,9 +41,7 @@ const Housing = ({ id }: HousingProps) => {
     <aside className="card min-w-[260px] self-stretch" style={{ flex: '0 1 330px' }}>
       <div className="flex flex-col gap-2.5 border-b border-line2 p-3.5">
         <div><strong>Logements</strong> <span className="muted">· {S.logements.filter(l => l.actif).length} actifs</span></div>
-        <label className="flt cursor-text"><Icon name="search" />
-          <input className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="N°, adresse, ville, ID Crypto" onChange={e => setUi({ q: e.target.value })} />
-        </label>
+        <SearchBox value={ui.q} placeholder="N°, adresse, ville, ID Crypto" onChange={q => setUi({ q })} />
         <div className="row !gap-1.5">
           <select className={`flt${ui.dept ? ' on' : ''}`} value={ui.dept} onChange={e => setUi({ dept: e.target.value })}><Opts list={['77', '91']} placeholder="Dépt" /></select>
           <select className={`flt${ui.typo ? ' on' : ''}`} value={ui.typo} onChange={e => setUi({ typo: e.target.value })}><Opts list={['T2', 'T3', 'T4', 'BUR']} placeholder="Typologie" /></select>
@@ -106,9 +105,7 @@ const Housing = ({ id }: HousingProps) => {
               <Kv pairs={[['ID Crypto', sel.crypto], ['Bailleur', sel.bailleur], ['Demande occupant', sel.dispositif === 'Solibail' ? 'Option activée' : 'Option désactivée'], ['Secteur ST', sel.secteur], ['Accès · clés', `${sel.acces || '—'} · ${sel.cles}`]]} />
             </div>
           </div>
-          <nav className="tabs !m-0">
-            {tabs.map(([k, l]) => <button key={k} className={`tab${tab === k ? ' on' : ''}`} onClick={() => setTab(k)}>{l}</button>)}
-          </nav>
+          <Tabs className="!m-0" active={tab} onChange={setTab} tabs={tabs.map(([key, label]) => ({ key, label }))} />
           {tab === 'synthese' && (
             <div>
               <div className="cols !gap-4">

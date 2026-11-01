@@ -1,4 +1,3 @@
-import Icon from '@/components/ui/Icon'
 import { useApp } from '@/hooks/useApp'
 import { useUiState } from '@/hooks/useUiState'
 import Layout from '@/components/Layout'
@@ -7,6 +6,8 @@ import { getD, getLog, shortLot } from '@/helpers/domain'
 import { fd, fday, feur } from '@/helpers/dates'
 import { FILTERS } from './constants'
 import { statsOf } from './helpers'
+import SearchBox from '@/components/ui/SearchBox'
+import PageHead from '@/components/ui/PageHead'
 
 /** Suivi des entreprises consultées : devis attendus, déposés, et accès à leur portail de dépôt. */
 const Companies = () => {
@@ -21,14 +22,12 @@ const Companies = () => {
 
   return (
     <Layout active="entreprises">
-      <div className="pagehead">
-        <div><h1 className="mb-1">Entreprises et devis</h1>
-          <p className="muted m-0">{S.entreprises.length} entreprises · {totalAttente} devis en attente de dépôt. Chaque entreprise dépose son devis depuis son portail personnel.</p></div>
-      </div>
+      <PageHead
+        title="Entreprises et devis"
+        subtitle={`${S.entreprises.length} entreprises · ${totalAttente} devis en attente de dépôt. Chaque entreprise dépose son devis depuis son portail personnel.`}
+      />
       <div className="row mb-4 !gap-2.5">
-        <label className="flt w-full cursor-text sm:w-[280px]"><Icon name="search" />
-          <input className="min-w-0 flex-1 border-0 outline-0" style={{ font: 'inherit' }} value={ui.q} placeholder="Nom, ville, activité…" onChange={e => setUi({ q: e.target.value })} />
-        </label>
+        <SearchBox className="w-full sm:w-[280px]" value={ui.q} placeholder="Nom, ville, activité…" onChange={q => setUi({ q })} />
         {FILTERS.map(([k, l]) => <button key={k} className={`btn btn-sm ${ui.f === k ? 'btnp' : ''}`} onClick={() => setUi({ f: k })}>{l}</button>)}
       </div>
       {rows.length === 0 && <div className="card pad empty">Aucune entreprise ne correspond.</div>}
