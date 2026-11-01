@@ -35,7 +35,7 @@ const Blank = () => <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
 
 function Pages({ S, d }: { S: AppState; d: Demande }) {
   const log = getLog(S, d.logementId)
-  const r = S.rdvs.filter(x => x.demandeId === d.id && x.etat !== 'imp').sort((a, b) => b.date.localeCompare(a.date))[0]
+  const r = S.rdvs.filter(x => x.demandeId === d.id && (x.etat !== 'imp' || x.rapport)).sort((a, b) => b.date.localeCompare(a.date))[0]
   const imp = S.rdvs.find(x => x.demandeId === d.id && x.etat === 'imp')
   const o = r && getOuv(S, r.ouvrierId)
   const rp = r?.rapport
@@ -95,14 +95,14 @@ function Pages({ S, d }: { S: AppState; d: Demande }) {
             <tr><td><Box /></td><td>…………………………………</td><td></td><td></td><td></td></tr><tr><td><Box /></td><td>…………………………………</td><td></td><td></td><td></td></tr>
           </tbody></table></div>
         {d.observations && <div><h3>Observations du demandeur</h3><p className="mb-0 mt-2">{d.observations}</p></div>}
-        <div className="foot"><span>Saisir heures, consommables et photos « après » sur mobile sous 48 h (QR code)</span><span>Recto 1/2</span></div>
+        <div className="foot"><span>Compte rendu saisi par l'ouvrier depuis son planning (rapport généré automatiquement)</span><span>Recto 1/2</span></div>
       </div>
 
       <div className="a4">
         <div><div className="text-xl font-bold">COMPTE RENDU D'INTERVENTION</div>
-          <div className="mt-1 text-sm"><strong>{d.id}</strong>{d.ft ? ' · ' + d.ft : ''}{rp && r && <> · <span className="font-bold text-good">saisi sur mobile le {fd(r.date)}</span></>}</div></div>
+          <div className="mt-1 text-sm"><strong>{d.id}</strong>{d.ft ? ' · ' + d.ft : ''}{rp && r && <> · <span className="font-bold text-good">saisi par l'ouvrier le {fd(r.date)}</span></>}</div></div>
         <div><h3>Accès au logement</h3><div className="mt-2.5 flex flex-wrap gap-[22px]">
-          <span><Box on={!!rp} />Intervention réalisée</span><span><Box on={!!imp} />Accès impossible</span>
+          <span><Box on={r?.etat === 'done'} />Intervention réalisée</span><span><Box on={!!imp} />Report nécessaire</span>
           {S.ref.motifsAcces.slice(0, 3).map(m => <span key={m}><Box on={!!imp && imp.motifImp === m} />{m}</span>)}</div></div>
         <div><h3>Main d'œuvre</h3><table className="mt-2"><thead><tr><th>Ouvrier</th><th>Début</th><th>Fin</th><th>Heures</th><th>Déplacements</th></tr></thead><tbody>
           {rp && r && o ? <tr><td>{o.nom}</td><td>{ftime(r.debutReel) || r.debut}</td><td>{ftime(r.finReel)}</td><td>{fdur(rp.tempsMin)}</td><td>1</td></tr> : <Blank />}
@@ -120,7 +120,7 @@ function Pages({ S, d }: { S: AppState; d: Demande }) {
           <div><div className="mb-1 text-[11px] text-muted">Signature de l'ouvrier</div><div className="sigbox">{rp && o && <span className="italic">{o.nom}</span>}</div></div>
           <div><div className="mb-1 text-[11px] text-muted">Signature occupant ou référent (facultatif)</div><div className="sigbox">{rp && rp.signature ? <img src={rp.signature} alt="Signature" /> : rp && rp.signataire ? <span className="italic">{rp.signataire}</span> : null}</div></div>
         </div>
-        <div className="foot"><span>À reporter sur mobile sous 48 h · à défaut, photo de cette fiche jointe par le chef d'équipe</span><span>Verso 2/2</span></div>
+        <div className="foot"><span>Rapport généré à la fin de la mission · à défaut, photo de cette fiche jointe par le chef d'équipe</span><span>Verso 2/2</span></div>
       </div>
     </>
   )

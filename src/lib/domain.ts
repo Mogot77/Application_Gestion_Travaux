@@ -34,7 +34,7 @@ export const STAT: Record<DemandeStatut, [string, Tone]> = {
   brouillon: ['Brouillon', 'gr'], a_qualifier: ['À qualifier', 'gr'], a_valider_occupant: ['À valider (occupant)', 'tl'],
   en_qualification: ['En qualification', 'bl'], a_completer: ['À compléter', 'h48'], a_reactualiser: ['À réactualiser', 'rx'],
   a_planifier: ['À planifier', 'gr'], planifiee: ['Planifiée', 'pg'], en_cours: ['En cours', 'ok'],
-  acces_impossible: ['Accès impossible', 'u'], realisee: ['Réalisée', 'ok'], cloturee: ['Clôturée', 'ok'],
+  acces_impossible: ['Report nécessaire', 'u'], realisee: ['Réalisée', 'ok'], cloturee: ['Clôturée', 'ok'],
   rejetee: ['Rejetée', 'gr'], bailleur: ['Demandée au bailleur', 'gr'], consultation: ['Consultation en cours', 'bl'],
   prestataire: ['Prestataire mandaté', 'pg'], sinistre: ['Sinistre en cours', 'rx'], annulee: ['Annulée', 'gr'],
 }
@@ -117,7 +117,7 @@ export const rdvClass = (S: AppState, r: Rdv) => {
   return u === 'urgent' ? 'bu' : u === 'h48' ? 'bh' : 'bp'
 }
 export const RDV_ETAT: Record<Rdv['etat'], [string, Tone]> = {
-  done: ['Réalisée', 'ok'], running: ['En cours', 'ok'], planned: ['Prévue', 'pg'], imp: ['Accès impossible', 'u'],
+  done: ['Réalisée', 'ok'], running: ['En cours', 'wa'], planned: ['Prévue', 'pg'], imp: ['Report nécessaire', 'u'],
 }
 
 /* ---------- Consultations : notation des devis ---------- */

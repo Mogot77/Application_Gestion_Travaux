@@ -93,7 +93,7 @@ export function Planning() {
                 <div className="row between"><strong>{d.id}</strong>{cardTag(d)}</div>
                 <div className="muted">{log?.ville} ({log?.dept}) · {log?.typo} · {log?.id}</div>
                 <div>{l0.piece} — {shortLot(l0.lot)} · {l0.nature}{d.lignes.length > 1 ? ' · +' + (d.lignes.length - 1) : ''}</div>
-                <div className="muted">{imp ? `Accès impossible le ${fd(imp.date)} (${imp.motifImp || ''})` : `Durée estimée ${fdur(dureeST(d))}`}</div>
+                <div className="muted">{imp ? `Report nécessaire le ${fd(imp.date)} (${imp.motifImp || ''})` : `Durée estimée ${fdur(dureeST(d))}`}</div>
               </div>
             )
           })}
@@ -125,7 +125,7 @@ export function Planning() {
                           return (
                             <div key={r.id} className={`blk ${cls}${ui.rdvSel === r.id ? ' sel' : ''}`} title={`${r.debut} · ${r.label}`}
                               onClick={e => { e.stopPropagation(); setUi({ rdvSel: r.id, demandeId: '' }) }}>
-                              <span>{icon}{r.label}</span><span>{r.etat === 'imp' ? 'Accès impossible' : fdurS(r.duree)}</span>
+                              <span>{icon}{r.label}</span><span>{r.etat === 'imp' ? 'Report nécessaire' : fdurS(r.duree)}</span>
                             </div>
                           )
                         })}
@@ -283,7 +283,7 @@ function PanelRdv({ r, setUi }: { r: Rdv; setUi: SetUi }) {
         ['Ouvrier', o?.nom], ['Date', fday(r.date)], ['Horaire', `${r.debut} – ${toTime(toMin(r.debut) + r.duree)}`],
         ['Logement', log ? `${log.id} · ${log.ville}` : '—'], ['Travaux', d ? d.lignes.map(l => l.piece + ' · ' + l.nature).join(', ') : r.label],
       ]} />
-      {r.motifImp && <div className="note warn">Accès impossible : {r.motifImp}</div>}
+      {r.motifImp && <div className="note warn">Report nécessaire : {r.motifImp}</div>}
       {r.rapport && <div className="note">Temps passé {fdur(r.rapport.tempsMin)} · {r.rapport.conso.length} consommable(s)</div>}
       <div className="row !gap-2">
         {d && <a className="btn btn-sm" href={`#/fiche/${d.id}`}>{r.rapport ? 'Rapport' : 'Fiche'}</a>}
