@@ -58,6 +58,9 @@ export const canon = (v: unknown): string => {
   return JSON.stringify(v) ?? 'null'
 }
 
+/** Retire les champs de synchronisation (`updatedAt`, `deleted`) : ils ne font pas partie des données de l'application. */
+export const stripMeta = (d: Rec): Rec => Object.fromEntries(Object.entries(d).filter(([k]) => k !== 'updatedAt' && k !== 'deleted'))
+
 /** Clés d'ordre des éléments de liste : chemin (`col/id`) → clé. Une clé est attribuée une fois, à la création du document. */
 export type OrderMap = Map<string, number>
 

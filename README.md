@@ -82,7 +82,7 @@ flowchart LR
 ### Flux de données
 
 1. **Connexion** : Google via Firebase Auth ; l'e-mail doit figurer dans la collection `users` (liste blanche, vérifiée par `firestore.rules`).
-2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/listeners` démarre `store/queries/appSync`, qui s'abonne en temps réel (`onSnapshot`) aux collections Firestore.
+2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/listeners` démarre `store/queries/appSync`. La première lecture (ou une lecture de plus de 24 h) est complète ; les suivantes sont **incrémentales** : le cache local sert de base et seuls les documents modifiés depuis le dernier `updatedAt` lu sont relus, ce qui limite les lectures Firestore. Une suppression laisse une « pierre tombale » (`deleted: true`) pour que les autres clients la voient. Le cache local et le curseur (`equalis-travaux-sync-v1`) vont ensemble : `resetLocal` efface les deux.
 3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Les listeners du store sauvegardent le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits (par lots).
 4. **Photos** : `helpers/photos` redimensionne l'image et l'envoie à Cloudinary ; seule l'URL est stockée dans Firestore, donc partagée entre appareils. Hors ligne (ou sans configuration), la photo reste une data-URL locale, jamais envoyée à Firestore, puis envoyée au chargement suivant ou au retour du réseau.
 
