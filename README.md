@@ -169,7 +169,7 @@ npm run dev       # http://localhost:5173
 
 - Clé de stockage local `equalis-travaux-v2` (format `{v:1, ...}`) : ne pas la changer sans migration.
 - Configuration : variables `VITE_FIREBASE_*` et `VITE_CLOUDINARY_*` (voir `.env.example`) dans `.env.local` en local, et dans les variables GitHub Actions pour le site en ligne.
-- `TODAY = '2026-10-29'` est une date de référence de démo, indépendante de la date réelle.
+- `TODAY` (`helpers/dates.ts`) est la date du jour ; la variable facultative `VITE_TODAY` (AAAA-MM-JJ) force une date pour une démo ou des tests.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
 - Le bundle dépasse 500 kB (avertissement Vite non bloquant).
 - Les polices et fonds de carte nécessitent internet.

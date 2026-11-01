@@ -1,8 +1,5 @@
 /* Dates et formats d'affichage (français) */
 
-// Date de démonstration : les données d'exemple sont centrées sur la semaine du 26/10/2026.
-export const TODAY = '2026-10-29'
-
 export const pad = (n: number) => String(n).padStart(2, '0')
 
 export const parse = (iso: string): Date => {
@@ -10,6 +7,8 @@ export const parse = (iso: string): Date => {
   return new Date(y, m - 1, d)
 }
 export const iso = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
+/** Date du jour (fuseau local). `VITE_TODAY` (AAAA-MM-JJ) force une date, pour une démonstration ou des tests. */
+export const TODAY: string = (import.meta.env.VITE_TODAY as string | undefined) || iso(new Date())
 export const addDays = (s: string, n: number) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d) }
 export const diffDays = (a: string, b: string) => Math.round((parse(b).getTime() - parse(a).getTime()) / 864e5)
 export const weekStart = (s: string) => { const d = parse(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return iso(d) }

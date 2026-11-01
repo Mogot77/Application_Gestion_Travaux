@@ -15,7 +15,7 @@ export const ouvActifs = (S: AppState): Ouvrier[] => S.ouvriers.filter(o => o.ac
 export const nextId = (S: AppState, kind: keyof AppState['seq']) => {
   const n = ++S.seq[kind]
   const p = { di: 'DI', ce: 'CE', cs: 'CS', ft: 'FT', bc: 'BC' }[kind]
-  return `${p}-2026-${String(n).padStart(4, '0')}`
+  return `${p}-${TODAY.slice(0, 4)}-${String(n).padStart(4, '0')}`
 }
 export const hist = (obj: { historique: { at: string; t: string }[] }, t: string) => { obj.historique.unshift({ at: now(), t }) }
 
