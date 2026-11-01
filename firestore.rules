@@ -17,7 +17,7 @@ service cloud.firestore {
     function isAdmin() {
       return verified() && (isBootstrap() ||
         (exists(/databases/$(database)/documents/users/$(mail())) &&
-         get(/databases/$(database)/documents/users/$(mail())).data.role == 'admin'));
+         get(/databases/$(database)/documents/users/$(mail())).data.role in ['admin', 'directeur']));
     }
 
     // Liste blanche : un document par e-mail Google (id = e-mail en minuscules).

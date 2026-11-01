@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from 'react'
-import type { ProfilKey } from '../../types'
-import { useApp } from '../../hooks/useApp'
 import { useAuth } from '../../hooks/useAuth'
-import { PROFILS } from '../../lib/domain'
+import { useApp } from '../../hooks/useApp'
+import { uniqueEtabs } from '../../lib/domain'
+import { ROLES, ROLE_LIST, canSee, type Role, type Section } from '../../lib/roles'
 
-const NAV: [string, string, string][] = [
+const NAV: [Section, string, string][] = [
   ['demandes', 'Demandes', '#/demandes'],
   ['planning', 'Planning', '#/planning'],
   ['ouvriers', 'Ouvriers', '#/ouvriers'],
@@ -15,24 +15,21 @@ const NAV: [string, string, string][] = [
   ['tableau', 'Tableau de bord', '#/tableau'],
   ['classement', 'Documents', '#/classement'],
   ['referentiels', 'Référentiels', '#/referentiels'],
+  ['utilisateurs', 'Utilisateurs', '#/utilisateurs'],
 ]
 
 /** Coque commune des écrans : en-tête de navigation (menu repliable sur petit écran) + contenu. */
 export function Layout({ active = '', children }: { active?: string; children?: ReactNode }) {
-  const { S, mutate, toast } = useApp()
-  const { user, logout, isAdmin } = useAuth()
+  const { user, logout, role, realRole, play, setPlay } = useAuth()
+  const { S } = useApp()
   const [open, setOpen] = useState(false)
-  const nav = isAdmin ? [...NAV, ['utilisateurs', 'Utilisateurs', '#/utilisateurs'] as [string, string, string]] : NAV
-  const onProfil = (k: ProfilKey) => {
-    mutate(s => { s.profil = k }, { now: true })
-    toast('Profil : ' + PROFILS[k].label)
-  }
+  const nav = NAV.filter(([k]) => canSee(role, k))
   return (
     <>
       <header className="noprint sticky top-0 z-20 bg-nav px-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:flex-nowrap">
           <a className="py-4 text-[17px] font-bold text-white no-underline hover:text-white" href="#/demandes">Equalis · Travaux</a>
-          <a className="btn btnp btn-sm ml-auto lg:order-last lg:ml-0" href="#/demande/new">+ <span className="hidden sm:inline">Nouvelle demande</span><span className="sm:hidden">Demande</span></a>
+          {role && ROLES[role].creerDemande && <a className="btn btnp btn-sm ml-auto lg:order-last lg:ml-0" href="#/demande/new">+ <span className="hidden sm:inline">Nouvelle demande</span><span className="sm:hidden">Demande</span></a>}
           <button
             type="button" className="grid size-10 place-items-center rounded-lg text-white lg:hidden"
             aria-label="Menu" aria-expanded={open} aria-controls="nav-principal" onClick={() => setOpen(o => !o)}
@@ -51,12 +48,32 @@ export function Layout({ active = '', children }: { active?: string; children?: 
               ))}
             </nav>
             <div className="flex flex-wrap items-center gap-3 lg:py-2">
-              <select
-                className="h-8 max-w-full rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] font-medium text-[#e5e7eb] lg:max-w-[220px]"
-                aria-label="Profil connecté" value={S.profil} onChange={e => onProfil(e.target.value as ProfilKey)}
-              >
-                {(Object.entries(PROFILS) as [ProfilKey, (typeof PROFILS)[ProfilKey]][]).map(([k, p]) => <option key={k} value={k}>{p.label}</option>)}
-              </select>
+              {realRole === 'directeur' ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    className="h-8 max-w-full rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] font-medium text-[#e5e7eb]"
+                    aria-label="Jouer un rôle" value={play?.role ?? 'directeur'}
+                    onChange={e => {
+                      const r = e.target.value as Role
+                      setPlay(r === 'directeur' ? null : { role: r, etab: ROLES[r].needsEtab ? uniqueEtabs(S)[0] ?? '' : '', ouvrierId: r === 'ouvrier' ? S.ouvriers[0]?.id ?? '' : '' })
+                    }}
+                  >
+                    {ROLE_LIST.map(r => <option key={r} value={r}>{r === 'directeur' ? 'Directeur (moi)' : 'Jouer : ' + ROLES[r].label}</option>)}
+                  </select>
+                  {play && ROLES[play.role].needsEtab && (
+                    <select className="h-8 max-w-[200px] rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] text-[#e5e7eb]" aria-label="Établissement joué"
+                      value={play.etab} onChange={e => setPlay({ ...play, etab: e.target.value })}>
+                      {uniqueEtabs(S).map(x => <option key={x} value={x}>{x}</option>)}
+                    </select>
+                  )}
+                  {play?.role === 'ouvrier' && (
+                    <select className="h-8 max-w-[200px] rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] text-[#e5e7eb]" aria-label="Ouvrier joué"
+                      value={play.ouvrierId} onChange={e => setPlay({ ...play, ouvrierId: e.target.value })}>
+                      {S.ouvriers.map(o => <option key={o.id} value={o.id}>{o.nom}</option>)}
+                    </select>
+                  )}
+                </div>
+              ) : role && <span className="max-w-full truncate text-[13px] font-medium text-[#e5e7eb] lg:max-w-[260px]" title={user?.email ?? undefined}>{ROLES[role].label}</span>}
               {user && (
                 <button
                   type="button" className="text-[13px] text-[#d1d5db] hover:text-white"

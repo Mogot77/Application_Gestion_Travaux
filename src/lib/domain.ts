@@ -27,7 +27,7 @@ export const PROFILS: Record<ProfilKey, ProfilInfo> = {
   coord: { nom: 'Coordination ST', label: 'Coordination ST', fonction: 'Coordination ST' },
   dir: { nom: 'Direction Immobilier', label: 'Direction Immobilier', fonction: "Directeur·rice d'établissement" },
 }
-export const profilOf = (S: AppState) => PROFILS[S.profil] || PROFILS.coord
+export const profilOf = (S: AppState) => S.moi || PROFILS[S.profil] || PROFILS.coord
 
 /* ---------- Statuts ---------- */
 export const STAT: Record<DemandeStatut, [string, Tone]> = {
@@ -70,6 +70,7 @@ export const nbPhotos = (d: Demande) => d.lignes.reduce((s, l) => s + (l.photos 
 export const visibleDemandes = (S: AppState) => {
   let list = S.demandes.filter(d => d.statut !== 'brouillon')
   if (S.profil === 'etab') list = list.filter(d => etabOf(S, d) === profilOf(S).etab)
+  if (S.moi?.portee === 'siennes') list = list.filter(d => !!d.auteurEmail && d.auteurEmail === S.moi?.email)
   return list
 }
 

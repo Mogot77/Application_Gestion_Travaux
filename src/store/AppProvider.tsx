@@ -6,6 +6,8 @@ import { clearUi, flushUi } from './ui'
 import { startSync, type Sync } from '../lib/sync'
 import { Modal } from '../components/ui/Modal'
 import { Toasts, type ToastItem } from '../components/ui/Toasts'
+import { useAuth } from '../hooks/useAuth'
+import { ROLES } from '../lib/roles'
 
 /** Même clé et même format que l'ancienne version : les données existantes restent lisibles. */
 const KEY = 'equalis-travaux-v2'
@@ -104,7 +106,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [saveNow])
 
-  const value = useMemo<AppCtx>(() => ({ S, mutate, getS: () => ref.current, reset, toast, openModal, closeModal }), [S, mutate, reset, toast, openModal, closeModal])
+  // Le profil n'est plus choisi à la main : il découle du rôle du compte connecté.
+  const { user, role, etab, play } = useAuth()
+  const email = (user?.email ?? '').toLowerCase()
+  const withMe = useCallback((s: AppState): AppState => {
+    if (!role) return s
+    const info = ROLES[role]
+    const ouv = role === 'ouvrier' ? s.ouvriers.find(o => play ? o.id === play.ouvrierId : (o.email ?? '').trim().toLowerCase() === email) : undefined
+    const nom = ouv?.nom || user?.displayName || email
+    return { ...s, profil: info.profil, moi: { nom, label: `${nom} · ${info.label}`, etab: etab || undefined, fonction: info.label, email, role, portee: info.portee, ouvrierId: ouv?.id } }
+  }, [role, etab, email, play, user?.displayName])
+  const SM = useMemo(() => withMe(S), [withMe, S])
+  const getS = useCallback(() => withMe(ref.current), [withMe])
+  const value = useMemo<AppCtx>(() => ({ S: SM, mutate, getS, reset, toast, openModal, closeModal }), [SM, mutate, getS, reset, toast, openModal, closeModal])
 
   return (
     <AppContext.Provider value={value}>

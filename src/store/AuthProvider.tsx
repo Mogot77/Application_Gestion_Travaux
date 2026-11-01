@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { signInWithGoogle, signOutUser, watchAuth, type AuthUser } from '../lib/firebase'
-import { fetchRole, type Role } from '../lib/users'
-import { AuthContext, type AuthCtx } from './authContext'
+import { fetchAccess, type Role } from '../lib/users'
+import { AuthContext, type AuthCtx, type Play } from './authContext'
 
 const message = (e: unknown): string => {
   const code = (e as { code?: string })?.code
@@ -13,12 +13,13 @@ const message = (e: unknown): string => {
   return 'Connexion impossible. Réessayez.'
 }
 
-interface Access { uid: string; state: AuthCtx['access']; role: Role | null }
+interface Access { uid: string; state: AuthCtx['access']; role: Role | null; etab: string }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined)
   const [acc, setAcc] = useState<Access | null>(null)
   const [error, setError] = useState('')
+  const [play, setPlay] = useState<Play | null>(null)
 
   useEffect(() => watchAuth(setUser), [])
 
@@ -26,9 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    const set = (state: Access['state'], role: Role | null) => { if (!cancelled) setAcc({ uid: user.uid, state, role }) }
+    const set = (state: Access['state'], role: Role | null, etab = '') => { if (!cancelled) setAcc({ uid: user.uid, state, role, etab }) }
     if (!user.email || !user.emailVerified) { set('denied', null); return }
-    fetchRole(user.email).then(r => set(r ? 'ok' : 'denied', r), () => set('error', null))
+    fetchAccess(user.email).then(r => set(r ? 'ok' : 'denied', r?.role ?? null, r?.etab), () => set('error', null))
     return () => { cancelled = true }
   }, [user])
 
@@ -46,10 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       user,
       access: cur ? cur.state : 'loading',
-      role: cur?.role ?? null,
-      isAdmin: cur?.role === 'admin',
+      role: cur?.role === 'directeur' && play ? play.role : cur?.role ?? null,
+      realRole: cur?.role ?? null,
+      play: cur?.role === 'directeur' ? play : null,
+      setPlay,
+      isAdmin: cur?.role === 'directeur',
+      etab: cur?.role === 'directeur' && play ? play.etab : cur?.etab ?? '',
       error, login, logout,
     }
-  }, [user, acc, error, login, logout])
+  }, [user, acc, error, play, login, logout])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

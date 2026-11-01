@@ -92,7 +92,7 @@ export function NouvelleDemande() {
       const lg = s.logements.find(l => l.id === x.logementId)
       const origine: Demande['origine'] = x.canal === 'Mail' ? 'mail' : x.canal === 'Téléphone' ? 'tel' : 'etab'
       const d: Demande = {
-        id: nextId(s, 'di'), recueLe: now(), logementId: x.logementId, origine, auteur: x.auteur, fonction: x.fonction, tel: x.tel,
+        id: nextId(s, 'di'), recueLe: now(), logementId: x.logementId, origine, auteur: x.auteur, auteurEmail: getS().moi?.email, fonction: x.fonction, tel: x.tel,
         urgence: x.urgence as UrgenceKey, dateSouhaitee: x.dateSouhaitee, acces: x.acces, numCles: x.numCles, lieuCles: x.lieuCles,
         facturation: x.facturation, sinistre: x.sinistre, sinistreInfo: x.sinistre === 'Oui' ? x.sinistreInfo : null,
         observations: x.observations, message: '', consommables: [], historique: [], statut: 'a_qualifier', ft: '', constatId: x.constatId || '',

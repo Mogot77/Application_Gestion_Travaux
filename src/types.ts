@@ -145,6 +145,8 @@ export interface Demande {
   consultationId?: string
   dateIntervention?: string
   parentId?: string
+  /** E-mail du compte ayant créé la demande. */
+  auteurEmail?: string
 }
 
 export interface DraftLigne {
@@ -308,9 +310,13 @@ export interface AppState {
   histoMois: Record<string, number>
   draft: DraftDemande | null
   profil: ProfilKey
+  moi?: Moi
   seq: { di: number; ce: number; cs: number; ft: number; bc: number }
 }
 
 export interface ProfilInfo { nom: string; label: string; etab?: string; fonction: string }
+
+/** Utilisateur connecté (non persisté) : identité, rôle et rattachement. */
+export interface Moi extends ProfilInfo { email: string; role: string; portee: 'toutes' | 'etab' | 'siennes'; ouvrierId?: string }
 
 export type Tone = 'u' | 'h48' | 'pg' | 'rx' | 'ok' | 'gr' | 'tl' | 'ko' | 'bad' | 'wa' | 'mid' | 'bl'

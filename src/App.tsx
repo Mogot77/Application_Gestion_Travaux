@@ -6,7 +6,7 @@ import { Login } from './components/pages/Login'
 import { NouveauConstat } from './components/pages/NouveauConstat'
 import { Utilisateurs } from './components/pages/Utilisateurs'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { useRoute } from './hooks/useRoute'
+import { go, useRoute } from './hooks/useRoute'
 import { Demandes } from './components/pages/Demandes'
 import { NouvelleDemande } from './components/pages/NouvelleDemande'
 import { Qualif } from './components/pages/Qualif'
@@ -24,6 +24,8 @@ import { Classement } from './components/pages/Classement'
 import { Referentiels } from './components/pages/Referentiels'
 import { Ouvriers } from './components/pages/Ouvriers'
 import { Carte } from './components/pages/Carte'
+import { MonPlanning } from './components/pages/MonPlanning'
+import { ROLES, canSee, sectionOf } from './lib/roles'
 
 type Render = (p: string[], q: Record<string, string>) => ReactNode
 
@@ -52,7 +54,23 @@ const ROUTES: [RegExp, Render][] = [
 
 function Router() {
   const { path, query } = useRoute()
+  const { role } = useAuth()
   useEffect(() => { window.scrollTo(0, 0) }, [path])
+
+  // Garde d'accès : une route hors des droits du rôle renvoie vers sa première section autorisée.
+  const section = sectionOf(path)
+  let redirect = ''
+  if (role) {
+    if (section && !canSee(role, section)) redirect = '#/' + ROLES[role].sections[0]
+    else if (/^\/demande\/new$/.test(path) && !ROLES[role].creerDemande) redirect = '#/demandes'
+  }
+  useEffect(() => { if (redirect) go(redirect) }, [redirect])
+  if (!role || redirect) return null
+
+  if (role === 'ouvrier') {
+    if (/^\/fiche\//.test(path)) return <ErrorBoundary key={path}><Fiche ids={path.split('/')[2]} /></ErrorBoundary>
+    return <ErrorBoundary key="mon-planning"><MonPlanning /></ErrorBoundary>
+  }
   for (const [re, render] of ROUTES) {
     const m = path.match(re)
     if (m) return <ErrorBoundary key={path}>{render(m.slice(1), query)}</ErrorBoundary>
