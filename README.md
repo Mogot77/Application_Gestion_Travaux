@@ -86,8 +86,9 @@ flowchart LR
 
 1. **Connexion** : Google via Firebase Auth ; l'e-mail doit figurer dans la collection `users` (liste blanche, vérifiée par `firestore.rules`).
 2. **Chargement** : `AppProvider` crée le store Redux avec le cache `localStorage` comme état de départ, puis `store/listeners` démarre `store/queries/appSync`. La première lecture (ou une lecture de plus de 24 h) est complète ; les suivantes sont **incrémentales** : le cache local sert de base et seuls les documents modifiés depuis le dernier `updatedAt` lu sont relus, ce qui limite les lectures Firestore. Une suppression laisse une « pierre tombale » (`deleted: true`) pour que les autres clients la voient. Le cache local et le curseur (`equalis-travaux-sync-v1`) vont ensemble : `resetLocal` efface les deux.
-3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Les listeners du store sauvegardent le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits (par lots).
-4. **Photos** : `helpers/photos` redimensionne l'image et l'envoie à Cloudinary ; seule l'URL est stockée dans Firestore, donc partagée entre appareils. Hors ligne (ou sans configuration), la photo reste une data-URL locale, jamais envoyée à Firestore, puis envoyée au chargement suivant ou au retour du réseau.
+3. **Modification** : un écran appelle `useApp().mutate(fn)` → action Redux `mutated` (Immer applique `fn`). Les listeners du store sauvegardent le cache et `helpers/cloudState` découpe l'état en documents ; seuls les documents modifiés sont écrits, et **seulement les champs modifiés**, par lots. À la réception, une fusion à trois voies garde vos modifications en cours : deux personnes qui changent des champs différents d'une même demande ne s'écrasent pas (un même champ reste « dernier écrit gagne »). Une écriture refusée est retentée automatiquement.
+4. **Numéros** : les numéros lisibles (DI, CE, CS, FT, BC) viennent d'un compteur Firestore atomique (`meta/counters`), jamais d'un compteur local, donc deux utilisateurs ne reçoivent jamais le même. Hors ligne, un numéro de secours unique est utilisé.
+5. **Photos** : `helpers/photos` redimensionne l'image et l'envoie à Cloudinary ; seule l'URL est stockée dans Firestore, donc partagée entre appareils. Hors ligne (ou sans configuration), la photo reste une data-URL locale, jamais envoyée à Firestore, puis envoyée au chargement suivant ou au retour du réseau.
 
 ### Collections Firestore
 
@@ -136,7 +137,8 @@ Les variables `VITE_FIREBASE_*` (clé d'API, identifiant de projet, domaine d'au
 1. **Les règles Firestore** (`firestore.rules`, publiées dans la console Firebase) : toute lecture ou écriture exige un compte Google connecté, avec une adresse e-mail vérifiée, présente dans la liste blanche `users`. Un visiteur qui connaît la configuration est refusé par le serveur.
 2. **La liste blanche** : seule la direction (rôle `admin` ou `directeur`) peut ajouter ou retirer des comptes autorisés.
 3. **Les domaines autorisés** de la connexion Google (console Firebase, Authentication) : seuls ces sites peuvent lancer la connexion.
-4. **Aucun vrai secret côté navigateur** : les photos partent sur Cloudinary avec un *preset unsigned* (le nom du compte et du preset sont publics, l'API secret Cloudinary n'est jamais utilisée dans l'application).
+4. **Photos** : l'adresse d'une photo (Cloudinary) est longue et impossible à deviner, et n'est lisible que par les comptes autorisés (elle est dans Firestore), mais quiconque possède le lien peut la voir sans se connecter. Supprimer une photo dans l'application ne la supprime pas chez Cloudinary.
+5. **Aucun vrai secret côté navigateur** : les photos partent sur Cloudinary avec un *preset unsigned* (le nom du compte et du preset sont publics, l'API secret Cloudinary n'est jamais utilisée dans l'application).
 
 ### À savoir
 
@@ -162,8 +164,21 @@ Skills utilisés pour travailler sur ce projet avec Claude Code. Un skill est un
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
+copy .env.example .env.local   # puis renseigner les valeurs (voir ci-dessous)
+npm run dev                    # http://localhost:5173
 ```
+
+### Configuration (`.env.local`)
+
+Le fichier `.env.local` n'est pas versionné : chaque personne crée le sien à partir de `.env.example`, puis redémarre `npm run dev` (Vite ne le relit qu'au démarrage).
+
+| Variable | Où la trouver |
+|---|---|
+| `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID` | console Firebase → Paramètres du projet → Vos applications |
+| `VITE_CLOUDINARY_CLOUD`, `VITE_CLOUDINARY_PRESET` | Cloudinary → Settings (cloud name) et preset *unsigned* |
+| `VITE_TODAY` (facultatif) | date forcée `AAAA-MM-JJ` pour une démo ; vide = date réelle |
+
+Pour le site en ligne, ces mêmes variables se créent dans GitHub → Settings → Secrets and variables → Actions → **Variables**. Sans elles, l'application s'arrête avec un message clair.
 
 | Commande | Rôle |
 |---|---|
@@ -182,5 +197,7 @@ npm run dev       # http://localhost:5173
 - Configuration : variables `VITE_FIREBASE_*` et `VITE_CLOUDINARY_*` (voir `.env.example`) dans `.env.local` en local, et dans les variables GitHub Actions pour le site en ligne.
 - `TODAY` (`helpers/dates.ts`) est la date du jour ; la variable facultative `VITE_TODAY` (AAAA-MM-JJ) force une date pour une démo ou des tests.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
-- Le bundle principal dépasse 500 kB (avertissement Vite non bloquant) ; les écrans sont chargés à la demande.
+- Chargement : chaque écran est chargé à la demande, Leaflet seulement sur les cartes. Le fichier Firebase (≈ 640 kB) est nécessaire dès la connexion : c'est lui qui déclenche l'avertissement Vite « plus de 500 kB », sans effet bloquant.
+- Données : aucun jeu de démo ni référentiel dans le code, tout vient de Firestore (référentiels modifiables dans l'écran Référentiels). Un nouveau projet Firebase démarre donc vide.
+- Les fichiers de migration des référentiels (`src/store/listeners/refsMigration.ts`, `src/store/queries/legacyRefs.ts`) sont à supprimer une fois la nouvelle version passée en production.
 - Les polices et fonds de carte nécessitent internet.
