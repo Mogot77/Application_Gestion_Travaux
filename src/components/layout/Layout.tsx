@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { ProfilKey } from '../../types'
 import { useApp } from '../../hooks/useApp'
+import { useAuth } from '../../hooks/useAuth'
 import { PROFILS } from '../../lib/domain'
 import { IcPhone } from '../ui/Icons'
 
@@ -20,6 +21,7 @@ const NAV: [string, string, string][] = [
 /** Coque commune des écrans bureau : en-tête de navigation + contenu. */
 export function Layout({ active = '', children }: { active?: string; children?: ReactNode }) {
   const { S, mutate, toast } = useApp()
+  const { user, logout } = useAuth()
   const onProfil = (k: ProfilKey) => {
     mutate(s => { s.profil = k }, { now: true })
     toast('Profil : ' + PROFILS[k].label)
@@ -45,6 +47,12 @@ export function Layout({ active = '', children }: { active?: string; children?: 
           >
             {(Object.entries(PROFILS) as [ProfilKey, (typeof PROFILS)[ProfilKey]][]).map(([k, p]) => <option key={k} value={k}>{p.label}</option>)}
           </select>
+          {user && (
+            <button
+              type="button" className="text-[13px] text-[#d1d5db] hover:text-white"
+              title={user.email ?? undefined} onClick={() => void logout()}
+            >Déconnexion</button>
+          )}
         </div>
       </header>
       <main className="main mx-auto max-w-[1440px] p-4 sm:p-6">{children}</main>

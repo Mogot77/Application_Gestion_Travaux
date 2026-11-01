@@ -1,5 +1,8 @@
 import { useEffect, type ReactNode } from 'react'
 import { AppProvider } from './store/AppProvider'
+import { AuthProvider } from './store/AuthProvider'
+import { useAuth } from './hooks/useAuth'
+import { Login } from './components/pages/Login'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useRoute } from './hooks/useRoute'
 import { Demandes } from './components/pages/Demandes'
@@ -53,9 +56,17 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/m\/profil$/, () => <ProfilMobile />],
 ]
 
+/** Écrans accessibles sans compte Google : portail entreprises et mobile terrain (liens signés). */
+const PUBLIC = /^\/(portail|m)\//
+
 function Router() {
   const { path, query } = useRoute()
+  const { user } = useAuth()
   useEffect(() => { window.scrollTo(0, 0) }, [path])
+  if (!PUBLIC.test(path)) {
+    if (user === undefined) return <p className="p-6 text-sm text-[#6b7280]">Chargement…</p>
+    if (user === null) return <Login />
+  }
   for (const [re, render] of ROUTES) {
     const m = path.match(re)
     if (m) return <ErrorBoundary key={path}>{render(m.slice(1), query)}</ErrorBoundary>
@@ -65,8 +76,10 @@ function Router() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <Router />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <Router />
+      </AppProvider>
+    </AuthProvider>
   )
 }
