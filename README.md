@@ -116,6 +116,29 @@ firestore.rules        règles de sécurité Firestore
 .claude/skills/        skills Claude Code du projet
 ```
 
+## Sécurité
+
+### La configuration Firebase n'est pas un secret
+
+Les variables `VITE_FIREBASE_*` (clé d'API, identifiant de projet, domaine d'authentification, etc.) **ne sont pas ce qui protège les données**. Elles sont publiques par conception :
+
+- Elles servent seulement à dire au navigateur *quel* projet Firebase contacter. Sans elles, l'application ne saurait pas où se connecter.
+- Elles finissent obligatoirement dans le JavaScript envoyé à chaque visiteur : toute application web Firebase les expose, c'est le fonctionnement normal du SDK. Les mettre en variables d'environnement GitHub évite de les écrire dans le dépôt, mais ne les cache pas dans le site construit.
+- Connaître la clé d'API ne donne **aucun accès** aux données : elle n'identifie pas un utilisateur et n'autorise rien.
+
+### Ce qui protège réellement les données
+
+1. **Les règles Firestore** (`firestore.rules`, publiées dans la console Firebase) : toute lecture ou écriture exige un compte Google connecté, avec une adresse e-mail vérifiée, présente dans la liste blanche `users`. Un visiteur qui connaît la configuration est refusé par le serveur.
+2. **La liste blanche** : seule la direction (rôle `admin` ou `directeur`) peut ajouter ou retirer des comptes autorisés.
+3. **Les domaines autorisés** de la connexion Google (console Firebase, Authentication) : seuls ces sites peuvent lancer la connexion.
+4. **Aucun vrai secret côté navigateur** : les photos partent sur Cloudinary avec un *preset unsigned* (le nom du compte et du preset sont publics, l'API secret Cloudinary n'est jamais utilisée dans l'application).
+
+### À savoir
+
+- Les règles distinguent « membre » et « administrateur » ; les rôles plus fins (établissement, ouvrier, coordination) restreignent l'affichage dans l'application, pas l'accès aux données côté serveur. Tout compte de la liste blanche peut en principe lire les données de l'application.
+- Ne jamais committer de **secret** : clé privée de compte de service, API secret Cloudinary, mot de passe. Ceux-là ne vont ni dans le dépôt ni dans une variable `VITE_*` (qui serait exposée au navigateur).
+- Option complémentaire : restreindre la clé d'API aux domaines du site dans la console Google Cloud (API et services, Identifiants) limite son usage par des tiers.
+
 ## Skills Claude Code
 
 Skills utilisés pour travailler sur ce projet avec Claude Code. Un skill est un jeu d'instructions que Claude charge quand la demande correspond (ou via `/nom`).
@@ -145,7 +168,7 @@ npm run dev       # http://localhost:5173
 ## Points d'attention
 
 - Clé de stockage local `equalis-travaux-v2` (format `{v:1, ...}`) : ne pas la changer sans migration.
-- Photos : `VITE_CLOUDINARY_CLOUD` et `VITE_CLOUDINARY_PRESET` (voir `.env.example`) en local ; variables GitHub Actions pour le site en ligne.
+- Configuration : variables `VITE_FIREBASE_*` et `VITE_CLOUDINARY_*` (voir `.env.example`) dans `.env.local` en local, et dans les variables GitHub Actions pour le site en ligne.
 - `TODAY = '2026-10-29'` est une date de référence de démo, indépendante de la date réelle.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
 - Le bundle dépasse 500 kB (avertissement Vite non bloquant).
