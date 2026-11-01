@@ -98,7 +98,7 @@ flowchart LR
 ```
 src/
 ├── App.tsx            routes (hash)
-├── types.ts           types du modèle de données
+├── types/             types du modèle de données (par domaine)
 ├── helpers/           fonctions partagées par plusieurs composants (domain, dates, csv, photos,
 │                      carto, docs, planning, cloudState, roles, emptyState ...)
 ├── store/             Redux Toolkit : index (store), reducers/ (app, ui), selectors/, thunks/,
@@ -144,6 +144,10 @@ Les variables `VITE_FIREBASE_*` (clé d'API, identifiant de projet, domaine d'au
 - Ne jamais committer de **secret** : clé privée de compte de service, API secret Cloudinary, mot de passe. Ceux-là ne vont ni dans le dépôt ni dans une variable `VITE_*` (qui serait exposée au navigateur).
 - Option complémentaire : restreindre la clé d'API aux domaines du site dans la console Google Cloud (API et services, Identifiants) limite son usage par des tiers.
 
+## Consignes pour Claude Code
+
+Le `CLAUDE.md` à la racine donne la vue d'ensemble ; chaque gros dossier a le sien avec ses règles détaillées : `src/store/`, `src/components/`, `src/helpers/`, `src/hooks/` et `src/stories/`.
+
 ## Skills Claude Code
 
 Skills utilisés pour travailler sur ce projet avec Claude Code. Un skill est un jeu d'instructions que Claude charge quand la demande correspond (ou via `/nom`).
@@ -178,5 +182,5 @@ npm run dev       # http://localhost:5173
 - Configuration : variables `VITE_FIREBASE_*` et `VITE_CLOUDINARY_*` (voir `.env.example`) dans `.env.local` en local, et dans les variables GitHub Actions pour le site en ligne.
 - `TODAY` (`helpers/dates.ts`) est la date du jour ; la variable facultative `VITE_TODAY` (AAAA-MM-JJ) force une date pour une démo ou des tests.
 - Avant de pousser : `npm run lint` et `npm run build` doivent passer.
-- Le bundle dépasse 500 kB (avertissement Vite non bloquant).
+- Le bundle principal dépasse 500 kB (avertissement Vite non bloquant) ; les écrans sont chargés à la demande.
 - Les polices et fonds de carte nécessitent internet.
