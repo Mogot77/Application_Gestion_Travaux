@@ -36,8 +36,13 @@ flowchart LR
     subgraph Direction
       D[Directeur<br/>tout, utilisateurs, référentiels]
     end
+    subgraph Finance
+      DAF[Directeur administratif et financier<br/>refacturation, tableau de bord]
+      CPT[Comptable<br/>refacturation]
+      CG[Contrôleur de gestion<br/>refacturation, tableau de bord]
+    end
     subgraph Service technique
-      C[Coordinateur<br/>demandes, planning, ouvriers,<br/>logements, carte, constats, classement]
+      C[Coordinateur<br/>demandes, planning, ouvriers, logements,<br/>carte, constats, refacturation, classement]
       O[Ouvrier<br/>son planning uniquement]
     end
     subgraph Établissement
@@ -46,3 +51,5 @@ flowchart LR
       DE[Directeur d'établissement<br/>demandes de son établissement]
     end
 ```
+
+Les droits précis des rôles Finance (qui crée, émet ou valide une facture) restent à déterminer : aujourd'hui les trois ont le même accès à la refacturation.

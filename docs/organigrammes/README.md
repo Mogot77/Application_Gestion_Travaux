@@ -16,6 +16,7 @@ Les schémas sont écrits en [Mermaid](https://mermaid.js.org/) : ils s'affichen
 | 6 | [06-consultation-devis.md](06-consultation-devis.md) | Consultation d'entreprises, notation des devis, décision |
 | 7 | [07-cycle-vie-demande.md](07-cycle-vie-demande.md) | Vue d'ensemble : statuts d'une demande |
 | 8 | [08-hierarchie-validation.md](08-hierarchie-validation.md) | Hiérarchie des fonctions et niveaux de validation des devis |
+| 9 | [09-refacturation.md](09-refacturation.md) | Refacturation à l'usager : création et vie d'une facture |
 
 Les mêmes schémas sont exportés en images dans [png/](png/) (un fichier par schéma, nommé `<fichier>_<numéro du schéma>.png`).
 
