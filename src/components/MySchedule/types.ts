@@ -9,6 +9,8 @@ export type ScheduleItem = {
   etat: [string, Tone]
   canStart: boolean
   canFinish: boolean
+  /** Mission reportée, reprenable tant que la demande n'est pas reprogrammée. */
+  canResume: boolean
   /** Identifiant de la demande liée (fiche / rapport). */
   demandeId?: string
 }
@@ -27,6 +29,7 @@ export type MyScheduleViewProps = {
   model: MyScheduleModel
   onStart: (rdvId: string) => void
   onFinish: (rdvId: string) => void
+  onResume: (rdvId: string) => void
 }
 
 export type FinishMissionFormProps = {
@@ -35,6 +38,12 @@ export type FinishMissionFormProps = {
   lignes: Ligne[]
   motifs: string[]
   conso: Consommable[]
-  /** Temps passé proposé par défaut, en minutes. */
-  tempsDefault: number
+}
+
+export type PhotoPickerProps = {
+  /** Nom des champs cachés qui portent les photos dans le formulaire. */
+  name: string
+  legend: string
+  hint?: string
+  required?: boolean
 }

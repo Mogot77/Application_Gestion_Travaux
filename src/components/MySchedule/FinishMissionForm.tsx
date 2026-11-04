@@ -1,10 +1,11 @@
 import { STATUTS } from './constants'
+import PhotoPicker from './PhotoPicker'
 import type { FinishMissionFormProps } from './types'
 
 /** Formulaire de fin de mission (affiché dans la modale) : les champs sont lus par `onOk` via leur `name`. */
-const FinishMissionForm = ({ debut, lignes, motifs, conso, tempsDefault }: FinishMissionFormProps) => (
+const FinishMissionForm = ({ debut, lignes, motifs, conso }: FinishMissionFormProps) => (
   <>
-    <p className="muted m-0 text-sm">Début réel : {debut}. Le rapport d’intervention est généré à partir de ce formulaire.</p>
+    <p className="muted m-0 text-sm">Début réel : {debut}. Le rapport d’intervention est généré à partir de ce formulaire ; le temps passé est celui du chronomètre de la mission.</p>
     <fieldset className="m-0 border-0 p-0">
       <legend className="lbl">Travaux réalisés</legend>
       {lignes.map((l, i) => (
@@ -34,10 +35,8 @@ const FinishMissionForm = ({ debut, lignes, motifs, conso, tempsDefault }: Finis
         ))}
       </fieldset>
     )}
-    <div className="grid gap-3 sm:grid-cols-2">
-      <div><label className="lbl" htmlFor="fm-t">Temps passé (minutes)</label><input className="in" id="fm-t" type="number" min={1} name="temps" defaultValue={tempsDefault} /></div>
-      <div><label className="lbl" htmlFor="fm-s">Signataire (occupant ou référent, facultatif)</label><input className="in" id="fm-s" name="signataire" /></div>
-    </div>
+    <PhotoPicker name="apres" legend="Photos de ce qui a été fait" hint="Ces photos seront intégrées au rapport." required />
+    <div><label className="lbl" htmlFor="fm-s">Signataire (occupant ou référent, facultatif)</label><input className="in" id="fm-s" name="signataire" /></div>
     <div><label className="lbl" htmlFor="fm-o">Observations</label><textarea className="in" id="fm-o" name="obs" rows={3} /></div>
   </>
 )

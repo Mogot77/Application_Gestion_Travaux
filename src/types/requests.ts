@@ -112,7 +112,11 @@ export type Work = {
 }
 
 export type Rapport = {
+  /** Temps passé : décompte du chronomètre de la mission (reprises comprises) à la fin de mission. */
   tempsMin: number
+  /** Photos de l'état initial et du résultat, intégrées au rapport. */
+  photosAvant?: string[]
+  photosApres?: string[]
   lignes: LigneStatut[]
   motifs: string[]
   conso: { nom: string; qte: number }[]
@@ -136,6 +140,12 @@ export type Rdv = {
   finReel?: string
   motifImp?: string
   photoImp?: string
+  /** Photos de l'état initial (début de mission) et de ce qui a été fait (fin de mission). */
+  photosAvant?: string[]
+  photosApres?: string[]
+  /** Chronomètre caché : secondes déjà cumulées (missions reprises) et instant (ms) du dernier démarrage ; absent hors mission en cours. */
+  chronoCumulSec?: number
+  chronoDepuis?: number
   rapport?: Rapport
   work?: Work
 }

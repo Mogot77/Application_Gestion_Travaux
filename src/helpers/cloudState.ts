@@ -14,7 +14,7 @@ const isRec = (v: unknown): v is Rec => typeof v === 'object' && v !== null
 
 /** Champs contenant des photos : ils ne sont jamais envoyés à Firestore. */
 const PHOTO_EMPTY: Record<string, () => unknown> = {
-  photos: () => [], photosApres: () => [], photo: () => '', photoImp: () => '', apres: () => ({}),
+  photos: () => [], photosAvant: () => [], photosApres: () => [], photo: () => '', photoImp: () => '', apres: () => ({}),
 }
 
 const isLocal = (v: unknown): v is string => typeof v === 'string' && v.startsWith('data:')

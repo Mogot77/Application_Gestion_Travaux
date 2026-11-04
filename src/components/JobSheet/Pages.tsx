@@ -105,6 +105,16 @@ const Pages = ({ m }: PagesProps) => {
           <table className="mt-2"><thead><tr><th>Pièce</th><th>Travaux</th><th className="w-[70px]">Temps</th><th className="w-[110px]">Fait / à prog.</th></tr></thead><tbody>
             {supps.map((s, i) => <tr key={i}><td>{s.piece}</td><td>{shortLot(s.lot)} · {s.nature} — {s.description}</td><td>{fdur(s.duree)}</td><td>{s.suiteLabel}</td></tr>)}
             {!supps.length && <><tr><td>&nbsp;</td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td></tr></>}</tbody></table></div>
+        {rp && ((rp.photosAvant ?? []).length > 0 || (rp.photosApres ?? []).length > 0) && (
+          <div><h3>Photos de l'intervention</h3>
+            {([['État initial', rp.photosAvant ?? []], ['Travaux réalisés', rp.photosApres ?? []]] as const).map(([titre, list]) => list.length > 0 && (
+              <div key={titre} className="mt-2"><div className="mb-1 text-[11px] font-bold text-muted">{titre}</div>
+                <div className="grid grid-cols-4 gap-2">
+                  {list.map((src, i) => <img key={i} src={src} alt={`${titre} ${i + 1}`} className="block h-[90px] w-full break-inside-avoid rounded border border-line object-cover" />)}
+                </div></div>
+            ))}
+          </div>
+        )}
         <div><h3>Matériel utilisé</h3><p className="mb-0 mt-2 min-h-9">{rp ? rp.conso.map(c => `${c.nom} × ${c.qte}`).join(' · ') || 'aucun' : ''}</p></div>
         <div><h3>Observations</h3><p className="mb-0 mt-2 min-h-12">{rp ? rp.obs || '—' : ''}</p></div>
         <div className="grid grid-cols-2 gap-5">

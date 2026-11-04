@@ -1,4 +1,5 @@
 import type { AppState, Rdv } from '@/types'
+import { canResumeMission } from '@/helpers/mission'
 import { RDV_ETAT, getD, getLog, logAdr } from '@/helpers/domain'
 import { TODAY } from '@/helpers/dates'
 import type { MyScheduleModel } from './types'
@@ -10,7 +11,7 @@ export const rdvsOf = (S: AppState, id?: string): Rdv[] =>
 /** Modèle de l'écran : interventions à venir (ou en cours) de l'ouvrier connecté, groupées par jour. */
 export const buildScheduleModel = (S: AppState): MyScheduleModel => {
   const id = S.moi?.ouvrierId
-  const shown = rdvsOf(S, id).filter(r => r.date >= TODAY || r.etat === 'running')
+  const shown = rdvsOf(S, id).filter(r => r.date >= TODAY || r.etat === 'running' || canResumeMission(S, r))
   const days = [...new Set(shown.map(r => r.date))]
   return {
     hasWorker: !!id,
@@ -28,6 +29,7 @@ export const buildScheduleModel = (S: AppState): MyScheduleModel => {
           etat: RDV_ETAT[r.etat],
           canStart: r.etat === 'planned' && r.date <= TODAY,
           canFinish: r.etat === 'running',
+          canResume: canResumeMission(S, r),
           demandeId: d?.id,
         }
       }),
