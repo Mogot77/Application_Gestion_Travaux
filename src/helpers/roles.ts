@@ -1,7 +1,7 @@
 /* Rôles des utilisateurs et droits associés (logique pure). */
 import type { ProfilKey } from '../types'
 
-export type Role = 'directeur' | 'coordinateur' | 'ouvrier' | 'travailleur_social' | 'chef_service' | 'directeur_etab'
+export type Role = 'directeur' | 'coordinateur' | 'ouvrier' | 'travailleur_social' | 'chef_service' | 'directeur_etab' | 'daf' | 'comptable' | 'controleur_gestion'
 
 /** Sections de l'application, utilisées pour le menu et la protection des routes. */
 export type Section =
@@ -60,6 +60,24 @@ export const ROLES: Record<Role, RoleInfo> = {
     description: 'Fait des demandes et voit l’état de toutes les demandes de son établissement.',
     profil: 'etab', portee: 'etab', creerDemande: true, needsEtab: true,
     sections: ['demandes'],
+  },
+  daf: {
+    label: 'Directeur administratif et financier',
+    description: 'Suit la refacturation et le tableau de bord.',
+    profil: 'coord', portee: 'toutes', creerDemande: false, needsEtab: false,
+    sections: ['facturation', 'tableau'],
+  },
+  comptable: {
+    label: 'Comptable',
+    description: 'Prépare, émet et suit les factures de refacturation.',
+    profil: 'coord', portee: 'toutes', creerDemande: false, needsEtab: false,
+    sections: ['facturation'],
+  },
+  controleur_gestion: {
+    label: 'Contrôleur de gestion',
+    description: 'Suit la refacturation et le tableau de bord.',
+    profil: 'coord', portee: 'toutes', creerDemande: false, needsEtab: false,
+    sections: ['facturation', 'tableau'],
   },
 }
 
