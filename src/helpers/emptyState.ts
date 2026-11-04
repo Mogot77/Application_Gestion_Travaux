@@ -12,9 +12,9 @@ export const emptyRef = (): Referentiels => ({
 export const emptyState = (): AppState => ({
   v: 1,
   ref: emptyRef(),
-  logements: [], ouvriers: [], entreprises: [], demandes: [], rdvs: [], constats: [], consultations: [],
+  logements: [], ouvriers: [], entreprises: [], demandes: [], rdvs: [], constats: [], consultations: [], factures: [],
   histoMois: {},
   draft: null,
   profil: 'coord',
-  seq: { di: 0, ce: 0, cs: 0, ft: 0, bc: 0 },
+  seq: { di: 0, ce: 0, cs: 0, ft: 0, bc: 0, fa: 0 },
 })

@@ -24,7 +24,7 @@ Redux Toolkit. Un store par session connectée, créé par `AppProvider` (`creat
 - Une écriture refusée est retentée (5 fois, délai croissant) ; une photo restée locale prévient l'utilisateur.
 - `meta/counters` n'est pas une donnée de l'application : ignoré par la synchro.
 
-## Numéros lisibles (DI, CE, CS, FT, BC)
+## Numéros lisibles (DI, CE, CS, FT, BC, FA)
 Attribués par un compteur atomique (`queries/counters.ts`). Le gestionnaire d'événement appelle `await reserveIds(getS(), [...])` **avant** `mutate`, puis `nextId` consomme la réservation. Hors ligne, `nextId` retombe sur un numéro de secours unique (`DI-2026-T7K2`). Voir `helpers/ids.ts`.
 
 ## Photos

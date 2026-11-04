@@ -3,7 +3,7 @@ import type { AppState } from '@/types'
 import { emptyRef } from './emptyState'
 
 /** Collections dont chaque élément (champ `id`) devient un document. */
-export const ITEM_COLS = ['logements', 'ouvriers', 'entreprises', 'demandes', 'rdvs', 'constats', 'consultations'] as const
+export const ITEM_COLS = ['logements', 'ouvriers', 'entreprises', 'demandes', 'rdvs', 'constats', 'consultations', 'factures'] as const
 export type ItemCol = (typeof ITEM_COLS)[number]
 /** Collections à document unique `main`. */
 export const SINGLE_COLS = ['ref', 'meta'] as const
@@ -169,7 +169,7 @@ export function upsertDoc(s: AppState, col: string, data: Rec, keyOf: (id: strin
   const baseItem = base ? Object.fromEntries(Object.entries(base).filter(([k]) => k !== '_i')) : undefined
   if (col === 'ref') { const item = mergeRemote(remote, s.ref as Rec, baseItem); graftPhotos(item, s.ref); s.ref = { ...emptyRef(), ...item } as AppState['ref']; return }
   const item = remote
-  if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = item.seq as AppState['seq']; return }
+  if (col === 'meta') { if (isRec(item.histoMois)) s.histoMois = item.histoMois as AppState['histoMois']; if (isRec(item.seq)) s.seq = { ...s.seq, ...(item.seq as AppState['seq']) }; return }
   if (!(ITEM_COLS as readonly string[]).includes(col)) return
   const arr = listOf(s, col as ItemCol)
   const idx = arr.findIndex(x => x.id === item.id)

@@ -9,6 +9,6 @@ Fonctions utilisées par **plusieurs** composants (ou par le store). Une fonctio
 - `emptyState.ts` : état et référentiels vides (le vrai contenu vient de Firestore).
 - `photos.ts` : redimensionnement et envoi Cloudinary.
 - `theme.ts` : choix clair/sombre (le hook est dans `hooks/useTheme.ts`).
-- `roles.ts` (rôles et droits), `planning.ts`, `mission.ts` (démarrage/fin de mission, rapport), `docs.ts` (plan de classement), `carto.ts` (coordonnées, repères Leaflet), `csv.ts`, `logements.ts`.
+- `billing.ts` (refacturation : totaux HT/TVA/TTC, proposition de facture, mentions obligatoires), `roles.ts` (rôles et droits), `planning.ts`, `mission.ts` (démarrage/fin de mission, rapport), `docs.ts` (plan de classement), `carto.ts` (coordonnées, repères Leaflet), `csv.ts`, `logements.ts`.
 
 Règles : fonctions pures autant que possible, type de retour explicite, aucun import de composant, de hook ou du store (sauf types). Les accès réseau (Firestore) sont dans `store/queries/`.

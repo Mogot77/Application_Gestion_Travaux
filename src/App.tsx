@@ -23,6 +23,8 @@ const Companies = lazy(() => import('@/components/Companies'))
 const Quotes = lazy(() => import('@/components/Quotes'))
 const Portal = lazy(() => import('@/components/Portal'))
 const JobSheet = lazy(() => import('@/components/JobSheet'))
+const Billing = lazy(() => import('@/components/Billing'))
+const Invoice = lazy(() => import('@/components/Invoice'))
 const Documents = lazy(() => import('@/components/Documents'))
 const ReferenceData = lazy(() => import('@/components/ReferenceData'))
 const Workers = lazy(() => import('@/components/Workers'))
@@ -41,6 +43,8 @@ const ROUTES: [RegExp, Render][] = [
   [/^\/logement\/([\w-]+)$/, p => <Housing id={p[0]} />],
   [/^\/constats$/, () => <Inspections />],
   [/^\/constat\/new$/, () => <NewInspection />],
+  [/^\/facturation$/, () => <Billing />],
+  [/^\/facture\/([\w-]+)$/, p => <Invoice id={p[0]} />],
   [/^\/tableau$/, () => <Dashboard />],
   [/^\/entreprises$/, () => <Companies />],
   [/^\/consultation\/([\w-]+)$/, p => <Consultation id={p[0]} />],

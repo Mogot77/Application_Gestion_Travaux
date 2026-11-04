@@ -1,4 +1,5 @@
 import type { ProfilKey } from './common'
+import type { Facture } from './billing'
 import type { Consultation } from './consultations'
 import type { Constat, Logement } from './housing'
 import type { Entreprise, Ouvrier } from './people'
@@ -16,8 +17,9 @@ export type SharedState = {
   rdvs: Rdv[]
   constats: Constat[]
   consultations: Consultation[]
+  factures: Facture[]
   histoMois: Record<string, number>
-  seq: { di: number; ce: number; cs: number; ft: number; bc: number }
+  seq: { di: number; ce: number; cs: number; ft: number; bc: number; fa: number }
 }
 
 /** État propre à ce navigateur : jamais envoyé à Firestore. */

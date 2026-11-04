@@ -6,7 +6,7 @@ export type Role = 'directeur' | 'coordinateur' | 'ouvrier' | 'travailleur_socia
 /** Sections de l'application, utilisées pour le menu et la protection des routes. */
 export type Section =
   | 'demandes' | 'planning' | 'ouvriers' | 'entreprises' | 'logements' | 'carte'
-  | 'constats' | 'tableau' | 'classement' | 'referentiels' | 'utilisateurs'
+  | 'constats' | 'facturation' | 'tableau' | 'classement' | 'referentiels' | 'utilisateurs'
 
 /** Portée des demandes visibles : toutes, celles de l'établissement, ou celles que l'on a créées. */
 export type Portee = 'toutes' | 'etab' | 'siennes'
@@ -29,13 +29,13 @@ export const ROLES: Record<Role, RoleInfo> = {
     label: 'Directeur',
     description: 'Voit et gère tout, administre les utilisateurs.',
     profil: 'dir', portee: 'toutes', creerDemande: true, needsEtab: false,
-    sections: ['demandes', 'planning', 'ouvriers', 'entreprises', 'logements', 'carte', 'constats', 'tableau', 'classement', 'referentiels', 'utilisateurs'],
+    sections: ['demandes', 'planning', 'ouvriers', 'entreprises', 'logements', 'carte', 'constats', 'facturation', 'tableau', 'classement', 'referentiels', 'utilisateurs'],
   },
   coordinateur: {
     label: 'Coordinateur du service technique',
     description: 'Voit les demandes entrantes et répartit les missions entre les ouvriers.',
     profil: 'coord', portee: 'toutes', creerDemande: true, needsEtab: false,
-    sections: ['demandes', 'planning', 'ouvriers', 'logements', 'carte', 'constats', 'classement'],
+    sections: ['demandes', 'planning', 'ouvriers', 'logements', 'carte', 'constats', 'facturation', 'classement'],
   },
   ouvrier: {
     label: 'Ouvrier',
@@ -80,7 +80,7 @@ export function sectionOf(path: string): Section | null {
   const map: Record<string, Section> = {
     demandes: 'demandes', demande: 'demandes', planning: 'planning', tournees: 'planning', fiche: 'planning',
     ouvriers: 'ouvriers', entreprises: 'entreprises', consultation: 'entreprises', devis: 'entreprises', portail: 'entreprises',
-    logements: 'logements', logement: 'logements', carte: 'carte', constats: 'constats', constat: 'constats',
+    logements: 'logements', logement: 'logements', carte: 'carte', constats: 'constats', constat: 'constats', facturation: 'facturation', facture: 'facturation',
     tableau: 'tableau', classement: 'classement', referentiels: 'referentiels', utilisateurs: 'utilisateurs',
   }
   return map[seg] ?? null

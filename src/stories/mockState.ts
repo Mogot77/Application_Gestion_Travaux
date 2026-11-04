@@ -252,8 +252,9 @@ export const mockState: AppState = {
   rdvs: mockRdvs,
   constats: mockConstats,
   consultations: mockConsultations,
+  factures: [],
   histoMois: { '2026-05': 14, '2026-06': 18, '2026-07': 11, '2026-08': 9, '2026-09': 16, '2026-10': 21 },
-  seq: { di: 301, ce: 232, cs: 11, ft: 120, bc: 4 },
+  seq: { di: 301, ce: 232, cs: 11, ft: 120, bc: 4, fa: 0 },
   draft: null,
   profil: 'coord',
 }

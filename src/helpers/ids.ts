@@ -4,8 +4,8 @@ import type { AppState } from '@/types'
 
 export type SeqKind = keyof AppState['seq']
 
-const PREFIX: Record<SeqKind, string> = { di: 'DI', ce: 'CE', cs: 'CS', ft: 'FT', bc: 'BC' }
-const reserved: Record<SeqKind, number[]> = { di: [], ce: [], cs: [], ft: [], bc: [] }
+const PREFIX: Record<SeqKind, string> = { di: 'DI', ce: 'CE', cs: 'CS', ft: 'FT', bc: 'BC', fa: 'FA' }
+const reserved: Record<SeqKind, number[]> = { di: [], ce: [], cs: [], ft: [], bc: [], fa: [] }
 
 export const pushReserved = (kind: SeqKind, n: number): void => { reserved[kind].push(n) }
 export const takeReserved = (kind: SeqKind): number | undefined => reserved[kind].shift()
@@ -21,7 +21,8 @@ export const maxNumber = (S: AppState, kind: SeqKind): number => {
     : kind === 'ce' ? S.constats.map(c => c.id)
     : kind === 'cs' ? S.consultations.map(c => c.id)
     : kind === 'ft' ? S.demandes.map(d => d.ft)
-    : S.consultations.map(c => c.decision?.bc)
+    : kind === 'bc' ? S.consultations.map(c => c.decision?.bc)
+    : S.factures.map(f => f.id)
   return Math.max(S.seq[kind], ...ids.map(numberOf))
 }
 

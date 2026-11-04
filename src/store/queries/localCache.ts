@@ -8,7 +8,7 @@ export const KEY = 'equalis-travaux-v2'
 export const loadState = (): AppState => {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null') as AppState | null
-    if (s && s.v === 1) return { ...s, ref: { ...emptyRef(), ...s.ref } }
+    if (s && s.v === 1) return { ...s, ref: { ...emptyRef(), ...s.ref }, factures: s.factures ?? [], seq: { ...emptyState().seq, ...s.seq } }
   } catch { /* stockage indisponible ou corrompu : on repart d'un état vide */ }
   return emptyState()
 }

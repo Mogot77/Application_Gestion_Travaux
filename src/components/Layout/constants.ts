@@ -8,6 +8,7 @@ export const NAV: NavItem[] = [
   ['logements', 'Logements', '#/logements'],
   ['carte', 'Carte', '#/carte'],
   ['constats', 'Constats', '#/constats'],
+  ['facturation', 'Refacturation', '#/facturation'],
   ['tableau', 'Tableau de bord', '#/tableau'],
   ['classement', 'Documents', '#/classement'],
   ['referentiels', 'Référentiels', '#/referentiels'],
