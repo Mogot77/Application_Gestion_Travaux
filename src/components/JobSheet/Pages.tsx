@@ -41,7 +41,7 @@ const Pages = ({ m }: PagesProps) => {
       <div className="a4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-[13px] font-bold text-muted">Equalis · Service technique</div>
+            <div className="text-[13px] font-bold text-muted">Service technique</div>
             <div className="mt-1 text-[22px] font-bold">FICHE D'INTERVENTION</div>
             <div className="mt-1 text-[15px]"><strong>{d.id}</strong>{d.ft ? ' · ' + d.ft : ''}</div>
             <div className="mt-2"><span className="inline-block rounded px-2.5 py-0.5 font-bold" style={{ border: `2px solid ${urgColor}`, color: urgColor }}>{m.urgLabel}</span> <span className="ml-2 text-muted">Imprimée le {fdy(TODAY)}</span></div>

@@ -24,13 +24,13 @@ const PortalView = ({ model, draft: p, onDraft, onChooseSlot, onAsk, onDeposit, 
   return (
     <>
       <header className="noprint sticky top-0 z-20 flex flex-wrap items-center gap-x-5 gap-y-2 bg-[#0F3D3A] px-4 sm:px-6">
-        <span className="py-4 text-[17px] font-bold text-white">Equalis · Portail entreprises</span>
+        <span className="py-4 text-[17px] font-bold text-white">Portail entreprises</span>
         <span className="flex-1"></span>
         <div className="flex flex-wrap items-center gap-3 py-2"><span className="text-[13px] text-[#d1d5db]">Connecté :</span>
           <select className="h-8 max-w-[220px] rounded-lg border border-[#4b5563] bg-[#374151] px-2 text-[13px] font-medium text-[#e5e7eb]" aria-label="Entreprise (démonstration)" value={eid} onChange={ev => onSwitchEnt(ev.target.value)}>
             <Opts list={entOptions} />
           </select>
-          <a className="text-[13px] text-[#d1d5db] no-underline hover:text-white" href={`#/devis/${c.id}`}>← Retour Equalis</a></div>
+          <a className="text-[13px] text-[#d1d5db] no-underline hover:text-white" href={`#/devis/${c.id}`}>← Retour</a></div>
       </header>
       <main className="main mx-auto max-w-[1440px] p-4 sm:p-6">
         <div className="pagehead items-start">

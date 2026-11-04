@@ -9,7 +9,7 @@ const LoginView = ({ theme, email, blocked, error, onLogin, onLogout, onToggleTh
       type="button" className="fixed right-4 top-4 grid size-9 place-items-center rounded-lg border border-field bg-surface text-ink"
       aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'} onClick={onToggleTheme}
     ><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
-    <h1 className="text-2xl font-bold">Equalis · Travaux</h1>
+    <h1 className="text-2xl font-bold">Travaux</h1>
     {blocked ? (
       <>
         <p role="alert" className="text-sm text-danger">

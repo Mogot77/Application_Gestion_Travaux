@@ -10,7 +10,7 @@ const WorkerForm = ({ o, metiers, defaultColor }: WorkerFormProps) => (
       <datalist id="om-list">{metiers.map(m => <option key={m} value={m} />)}</datalist></Field>
     <div className="grid grid-cols-2 gap-3">
       <Field label="Téléphone" htmlFor="ot"><input className="in" id="ot" name="tel" type="tel" defaultValue={o.tel || ''} placeholder="06 ·· ·· ·· ··" /></Field>
-      <Field label="E-mail (agenda Outlook)" htmlFor="oe"><input className="in" id="oe" name="email" type="email" defaultValue={o.email || ''} placeholder="prenom.nom@equalis.fr" /></Field>
+      <Field label="E-mail (agenda Outlook)" htmlFor="oe"><input className="in" id="oe" name="email" type="email" defaultValue={o.email || ''} placeholder="prenom.nom@exemple.fr" /></Field>
     </div>
     <div><span className="lbl">Couleur sur le planning et la carte</span><ColorPicker initial={o.color || defaultColor} /></div>
   </>

@@ -10,7 +10,7 @@ const LayoutView = ({ active = '', children, nav, canCreate, play, roleLabel, em
     <>
       <header className="noprint sticky top-0 z-20 bg-nav px-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:flex-nowrap">
-          <a className="py-4 text-[17px] font-bold text-white no-underline hover:text-white" href="#/demandes">Equalis · Travaux</a>
+          <a className="py-4 text-[17px] font-bold text-white no-underline hover:text-white" href="#/demandes">Travaux</a>
           {canCreate && <a className="btn btnp btn-sm ml-auto lg:order-last lg:ml-0" href="#/demande/new">+ <span className="hidden sm:inline">Nouvelle demande</span><span className="sm:hidden">Demande</span></a>}
           <button
             type="button" className="grid size-10 place-items-center rounded-lg text-white lg:hidden"
