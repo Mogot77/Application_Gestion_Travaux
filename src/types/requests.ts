@@ -32,6 +32,8 @@ export type Demande = {
   tel: string
   urgence: UrgenceKey
   dateSouhaitee: string
+  /** Logement Solibail : créneaux de RDV prévalidés avec le locataire (AAAA-MM-JJTHH:MM). */
+  rdvLocataire?: string[]
   acces: string
   numCles: string
   lieuCles: string
@@ -74,6 +76,8 @@ export type DraftDemande = {
   logementId: string
   urgence: UrgenceKey | ''
   dateSouhaitee: string
+  /** Créneaux prévalidés avec le locataire (logement Solibail) ; absent des anciens brouillons. */
+  rdvLocataire?: string[]
   acces: string
   numCles: string
   lieuCles: string

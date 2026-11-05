@@ -19,6 +19,8 @@ export type NewRequestModel = {
   constat?: Constat
   check: CheckResult
   isCoord: boolean
+  /** Logement du dispositif Solibail : l'agent peut saisir des RDV prévalidés avec le locataire. */
+  isSolibail: boolean
   service: string
   groups: LogementGroup[]
   urgences: UrgenceRef[]
@@ -38,6 +40,8 @@ export type NewRequestViewProps = {
   onUrgence: (k: UrgenceKey) => void
   onSinistreInfo: (k: keyof SinistreInfo, v: string) => void
   onLogement: (id: string) => void
+  onAddRdv: (v: string) => void
+  onRemoveRdv: (i: number) => void
   onLine: (i: number, k: LineField, v: string) => void
   onExtra: (i: number, k: string, v: string) => void
   onAddLine: () => void

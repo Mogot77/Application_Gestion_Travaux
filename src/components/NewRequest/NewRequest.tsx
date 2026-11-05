@@ -7,7 +7,7 @@ import { now } from '@/helpers/dates'
 import { hist, nbPhotos, nextId, piecesFor } from '@/helpers/domain'
 import { readPhotos } from '@/helpers/photos'
 import { reserveIds } from '@/store/queries/counters'
-import { buildNewRequestModel, emptyLine, newDraft } from './helpers'
+import { buildNewRequestModel, emptyLine, isSolibail, newDraft } from './helpers'
 import NewRequestView from './NewRequestView'
 import type { DraftField, LineField } from './types'
 
@@ -61,7 +61,8 @@ const NewRequest = () => {
       const origine: Demande['origine'] = x.canal === 'Mail' ? 'mail' : x.canal === 'Téléphone' ? 'tel' : 'etab'
       const d: Demande = {
         id: nextId(s, 'di'), recueLe: now(), logementId: x.logementId, origine, auteur: x.auteur, auteurEmail: x.auteurEmail, fonction: x.fonction, tel: x.tel,
-        urgence: x.urgence as UrgenceKey, dateSouhaitee: x.dateSouhaitee, acces: x.acces, numCles: x.numCles, lieuCles: x.lieuCles,
+        urgence: x.urgence as UrgenceKey, dateSouhaitee: x.dateSouhaitee,
+        rdvLocataire: isSolibail(lg) ? [...(x.rdvLocataire ?? [])].sort() : [], acces: x.acces, numCles: x.numCles, lieuCles: x.lieuCles,
         facturation: x.facturation, sinistre: x.sinistre, sinistreInfo: x.sinistre === 'Oui' ? x.sinistreInfo : null,
         observations: x.observations, message: '', consommables: [], historique: [], statut: 'a_qualifier', ft: '', constatId: x.constatId || '',
         lignes: x.lignes.map(l => ({
@@ -91,6 +92,8 @@ const NewRequest = () => {
         onUrgence={k => upd(d => { d.urgence = k })}
         onSinistreInfo={(k: keyof SinistreInfo, v) => upd(d => { d.sinistreInfo[k] = v })}
         onLogement={onLog}
+        onAddRdv={v => upd(d => { const l = d.rdvLocataire ?? []; if (v && !l.includes(v)) d.rdvLocataire = [...l, v].sort() })}
+        onRemoveRdv={i => upd(d => { d.rdvLocataire = (d.rdvLocataire ?? []).filter((_, j) => j !== i) })}
         onLine={setLine}
         onExtra={setExtra}
         onAddLine={() => upd(d => { d.lignes.push(emptyLine()) })}

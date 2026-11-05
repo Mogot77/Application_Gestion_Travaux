@@ -3,6 +3,9 @@ import { now } from '@/helpers/dates'
 import { getLog, piecesFor, profilOf } from '@/helpers/domain'
 import type { CheckItem, CheckResult, LogementGroup, NewRequestModel } from './types'
 
+/** Dispositif Solibail (comparaison sans tenir compte de la casse). */
+export const isSolibail = (l?: Logement) => !!l && l.dispositif.toLowerCase().includes('solibail')
+
 export const emptyLine = (): DraftLigne => ({ piece: '', lot: '', nature: '', description: '', photos: [], extra: {} })
 
 export const newDraft = (S: AppState, logId?: string, constatId?: string): DraftDemande => {
@@ -25,6 +28,10 @@ export const check = (S: AppState, dr: DraftDemande): CheckResult => {
   items.push([complete.length === dr.lignes.length && complete.length ? 'ok' : 'wa', complete.length === dr.lignes.length ? `${complete.length} problème${complete.length > 1 ? 's' : ''} décrit${complete.length > 1 ? 's' : ''}` : `${dr.lignes.length - complete.length} ligne(s) incomplète(s)`])
   // Photo obligatoire, sauf pour une demande urgente (on ne retarde pas l'envoi)
   if (dr.urgence !== 'urgent') dr.lignes.forEach((l, i) => { if (!l.photos.length) items.push(['wa', `Ligne ${i + 1} : photo manquante`]) })
+  if (isSolibail(log)) {
+    const n = dr.rdvLocataire?.length ?? 0
+    items.push([n ? 'ok' : 'na', n ? `${n} RDV prévalidé${n > 1 ? 's' : ''} avec le locataire` : 'Solibail : aucun RDV prévalidé avec le locataire (recommandé)'])
+  }
   if (dr.sinistre === 'Oui') items.push([dr.sinistreInfo.nature ? 'ok' : 'wa', dr.sinistreInfo.nature ? 'Sinistre décrit' : 'Nature du sinistre à préciser'])
   items.push(['na', dr.facturation === 'Oui' ? 'Validation hiérarchique : requise (refacturation)' : 'Validation hiérarchique : non requise'])
   return { items, ok: items.every(i => i[0] !== 'wa') }
@@ -54,6 +61,7 @@ export const buildNewRequestModel = (S: AppState, dr: DraftDemande): NewRequestM
     constat: getCe(S, dr.constatId),
     check: check(S, dr),
     isCoord: S.profil === 'coord',
+    isSolibail: isSolibail(log),
     service: log ? log.etab : profilOf(S).etab || '—',
     groups: logementGroups(S),
     urgences: S.ref.urgences,

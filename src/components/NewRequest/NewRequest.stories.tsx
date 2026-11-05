@@ -20,7 +20,7 @@ const meta = {
   title: 'Ecrans/NewRequest', component: NewRequestView,
   args: {
     model: modelOf(),
-    onField: fn(), onUrgence: fn(), onSinistreInfo: fn(), onLogement: fn(), onLine: fn(), onExtra: fn(), onAddLine: fn(), onRemoveLine: fn(),
+    onField: fn(), onUrgence: fn(), onSinistreInfo: fn(), onLogement: fn(), onAddRdv: fn(), onRemoveRdv: fn(),onLine: fn(), onExtra: fn(), onAddLine: fn(), onRemoveLine: fn(),
     onAddPhotos: fn(), onDeletePhoto: fn(), onOpenPhoto: fn(), onSend: fn(), onSave: fn(), onDiscard: fn(),
   },
 } satisfies Meta<typeof NewRequestView>

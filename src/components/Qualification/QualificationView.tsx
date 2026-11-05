@@ -43,6 +43,7 @@ const QualificationView = ({ model, onAction, onSetLine, onDuree, onAddPhotos, o
                 ['Demandeur', `${d.auteur}, ${d.fonction.toLowerCase()}`], ['Téléphone', d.tel || '—'], ['Établissement', `${log?.etab} · ${log?.section}`],
                 ['Facturation pressentie', d.facturation], ['Sinistre', d.sinistre + (d.sinistreInfo ? ` · ${d.sinistreInfo.nature}` : '')],
                 ['Date souhaitée', d.dateSouhaitee ? fday(d.dateSouhaitee) : '—'],
+                ...(d.rdvLocataire?.length ? [['RDV prévalidés (locataire)', d.rdvLocataire.map(r => fdt(r)).join(' · ')] as [string, string]] : []),
               ]} />
               <Kv pairs={[
                 ['Logement', <><a href={`#/logement/${log?.id}`}>{log?.id}</a> · {log?.typo} · {log?.ville} ({log?.dept})</>], ['Adresse', logAdr(log)],

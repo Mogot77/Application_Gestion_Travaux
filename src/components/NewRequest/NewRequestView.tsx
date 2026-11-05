@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import AddPhoto from '@/components/ui/AddPhoto'
 import Card from '@/components/ui/Card'
 import Chip from '@/components/ui/Chip'
@@ -10,16 +10,17 @@ import Opts from '@/components/ui/Opts'
 import Seg from '@/components/ui/Seg'
 import StepHeader from '@/components/ui/StepHeader'
 import PhotoView from '@/components/Photo/PhotoView'
-import { TODAY, fd, ftime } from '@/helpers/dates'
+import { TODAY, fd, fdt, ftime } from '@/helpers/dates'
 import { URG_ON } from './constants'
 import type { NewRequestViewProps } from './types'
 
 /** Fiche de demande d'intervention (présentation seule) : brouillon en trois étapes + liste de contrôle avant envoi. */
 const NewRequestView = ({
-  model, onField, onUrgence, onSinistreInfo, onLogement, onLine, onExtra, onAddLine, onRemoveLine, onAddPhotos, onDeletePhoto, onOpenPhoto, onSend, onSave, onDiscard,
+  model, onField, onUrgence, onSinistreInfo, onLogement, onAddRdv, onRemoveRdv, onLine, onExtra, onAddLine, onRemoveLine, onAddPhotos, onDeletePhoto, onOpenPhoto, onSend, onSave, onDiscard,
 }: NewRequestViewProps) => {
   const { dr, log, constat, check: ck } = model
   const si = dr.sinistreInfo
+  const [rdvNew, setRdvNew] = useState('')
 
   return (
     <>
@@ -62,6 +63,23 @@ const NewRequestView = ({
                   <div><span className="lbl">Dispositif</span><div className="in ro">{log.dispositif}</div></div>
                   <div><span className="lbl">Ménage (n° famille)</span><div className="in ro">{log.menage}</div></div>
                 </div>
+                {model.isSolibail && (
+                  <div className="mt-3.5 rounded-lg bg-panel p-3.5">
+                    <span className="lbl">RDV prévalidés avec le locataire (Solibail)</span>
+                    <p className="muted small mb-2 mt-0">Indiquez plusieurs créneaux déjà validés avec le locataire pour garantir sa présence et éviter que l'ouvrier trouve porte close.</p>
+                    {(dr.rdvLocataire ?? []).length > 0 && (
+                      <div className="row !gap-2 mb-2">
+                        {(dr.rdvLocataire ?? []).map((r, i) => (
+                          <Chip key={r} tone="ok">{fdt(r)} <button type="button" className="linkbtn small" aria-label={`Retirer le créneau ${fdt(r)}`} onClick={() => onRemoveRdv(i)}>×</button></Chip>
+                        ))}
+                      </div>
+                    )}
+                    <div className="row !gap-2">
+                      <input className="in !w-auto" type="datetime-local" aria-label="Nouveau créneau" value={rdvNew} min={`${TODAY}T00:00`} onChange={e => setRdvNew(e.target.value)} />
+                      <button type="button" className="btn" disabled={!rdvNew} onClick={() => { onAddRdv(rdvNew); setRdvNew('') }}>Ajouter ce créneau</button>
+                    </div>
+                  </div>
+                )}
                 <p className="muted small mb-0 mt-2.5">Champs remplis automatiquement depuis le référentiel logements. Logement introuvable ? Contacter la coordination.</p>
               </>
             )}
