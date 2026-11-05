@@ -104,11 +104,12 @@ const NewRequestView = ({
           </section>
 
           <section className="card pad">
-            <StepHeader step={3} title="Problèmes à traiter"><span className="muted s13">une ligne par problème · photo obligatoire</span></StepHeader>
+            <StepHeader step={3} title="Problèmes à traiter"><span className="muted s13">une ligne par problème · {dr.urgence === 'urgent' ? 'photo facultative (urgence)' : 'photo obligatoire'}</span></StepHeader>
             {dr.lignes.map((l, i) => {
               const natures = l.lot ? model.lots[l.lot] || [] : []
-              const ok = l.piece && l.lot && l.nature && l.description.trim() && l.photos.length
-              const status = !(l.piece && l.lot && l.nature && l.description.trim()) ? <Chip>À compléter</Chip> : !l.photos.length ? <Chip tone="h48">Photo manquante</Chip> : <Chip tone="ok">Complète</Chip>
+              const photoReq = dr.urgence !== 'urgent'
+              const ok = l.piece && l.lot && l.nature && l.description.trim() && (l.photos.length || !photoReq)
+              const status = !(l.piece && l.lot && l.nature && l.description.trim()) ? <Chip>À compléter</Chip> : photoReq && !l.photos.length ? <Chip tone="h48">Photo manquante</Chip> : <Chip tone="ok">Complète</Chip>
               return (
                 <div key={i} className={`line ${ok ? '' : '!border-2 !border-danger-line !bg-danger-wash'}`}>
                   <div className="row between mb-3">
@@ -143,7 +144,7 @@ const NewRequestView = ({
                       {l.photos.map((p, j) => <PhotoView key={j} src={p} onOpen={onOpenPhoto} onDelete={() => onDeletePhoto(i, j)} />)}
                       {l.photos.length
                         ? <AddPhoto onFiles={f => onAddPhotos(i, f)} />
-                        : <AddPhoto onFiles={f => onAddPhotos(i, f)} label="Prendre ou ajouter une photo (obligatoire)" w={320} req />}
+                        : <AddPhoto onFiles={f => onAddPhotos(i, f)} label={photoReq ? 'Prendre ou ajouter une photo (obligatoire)' : 'Prendre ou ajouter une photo (facultatif)'} w={320} req={photoReq} />}
                     </div>
                   </div>
                 </div>

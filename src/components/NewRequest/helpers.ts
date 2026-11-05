@@ -23,7 +23,8 @@ export const check = (S: AppState, dr: DraftDemande): CheckResult => {
   items.push([dr.urgence ? 'ok' : 'wa', dr.urgence ? 'Urgence renseignée' : "Niveau d'urgence à choisir"])
   const complete = dr.lignes.filter(l => l.piece && l.lot && l.nature && l.description.trim())
   items.push([complete.length === dr.lignes.length && complete.length ? 'ok' : 'wa', complete.length === dr.lignes.length ? `${complete.length} problème${complete.length > 1 ? 's' : ''} décrit${complete.length > 1 ? 's' : ''}` : `${dr.lignes.length - complete.length} ligne(s) incomplète(s)`])
-  dr.lignes.forEach((l, i) => { if (!l.photos.length) items.push(['wa', `Ligne ${i + 1} : photo manquante`]) })
+  // Photo obligatoire, sauf pour une demande urgente (on ne retarde pas l'envoi)
+  if (dr.urgence !== 'urgent') dr.lignes.forEach((l, i) => { if (!l.photos.length) items.push(['wa', `Ligne ${i + 1} : photo manquante`]) })
   if (dr.sinistre === 'Oui') items.push([dr.sinistreInfo.nature ? 'ok' : 'wa', dr.sinistreInfo.nature ? 'Sinistre décrit' : 'Nature du sinistre à préciser'])
   items.push(['na', dr.facturation === 'Oui' ? 'Validation hiérarchique : requise (refacturation)' : 'Validation hiérarchique : non requise'])
   return { items, ok: items.every(i => i[0] !== 'wa') }
