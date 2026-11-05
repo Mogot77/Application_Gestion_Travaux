@@ -40,6 +40,11 @@ flowchart TD
       CDS --> TS
       DE --> RL
     end
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
 ```
 
 Rattachement des directeurs d'établissement au niveau supérieur : non précisé (à compléter).
@@ -51,7 +56,7 @@ flowchart TD
     A([Demande nécessitant un devis<br/>émise par un établissement<br/>sauf cas exceptionnel]) --> B[Assistante gestion du patrimoine<br/>prévalide et pré-oriente]
     B --> C{Pré-validation acceptée ?}
     C -- Non --> C1[Renvoi ou rejet de la demande]
-    C -- Oui --> D[Coordinateur technique<br/>ou consultation d'entreprises<br/>montant chiffré par les entreprises<br/>ou fixé par l'équipe : voir 6.4]
+    C -- Oui --> D[Coordinateur technique<br/>ou consultation d'entreprises<br/>montant chiffré par les entreprises<br/>ou fixé par l'équipe : voir 6.5]
     D --> E[Réception et comparaison des devis<br/>voir organigramme 6]
     E --> F{Montant du devis retenu}
     F -- "Inférieur à 3 000 €" --> G[Validation par le directeur d'établissement]
@@ -61,6 +66,13 @@ flowchart TD
     I -- Validé --> J[Bon de commande émis<br/>demande passée au prestataire]
     I -- Refusé --> K[Choix à revoir]
     K --> E
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class C,F,I dec
+    class A term
 ```
 
 ## 8.3 Qui encadre qui, qui valide quoi
@@ -89,4 +101,4 @@ flowchart TD
 - Les rôles **Directeur général adjoint**, **Assistante gestion du patrimoine**, **Coordinateur superviseur** et **Référent logement** n'existent pas.
 - Les **trois coordinateurs par secteur** ne sont pas distingués : un seul rôle « Coordinateur ».
 - La **prévalidation** par l'assistante n'existe pas : la coordination qualifie directement la demande.
-- L'option « montant fixé par l'équipe » (6.4) n'existe pas : les entreprises chiffrent toujours.
+- L'option « montant fixé par l'équipe » (6.5) n'existe pas : les entreprises chiffrent toujours.

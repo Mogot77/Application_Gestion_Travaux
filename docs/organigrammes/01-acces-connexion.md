@@ -27,6 +27,13 @@ flowchart TD
     OK([Accès accordé]) --> S{Route autorisée pour le rôle ?}
     S -- Oui --> P[Écran affiché]
     S -- Non --> Q[Redirection]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,C,D,E,G,H,S dec
+    class A,OK term
 ```
 
 ## Droits par rôle
@@ -50,6 +57,11 @@ flowchart LR
       CS[Chef de service<br/>ses demandes]
       DE[Directeur d'établissement<br/>demandes de son établissement]
     end
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
 ```
 
 Les droits précis des rôles Finance (qui crée, émet ou valide une facture) restent à déterminer : aujourd'hui les trois ont le même accès à la refacturation.

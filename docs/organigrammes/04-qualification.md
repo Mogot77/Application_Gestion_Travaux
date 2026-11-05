@@ -20,6 +20,13 @@ flowchart TD
     F --> F2[Renvoyer à l'établissement<br/>motif obligatoire → À compléter]
     F --> F3[Rejeter<br/>motif obligatoire → Rejetée]
     F --> F4[Valider → voir 4.2]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,C,D,E dec
+    class A term
 ```
 
 Demande de plus de deux mois sans intervention : statut **À réactualiser**. Sans réactualisation avant J+80, rejet automatique (motif « Non réactualisée »). La coordination peut relancer le demandeur, marquer la demande réactualisée ou la rejeter.
@@ -42,6 +49,14 @@ flowchart TD
     D -- Non --> F{Une ligne en circuit sinistre ?}
     F -- Oui --> F1[Statut Sinistre<br/>déclaration à faire]
     F -- Non --> G[Statut Demandée au bailleur]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class A,C,C2,D,F dec
+    class V,C4 term
+    class E err
 ```
 
 Choisir le circuit **bailleur** sur une ligne force l'imputation « Bailleur propriétaire ». Priorité des circuits : ST, puis prestataire, puis sinistre, puis bailleur.
@@ -65,4 +80,10 @@ flowchart TD
       S2 -- "Déclaration envoyée à l'assureur" --> S1
       S2 -- "Indemnisation actée" --> S3[Lignes → circuit ST<br/>numéro de fiche<br/>statut À planifier]
     end
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B2,P2,S2 dec
 ```

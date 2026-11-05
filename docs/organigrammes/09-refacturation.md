@@ -17,6 +17,13 @@ flowchart TD
     E2 --> F
     F --> G[Destinataire : ménage et adresse du logement<br/>émetteur : celui de la dernière facture<br/>échéance J + 30]
     G --> H([Facture Brouillon])
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,E dec
+    class A,H term
 ```
 
 ## 9.2 Vie de la facture
@@ -35,6 +42,14 @@ flowchart TD
     G -- Annuler --> I([Annulée])
     A -- Annuler --> I
     F --> J[Imprimer ou enregistrer en PDF]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class D,E,G dec
+    class A,F,H,I term
+    class E1 err
 ```
 
 Une facture annulée garde son numéro. Une facture payée ne peut plus être annulée.

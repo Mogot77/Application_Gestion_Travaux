@@ -34,6 +34,14 @@ flowchart TD
     O -- Oui --> O2[Rappel : pensez à créer une demande]
     O -- Non --> P
     O2 --> P[Redirection vers la liste des constats]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,C,D,G,I,K,L2,M,O dec
+    class A term
+    class E1,E2,E3,L3 err
 ```
 
 ## 2.2 Scénarios recommandés (un constat peut en cumuler plusieurs)
@@ -66,6 +74,13 @@ flowchart TD
     T11 -- Oui --> R11["Récidive<br/>Suite : fin de prise en charge<br/>Échelons : dir. établissement, directeur"]
     S --> T12{Bâti Dégradé et aucun scénario<br/>n'a déjà prévu d'intervention ?}
     T12 -- Oui --> R12["Bâti dégradé<br/>Suite : intervention<br/>Échelons : coordinateur, dir. établissement"]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12 dec
+    class S term
 ```
 
 Les suites et échelons proposés sont l'union de ceux de tous les scénarios déclenchés. Les échelons d'établissement ne reçoivent que les constats de leur établissement.

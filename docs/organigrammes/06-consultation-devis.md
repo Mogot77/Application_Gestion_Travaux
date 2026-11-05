@@ -30,6 +30,14 @@ flowchart TD
     V4 -- Oui --> Z{Mode accord-cadre ?}
     Z -- Oui --> Z1[Bon de commande émis immédiatement<br/>consultation Commande<br/>demande Prestataire]
     Z -- Non --> Z2[Consultation Envoyée<br/>réponses en attente<br/>demande Consultation en cours]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class C,C1,W,V,V1,V2,V3,V4,Z dec
+    class A term
+    class C2,X err
 ```
 
 ## 6.2 Réponse de l'entreprise (portail)
@@ -42,39 +50,62 @@ flowchart TD
     C -- "Déposer un devis" --> D[Statut Reçu<br/>montant, délai, durée, postes]
     C -- "Décliner" --> E[Statut Décliné<br/>motif]
     C -- "Question" --> F[Réponse publiée par la coordination]
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,C dec
+    class A term
 ```
 
-## 6.3 Notation et décision
+## 6.3 Notation des devis
 
 ```mermaid
 flowchart TD
-    A([Devis reçus]) --> B[Note par entreprise :<br/>prix = prix mini / prix × poids<br/>délai = délai mini / délai × poids<br/>qualité saisie, plafonnée au poids]
+    A([Devis reçus]) --> B[Note par entreprise<br/>prix = prix mini / prix × poids<br/>délai = délai mini / délai × poids<br/>qualité saisie, plafonnée au poids]
     B --> C{Documents à jour ?<br/>Kbis ≤ 92 j, URSSAF ≤ 182 j,<br/>RC et décennale non expirées}
     C -- Non --> D[Non retenable]
-    C -- Oui --> E{Tous les postes chiffrés ?}
+    C -- Oui --> E{Tous les postes<br/>chiffrés ?}
     E -- Non --> D
     E -- Oui --> F[Retenable]
-    F --> G[Meilleure note retenable<br/>proposée par défaut]
-    G --> H[Choix d'une entreprise]
-    H --> I{Entreprise choisie ?}
-    I -- Non --> X[/Erreur/]
-    I -- Oui --> J{Retenable ?}
-    J -- Non --> X
-    J -- Oui --> K{Motif du choix renseigné ?}
-    K -- Non --> X
-    K -- Oui --> L{Montant HT > seuil direction ?}
-    L -- Oui --> M[Décision À valider]
-    M --> N{Directeur}
-    N -- Valide --> O
-    N -- Refuse --> P[Décision Brouillon<br/>choix à revoir]
-    P --> H
-    L -- Non --> O[Bon de commande émis<br/>consultation Commande<br/>autres entreprises informées]
-    O --> Q[Demande Prestataire<br/>intervention prévue à J + délai du devis]
+    F --> G([Meilleure note retenable<br/>proposée par défaut])
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class C,E dec
+    class A,G term
 ```
+
+## 6.4 Décision
 
 Seule la direction valide un choix soumis (`S.profil === 'dir'`). Les seuils (3 devis, direction) se règlent dans les référentiels.
 
-## 6.4 Option cible : mission et montant proposés par l'équipe
+```mermaid
+flowchart TD
+    H([Choix d'une entreprise]) --> I{Choix valide ?<br/>entreprise choisie,<br/>retenable, motif renseigné}
+    I -- Non --> X[/Erreur : compléter le choix/]
+    I -- Oui --> L{Montant HT ><br/>seuil direction ?}
+    L -- Non --> O
+    L -- Oui --> M[Décision À valider]
+    M --> N{Avis du directeur}
+    N -- Valide --> O[Bon de commande émis<br/>consultation Commande<br/>autres entreprises informées]
+    N -- Refuse --> P[Décision Brouillon<br/>choix à revoir]
+    P --> H
+    O --> Q([Demande Prestataire<br/>intervention prévue à J + délai du devis])
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class I,L,N dec
+    class H,Q term
+    class X err
+```
+
+## 6.5 Option cible : mission et montant proposés par l'équipe
 
 Option **non implémentée** dans le site (schéma cible). Au lancement de la consultation, l'équipe peut choisir de fixer elle-même le montant de la mission, au lieu de laisser les entreprises chiffrer.
 
@@ -92,6 +123,13 @@ flowchart TD
     I -- Non --> K[Validation par le directeur d'établissement]
     J --> L[Bon de commande émis]
     K --> L
+    %% styles communs
+    classDef dec fill:#fff4d6,stroke:#b45309,stroke-width:2px,color:#431407
+    classDef term fill:#dbe4ff,stroke:#3730a3,stroke-width:2px,color:#1e1b4b
+    classDef err fill:#fde2e2,stroke:#b91c1c,stroke-width:2px,color:#450a0a
+    classDef ok fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#052e16
+    class B,F,I dec
+    class A term
 ```
 
 Points à préciser : si plusieurs entreprises acceptent, comment est choisie celle qui réalise la mission (première réponse, critères délai et qualité) ? Le montant fixé par l'équipe est-il visible de toutes les entreprises ?
