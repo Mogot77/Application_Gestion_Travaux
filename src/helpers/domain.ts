@@ -3,6 +3,7 @@ import type {
   AppState, Demande, DemandeStatut, Entreprise, Ligne, Logement, Ouvrier, ProfilInfo, ProfilKey, Rdv, Tone, UrgenceKey,
 } from '../types'
 import { TODAY, addDays, diffDays, now, toMin, toTime } from './dates'
+import { DAY_END, DAY_START } from './planning'
 import { fallbackSuffix, formatId, takeReserved, type SeqKind } from './ids'
 
 /* ---------- Accès ---------- */
@@ -85,15 +86,20 @@ export const entDocs = (e: Entreprise) => {
 }
 
 /* ---------- Rendez-vous ---------- */
+/** Ouvriers d'une mission : le responsable puis les renforts. */
+export const equipeIds = (r: Rdv): string[] => [r.ouvrierId, ...(r.renfortIds ?? [])]
+/** Rendez-vous d'un ouvrier un jour donné, en tant que responsable ou en renfort. */
 export const rdvsOf = (S: AppState, ouvrierId: string, date: string) =>
-  S.rdvs.filter(r => r.ouvrierId === ouvrierId && r.date === date).sort((a, b) => a.debut.localeCompare(b.debut))
+  S.rdvs.filter(r => r.date === date && equipeIds(r).includes(ouvrierId)).sort((a, b) => a.debut.localeCompare(b.debut))
 export const chargeOf = (S: AppState, ouvrierId: string, date: string) =>
   rdvsOf(S, ouvrierId, date).reduce((s, r) => s + (r.etat === 'imp' ? Math.min(r.duree, 120) : r.duree), 0)
-export const firstFree = (S: AppState, ouvrierId: string, date: string) => {
-  let t = toMin('08:00')
+/** Premier créneau libre de la journée (pas de 30 min) ; la mission de `dur` minutes doit finir avant 18 h si possible. */
+export const firstFree = (S: AppState, ouvrierId: string, date: string, dur = 0) => {
+  let t = toMin(DAY_START)
   rdvsOf(S, ouvrierId, date).forEach(r => { t = Math.max(t, toMin(r.debut) + r.duree) })
   t = Math.ceil(t / 30) * 30
-  return toTime(Math.min(t, toMin('17:00')))
+  const last = Math.max(toMin(DAY_START), Math.floor((toMin(DAY_END) - Math.min(dur, toMin(DAY_END) - toMin(DAY_START))) / 30) * 30)
+  return toTime(Math.min(t, last))
 }
 export const RDV_ETAT: Record<Rdv['etat'], [string, Tone]> = {
   done: ['Réalisée', 'ok'], running: ['En cours', 'wa'], planned: ['Prévue', 'pg'], imp: ['Report nécessaire', 'u'],

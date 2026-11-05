@@ -11,6 +11,8 @@ export type ScheduleItem = {
   canFinish: boolean
   /** Mission reportée, reprenable tant que la demande n'est pas reprogrammée. */
   canResume: boolean
+  /** Collègues présents sur la même mission. */
+  equipe: string[]
   /** Identifiant de la demande liée (fiche / rapport). */
   demandeId?: string
 }
@@ -38,6 +40,8 @@ export type FinishMissionFormProps = {
   lignes: Ligne[]
   motifs: string[]
   conso: Consommable[]
+  /** Ouvriers présents sur la mission. */
+  equipe: string[]
 }
 
 export type PhotoPickerProps = {

@@ -12,6 +12,10 @@ const WorkerForm = ({ o, metiers, defaultColor }: WorkerFormProps) => (
       <Field label="Téléphone" htmlFor="ot"><input className="in" id="ot" name="tel" type="tel" defaultValue={o.tel || ''} placeholder="06 ·· ·· ·· ··" /></Field>
       <Field label="E-mail (agenda Outlook)" htmlFor="oe"><input className="in" id="oe" name="email" type="email" defaultValue={o.email || ''} placeholder="prenom.nom@exemple.fr" /></Field>
     </div>
+    <div className="rounded-lg bg-panel p-3">
+      <label className="row !gap-2 text-sm font-semibold"><input type="checkbox" name="astreinte" defaultChecked={!!o.astreinte} /> D’astreinte (urgences)</label>
+      <Field label="Numéro d’astreinte (à défaut, le téléphone ci-dessus)" htmlFor="ota" className="mt-2"><input className="in" id="ota" name="telAstreinte" type="tel" defaultValue={o.telAstreinte || ''} placeholder="06 ·· ·· ·· ··" /></Field>
+    </div>
     <div><span className="lbl">Couleur sur le planning et la carte</span><ColorPicker initial={o.color || defaultColor} /></div>
   </>
 )

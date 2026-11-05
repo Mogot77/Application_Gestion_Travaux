@@ -17,10 +17,10 @@ const MyScheduleView = ({ model, onStart, onFinish, onResume }: MyScheduleViewPr
       <section key={day.date} className="card mb-4 p-4">
         <h2 className="mb-2 text-base font-semibold">{fday(day.date)}{day.today && <small className="ml-2">Aujourd’hui</small>}</h2>
         <ul className="m-0 list-none p-0">
-          {day.items.map(({ r, place, etat: [lib, tone], canStart, canFinish, canResume, demandeId }) => (
+          {day.items.map(({ r, place, etat: [lib, tone], canStart, canFinish, canResume, demandeId, equipe }) => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line py-2 first:border-t-0">
               <b>{r.debut}</b><span className="muted">{fdur(r.duree)}</span>
-              <span className="min-w-[200px] flex-1">{r.label}{place && <span className="muted"> — {place}</span>}{r.motifImp && <span className="muted"> · {r.motifImp}</span>}</span>
+              <span className="min-w-[200px] flex-1">{r.label}{place && <span className="muted"> — {place}</span>}{r.motifImp && <span className="muted"> · {r.motifImp}</span>}{equipe.length > 0 && <span className="muted"> · avec {equipe.join(', ')}</span>}</span>
               <Chip tone={tone}>{lib}</Chip>
               {canStart && <button className="btn btnp btn-sm" onClick={() => onStart(r.id)}>Démarrer la mission</button>}
               {canResume && <button className="btn btnp btn-sm" onClick={() => onResume(r.id)}>Reprendre la mission</button>}

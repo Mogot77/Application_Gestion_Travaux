@@ -12,7 +12,7 @@ const callbacks = {
   onCell: fn(), onSelectRdv: fn(), onDropCard: fn(), onMap: fn(),
 }
 const panelCallbacks = {
-  onOuvrier: fn(), onDate: fn(), onDebut: fn(), onToggleConso: fn(), onRemoveConso: fn(),
+  onOuvrier: fn(), onToggleRenfort: fn(), onDate: fn(), onDebut: fn(), onToggleConso: fn(), onRemoveConso: fn(),
   onAddConso: fn(() => true), onPlan: fn(), onClose: fn(),
 }
 

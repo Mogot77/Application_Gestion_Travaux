@@ -23,7 +23,7 @@ const Workers = () => {
       if (cur.ouvriers.some(x => x.nom.toLowerCase() === nom.toLowerCase() && (!o || x.id !== o.id))) { toast('Un ouvrier porte déjà ce nom', 'err'); return false }
       const email = String(fd.get('email') || '').trim()
       if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('E-mail invalide', 'err'); return false }
-      const data = { nom, metier: String(fd.get('metier') || '').trim(), tel: String(fd.get('tel') || '').trim(), email, color: String(fd.get('color') || COLORS[0]) }
+      const data = { nom, metier: String(fd.get('metier') || '').trim(), tel: String(fd.get('tel') || '').trim(), email, color: String(fd.get('color') || COLORS[0]), astreinte: fd.get('astreinte') === 'on', telAstreinte: String(fd.get('telAstreinte') || '').trim() }
       mutate(s => {
         if (!o) s.ouvriers.push({ id: 'o' + Date.now().toString(36), actif: true, ...data })
         else { const t = getOuv(s, o.id); if (t) Object.assign(t, data) }

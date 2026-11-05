@@ -15,6 +15,8 @@ export type SheetModel = {
   /** Rendez-vous « accès impossible » éventuel. */
   imp?: Rdv
   o?: Ouvrier
+  /** Noms de l'équipe prévue sur la mission (responsable en premier). */
+  equipe: string[]
   rp?: Rapport
   /** Lignes à exécuter par le service technique. */
   lignes: Ligne[]

@@ -1,6 +1,7 @@
 import Empty from '@/components/ui/Empty'
+import Note from '@/components/ui/Note'
 import { URG } from '@/helpers/domain'
-import { DAY_MAX } from '@/helpers/planning'
+import { DAY_END, DAY_MAX, DAY_START } from '@/helpers/planning'
 import { TODAY, dayShort, fdayLong, nowTime, parse } from '@/helpers/dates'
 import CardTag from './CardTag'
 import LoadBar from './LoadBar'
@@ -8,8 +9,11 @@ import { fdurS } from './helpers'
 import type { PlanningViewProps } from './types'
 
 /** Vue pure du planning : file « À planifier », grille ouvriers × jours et panneau latéral fourni par le conteneur. */
+/** Couleur des segments de la jauge horaire selon l'urgence. */
+const SEG_CLS = { bu: 'bg-danger', bh: 'bg-warn', bp: 'bg-brand', imp: 'bg-icon', ghost: 'bg-brand opacity-40' } as const
+
 const PlanningView = ({ model, side, onPrevWeek, onNextWeek, onThisWeek, onFilter, onSelectCard, onCell, onSelectRdv, onDropCard, onMap }: PlanningViewProps) => {
-  const { days, isCurrentWeek, queueCount, fUrg, queue, rows, hors, todayIds } = model
+  const { days, isCurrentWeek, queueCount, fUrg, queue, rows, hors, todayIds, astreinte } = model
   return (
     <>
       <div className="pagehead">
@@ -25,6 +29,13 @@ const PlanningView = ({ model, side, onPrevWeek, onNextWeek, onThisWeek, onFilte
           <a className="btn" href={`#/fiche/${todayIds.join(',') || 'none'}`}>Imprimer les fiches du jour</a>
         </div>
       </div>
+      <Note tone={astreinte.length ? 'warn' : ''} className="mb-3">
+        <strong>Astreinte urgences</strong> :{' '}
+        {astreinte.length
+          ? astreinte.map((a, i) => <span key={a.nom}>{i > 0 && ' · '}<strong>{a.nom}</strong>{a.tel && <> <a href={`tel:${a.tel.replace(/\s/g, '')}`}>{a.tel}</a></>}</span>)
+          : 'aucun ouvrier désigné (à renseigner dans la fiche ouvrier).'}
+        {' '}· Plage de travail {DAY_START} – {DAY_END}.
+      </Note>
       <div className="plan">
         <aside className="card plan-q">
           <div className="row between"><strong>À planifier</strong><span className="muted s13">{queueCount} demande{queueCount > 1 ? 's' : ''}</span></div>
@@ -52,7 +63,9 @@ const PlanningView = ({ model, side, onPrevWeek, onNextWeek, onThisWeek, onFilte
             {days.map(dt => <div key={dt} className={`hd${dt === TODAY ? ' today' : ''}`}>{dayShort(dt)} {parse(dt).getDate()}{dt === TODAY ? " · aujourd'hui" : ''}</div>)}
             {rows.map(({ o, week, cells }) => (
               <div key={o.id} className="contents">
-                <div className="wk"><strong>{o.nom}</strong>{o.metier}<LoadBar min={week} max={DAY_MAX * 5} /></div>
+                <div className={`wk${o.astreinte ? ' border-l-4 border-l-danger' : ''}`}><strong>{o.nom}</strong>{o.metier}
+                  {o.astreinte && <div><span className="chip u">Astreinte</span>{(o.telAstreinte || o.tel) && <a className="ml-1 text-[11px]" href={`tel:${(o.telAstreinte || o.tel || '').replace(/\s/g, '')}`}>{o.telAstreinte || o.tel}</a>}</div>}
+                  <LoadBar min={week} max={DAY_MAX * 5} /></div>
                 {cells.map(cell => (
                   <div key={cell.date} className={`cell${cell.today ? ' today' : ''}`}
                     onClick={() => onCell(o.id, cell.date)}
@@ -63,14 +76,17 @@ const PlanningView = ({ model, side, onPrevWeek, onNextWeek, onThisWeek, onFilte
                       e.currentTarget.classList.remove('over')
                       onDropCard(e.dataTransfer.getData('text/plain'), o.id, cell.date)
                     }}>
-                    {cell.blocks.map(({ r, icon, cls, selected }) => (
-                      <div key={r.id} className={`blk ${cls}${selected ? ' sel' : ''}`} title={`${r.debut} · ${r.label}`}
+                    {cell.blocks.map(({ r, icon, cls, selected, renfort, horaire, equipe }) => (
+                      <div key={r.id} className={`blk ${cls}${selected ? ' sel' : ''}`} title={`${horaire} · ${r.label} · ${equipe}`}
                         onClick={e => { e.stopPropagation(); onSelectRdv(r.id) }}>
-                        <span>{icon}{r.label}</span><span>{r.etat === 'imp' ? 'Report nécessaire' : fdurS(r.duree)}</span>
+                        <span className="flex flex-col"><span>{icon}{r.label}{renfort ? ' (renfort)' : ''}</span><span className="font-normal">{horaire}{equipe.includes(',') ? ` · ${equipe}` : ''}</span></span><span>{r.etat === 'imp' ? 'Report nécessaire' : fdurS(r.duree)}</span>
                       </div>
                     ))}
                     {cell.ghost && <div className="blk ghost"><span>{cell.ghost.label}</span><span>{cell.ghost.dur}</span></div>}
                     {!cell.blocks.length && !cell.ghost && <span className="avail">Disponible</span>}
+                    <div className="relative mt-auto h-1.5 rounded bg-line2" role="img" aria-label={`Occupation de ${DAY_START} à ${DAY_END}`}>
+                      {cell.segs.map((sg, i) => <span key={i} className={`absolute top-0 h-full rounded ${SEG_CLS[sg.kind]}`} style={{ left: `${sg.left}%`, width: `${sg.width}%` }} />)}
+                    </div>
                     <LoadBar min={cell.load} />
                   </div>
                 ))}
@@ -78,7 +94,7 @@ const PlanningView = ({ model, side, onPrevWeek, onNextWeek, onThisWeek, onFilte
             ))}
           </div>
           <div className="row between muted small px-3.5 py-2.5">
-            <span>✓ réalisée · ▶ en cours · ⚠ accès impossible · pointillé : en cours de planification</span>
+            <span>✓ réalisée · ▶ en cours · ⚠ accès impossible · pointillé : en cours de planification · jauge : {DAY_START} → {DAY_END}</span>
             <span>Hors planning ST : {hors} intervention{hors > 1 ? 's' : ''} bailleur / prestataire</span>
           </div>
         </section>

@@ -1,5 +1,5 @@
 import type { AppState, Demande } from '@/types'
-import { URG, getD, getLog, getOuv } from '@/helpers/domain'
+import { URG, equipeIds, getD, getLog, getOuv } from '@/helpers/domain'
 import type { SheetModel } from './types'
 
 /** Modèle d'une fiche : rendez-vous, ouvrier, lignes ST, photos et rapport, calculés depuis l'état. */
@@ -13,6 +13,7 @@ export const buildSheetModel = (S: AppState, d: Demande): SheetModel => {
     r,
     imp: S.rdvs.find(x => x.demandeId === d.id && x.etat === 'imp'),
     o: r && getOuv(S, r.ouvrierId),
+    equipe: r ? equipeIds(r).map(id => getOuv(S, id)?.nom).filter((n): n is string => !!n) : [],
     rp,
     lignes,
     photos: lignes.flatMap((l, i) => l.photos.filter(p => p && p !== 'seed').map(src => ({ src, n: i + 1, piece: l.piece }))),

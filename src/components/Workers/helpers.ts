@@ -1,10 +1,10 @@
 import type { AppState, Ouvrier } from '@/types'
-import { ouvActifs, shortLot } from '@/helpers/domain'
+import { equipeIds, ouvActifs, shortLot } from '@/helpers/domain'
 import { TODAY, weekStart } from '@/helpers/dates'
 import type { OuvrierStats, WorkersModel, WorkersUi } from './types'
 
 export const stats = (S: AppState, o: Ouvrier): OuvrierStats => {
-  const rdvs = S.rdvs.filter(r => r.ouvrierId === o.id)
+  const rdvs = S.rdvs.filter(r => equipeIds(r).includes(o.id))
   const ws = weekStart(TODAY)
   const week = rdvs.filter(r => weekStart(r.date) === ws).reduce((s, r) => s + r.duree, 0)
   const avenir = rdvs.filter(r => r.etat === 'planned' && r.date >= TODAY).length

@@ -26,7 +26,7 @@ const AppointmentPanel = ({ r, setUi }: AppointmentPanelProps) => {
       const x = getD(s, d.id)
       if (x) { x.statut = 'a_planifier'; hist(x, `Rendez-vous du ${fday(r.date)} déplacé`) }
     })
-    setUi({ rdvSel: '', demandeId: d.id, ouvrierId: r.ouvrierId, date: r.date, debut: r.debut })
+    setUi({ rdvSel: '', demandeId: d.id, ouvrierId: r.ouvrierId, renfortIds: r.renfortIds ?? [], date: r.date, debut: r.debut })
   }
 
   return <AppointmentPanelView model={model} onMove={move} onCancel={cancel} />

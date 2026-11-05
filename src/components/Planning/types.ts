@@ -22,6 +22,11 @@ export type PlanPanelModel = {
   /** Durée estimée, en minutes. */
   dur: number
   ouvOptions: { v: string; l: string }[]
+  /** Ouvriers proposés en renfort (tous sauf le responsable), cochés s'ils sont retenus. */
+  renfortOptions: { v: string; l: string; checked: boolean }[]
+  /** Demande urgente : le panneau rappelle les ouvriers d'astreinte. */
+  urgent: boolean
+  astreinte: { nom: string; tel: string }[]
   ouvrierId: string
   date: string
   debut: string
@@ -38,6 +43,7 @@ export type PlanPanelModel = {
 export type PlanPanelViewProps = {
   model: PlanPanelModel
   onOuvrier: (id: string) => void
+  onToggleRenfort: (id: string, on: boolean) => void
   onDate: (date: string) => void
   onDebut: (debut: string) => void
   onToggleConso: (index: number, pris: boolean) => void
@@ -83,12 +89,24 @@ export type QueueItem = {
   info: string
 }
 
-export type PlanBlock = { r: Rdv; icon: string; cls: string; selected: boolean }
+export type PlanBlock = {
+  r: Rdv; icon: string; cls: string; selected: boolean
+  /** Vrai si l'ouvrier de la ligne est en renfort (et non responsable). */
+  renfort: boolean
+  /** Plage horaire « 08:00–09:30 ». */
+  horaire: string
+  /** Noms de toute l'équipe de la mission. */
+  equipe: string
+}
+
+/** Segment de la jauge horaire 8 h – 18 h d'une journée (positions en %). */
+export type PlanSeg = { left: number; width: number; kind: 'bu' | 'bh' | 'bp' | 'imp' | 'ghost' }
 
 export type PlanCell = {
   date: string
   today: boolean
   blocks: PlanBlock[]
+  segs: PlanSeg[]
   /** Créneau en cours de planification, affiché en pointillé. */
   ghost?: { label: string; dur: string }
   /** Charge de la journée en minutes (ghost compris). */
@@ -107,6 +125,8 @@ export type PlanningModel = {
   fUrg: PlanUi['fUrg']
   queue: QueueItem[]
   rows: PlanRow[]
+  /** Ouvriers d'astreinte (urgences) et leur numéro. */
+  astreinte: { nom: string; tel: string }[]
   /** Interventions hors planning du service technique. */
   hors: number
   /** Demandes ayant un rendez-vous aujourd'hui (impression des fiches). */

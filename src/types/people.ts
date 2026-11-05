@@ -6,6 +6,10 @@ export type Ouvrier = {
   actif?: boolean
   tel?: string
   email?: string
+  /** Membre du dispositif d'astreinte (urgences) : repéré en rouge dans le planning. */
+  astreinte?: boolean
+  /** Numéro d'astreinte (à défaut, le téléphone de l'ouvrier). */
+  telAstreinte?: string
 }
 
 export type DocsEntreprise = { kbis: string; urssaf: string; rc: string; decennale: string }

@@ -4,7 +4,7 @@ import { go, useRoute } from '@/hooks/useRoute'
 import { useUiState } from '@/hooks/useUiState'
 import { getUi, patchUi } from '@/store/local/uiState'
 import Layout from '@/components/Layout'
-import { firstFree, getD } from '@/helpers/domain'
+import { dureeST, firstFree, getD } from '@/helpers/domain'
 import { PLAN_INIT, PLAN_KEY, type PlanUi } from '@/helpers/planning'
 import { TODAY, addDays, weekStart } from '@/helpers/dates'
 import PlanningView from './PlanningView'
@@ -22,7 +22,7 @@ const Planning = () => {
     if (!q.sel) return
     const cur = getUi(PLAN_KEY, PLAN_INIT)
     if (q.sel === cur.lastQ) return
-    const patch: Partial<PlanUi> = { lastQ: q.sel, demandeId: q.sel, rdvSel: '', ouvrierId: '', date: '', debut: '' }
+    const patch: Partial<PlanUi> = { lastQ: q.sel, demandeId: q.sel, rdvSel: '', ouvrierId: '', renfortIds: [], date: '', debut: '' }
     if (q.w) patch.week = weekStart(q.w)
     const s = getS()
     const d = getD(s, q.sel)
@@ -48,12 +48,13 @@ const Planning = () => {
         onNextWeek={() => setUi({ week: addDays(ws, 7) })}
         onThisWeek={() => setUi({ week: weekStart(TODAY) })}
         onFilter={k => setUi({ fUrg: k })}
-        onSelectCard={id => { if (ui.demandeId !== id) setUi({ demandeId: id, rdvSel: '', ouvrierId: '', date: '', debut: '' }) }}
-        onCell={(o, dt) => { if (ui.demandeId) setUi({ ouvrierId: o, date: dt, debut: firstFree(S, o, dt) }) }}
+        onSelectCard={id => { if (ui.demandeId !== id) setUi({ demandeId: id, rdvSel: '', ouvrierId: '', renfortIds: [], date: '', debut: '' }) }}
+        onCell={(o, dt) => { if (ui.demandeId) { const sd = getD(S, ui.demandeId); setUi({ ouvrierId: o, renfortIds: (ui.renfortIds ?? []).filter(x => x !== o), date: dt, debut: firstFree(S, o, dt, sd ? dureeST(sd) : 0) }) } }}
         onSelectRdv={id => setUi({ rdvSel: id, demandeId: '' })}
         onDropCard={(id, o, dt) => {
-          if (!getD(S, id)) return
-          setUi({ demandeId: id, rdvSel: '', ouvrierId: o, date: dt, debut: firstFree(S, o, dt) })
+          const sd = getD(S, id)
+          if (!sd) return
+          setUi({ demandeId: id, rdvSel: '', ouvrierId: o, renfortIds: [], date: dt, debut: firstFree(S, o, dt, dureeST(sd)) })
         }}
         onMap={() => go('#/tournees')}
       />

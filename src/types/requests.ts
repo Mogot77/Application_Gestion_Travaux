@@ -118,6 +118,12 @@ export type Work = {
 export type Rapport = {
   /** Temps passé : décompte du chronomètre de la mission (reprises comprises) à la fin de mission. */
   tempsMin: number
+  /** Ouvriers présents sur la mission (responsable en premier). */
+  equipe?: string[]
+  /** Nombre de déplacements effectués. */
+  deplacements?: number
+  /** Contrôles de fin de mission cochés (voir `CHECKS_FIN`). */
+  checks?: string[]
   /** Photos de l'état initial et du résultat, intégrées au rapport. */
   photosAvant?: string[]
   photosApres?: string[]
@@ -133,7 +139,10 @@ export type Rapport = {
 
 export type Rdv = {
   id: string
+  /** Responsable de la mission. */
   ouvrierId: string
+  /** Ouvriers en renfort sur la même mission (même créneau). */
+  renfortIds?: string[]
   date: string
   debut: string
   duree: number

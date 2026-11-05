@@ -32,7 +32,7 @@ const WorkersView = ({ model, q, showInactive, onQuery, onShowInactive, onCreate
               return (
                 <tr key={o.id} className={off ? 'opacity-60' : ''}>
                   <td className="w-11"><i className="av" style={{ background: o.color }}>{initials(o.nom)}</i></td>
-                  <td><strong>{o.nom}</strong></td>
+                  <td><strong>{o.nom}</strong>{o.astreinte && <> <Chip tone="u">Astreinte{o.telAstreinte ? ` · ${o.telAstreinte}` : ''}</Chip></>}</td>
                   <td>{o.metier || '—'}</td>
                   <td>{o.tel || '—'}</td>
                   <td>{o.email ? o.email : <span className="muted">—</span>}</td>

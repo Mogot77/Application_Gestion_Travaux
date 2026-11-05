@@ -104,7 +104,7 @@ const QualificationView = ({ model, onAction, onSetLine, onDuree, onAddPhotos, o
               <Kv pairs={[
                 ['Ouvrier', ouvrier], ['Horaires', `${ftime(r.debutReel) || r.debut} – ${ftime(r.finReel) || ''}`], ['Temps passé', fdur(rp.tempsMin)],
                 ['Consommables', rp.conso.map(c => `${c.nom} × ${c.qte}`).join(', ') || '—'],
-                ['Travaux ajoutés', (rp.supps || []).map(s => `${s.piece} · ${s.nature} (${s.suiteLabel})`).join(', ') || '—'],
+                ['Travaux ajoutés', (rp.supps || []).map(s => `${s.piece ? s.piece + ' · ' : ''}${s.nature || s.description} (${s.suiteLabel})`).join(', ') || '—'],
                 ['Observations', rp.obs || '—'],
                 ['Signature', rp.signature ? <img src={rp.signature} alt="Signature" className="h-10" /> : rp.signataire || '—'],
               ]} />

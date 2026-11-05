@@ -6,11 +6,11 @@ import CardTag from './CardTag'
 import type { PlanPanelViewProps } from './types'
 
 /** Vue pure du panneau « fiche mission » : seul le brouillon de consommable est un état local. */
-const PlanPanelView = ({ model, onOuvrier, onDate, onDebut, onToggleConso, onRemoveConso, onAddConso, onPlan, onClose }: PlanPanelViewProps) => {
+const PlanPanelView = ({ model, onOuvrier, onToggleRenfort, onDate, onDebut, onToggleConso, onRemoveConso, onAddConso, onPlan, onClose }: PlanPanelViewProps) => {
   const [cnom, setCnom] = useState('')
   const [cqte, setCqte] = useState('1')
   const [corg, setCorg] = useState('Stock')
-  const { d, log, adr, lignes, dur, ouvOptions, ouvrierId, date, debut, slots, fin, warn, canPlan } = model
+  const { d, log, adr, lignes, dur, ouvOptions, renfortOptions, urgent, astreinte, ouvrierId, date, debut, slots, fin, warn, canPlan } = model
 
   const add = () => {
     if (onAddConso(cnom, cqte, corg)) { setCnom(''); setCqte('1') }
@@ -25,10 +25,20 @@ const PlanPanelView = ({ model, onOuvrier, onDate, onDebut, onToggleConso, onRem
         {lignes.map((l, i) => <div key={i}><strong>{i + 1} · {l.piece} — {l.nature}</strong> · {fdur(l.duree)}</div>)}
       </div>
       <div><span className="lbl">Durée estimée (coordinatrice)</span><div className="in ro"><strong>{fdur(dur)}</strong><span className="muted small">somme des lignes</span></div></div>
-      <div><label className="lbl" htmlFor="pouv">Ouvrier</label>
+      {urgent && (
+        <Note tone="warn"><strong>Urgence :</strong> {astreinte.length ? astreinte.map((a, i) => <span key={a.nom}>{i > 0 && ' · '}{a.nom}{a.tel && <> ({a.tel})</>}</span>) : 'aucun ouvrier d’astreinte désigné.'}</Note>
+      )}
+      <div><label className="lbl" htmlFor="pouv">Ouvrier responsable</label>
         <select className="in" id="pouv" value={ouvrierId} onChange={e => onOuvrier(e.target.value)}>
           <Opts placeholder="Choisir…" list={ouvOptions} />
         </select></div>
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="lbl">Renforts (plusieurs ouvriers sur la mission)</legend>
+        {renfortOptions.map(o => (
+          <label key={o.v} className="row s13 flex-nowrap !gap-2 py-0.5"><input type="checkbox" checked={o.checked} disabled={!ouvrierId} onChange={e => onToggleRenfort(o.v, e.target.checked)} /> {o.l}</label>
+        ))}
+        {!ouvrierId && <div className="muted small">Choisissez d’abord le responsable.</div>}
+      </fieldset>
       <div className="grid grid-cols-[1fr_110px] gap-2.5">
         <div><label className="lbl" htmlFor="pdate">Date</label><input className="in" type="date" id="pdate" value={date} min={TODAY} onChange={e => onDate(e.target.value)} /></div>
         <div><label className="lbl" htmlFor="pdeb">Début</label><select className="in" id="pdeb" value={debut} onChange={e => onDebut(e.target.value)}><Opts list={slots} placeholder="—" /></select></div>

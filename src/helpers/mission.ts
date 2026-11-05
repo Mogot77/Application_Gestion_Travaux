@@ -1,7 +1,23 @@
 /* Déroulement d'une mission par l'ouvrier : démarrage, fin, reprise, rapport généré automatiquement (logique pure). */
-import type { AppState, LigneStatut, Rapport, Rdv } from '../types'
-import { getD, hist } from './domain'
+import type { AppState, LigneStatut, Rapport, Rdv, SuiteSupp, SuppRapport } from '../types'
+import { equipeIds, getD, getOuv, hist } from './domain'
 import { fday, nowTime } from './dates'
+
+/** Contrôles de fin de mission à cocher dans le rapport. */
+export const CHECKS_FIN = [
+  'Zone de travail nettoyée',
+  'Déchets et gravats évacués',
+  'Matériel et outils rangés',
+  'Occupant informé de la fin des travaux',
+  'Eau / électricité / gaz rétablis',
+  'Sécurité vérifiée avant départ',
+]
+
+/** Suites possibles d'un travail supplémentaire constaté sur place. */
+export const SUITES_SUPP: [SuiteSupp, string][] = [['realise', 'Fait sur place'], ['programmer', 'À programmer'], ['validation', 'À faire valider']]
+
+/** Travail supplémentaire saisi par l'ouvrier à la fin de la mission. */
+export type SuppSaisie = { piece: string; description: string; duree: number; suite: SuiteSupp }
 
 export type FinMission = {
   /** Statut de chaque ligne de travaux ST de la demande, dans l'ordre. */
@@ -15,6 +31,12 @@ export type FinMission = {
   /** Photos de ce qui a été fait : intégrées au rapport. */
   photosApres: string[]
   signataire: string
+  /** Travaux supplémentaires constatés sur place. */
+  supps?: SuppSaisie[]
+  /** Contrôles de fin de mission cochés. */
+  checks?: string[]
+  /** Nombre de déplacements. */
+  deplacements?: number
 }
 
 export const MOTIFS_REPORT_EXTRA = ['Travaux à poursuivre', 'Matériel ou pièce manquant']
@@ -80,12 +102,15 @@ export function finishMission(s: AppState, rdvId: string, f: FinMission, nowMs: 
 
   const rapport: Rapport = {
     tempsMin,
+    equipe: equipeIds(r).map(id => getOuv(s, id)?.nom).filter((n): n is string => !!n),
+    deplacements: f.deplacements ?? 1,
+    checks: f.checks ?? [],
     photosAvant: r.photosAvant ?? [],
     photosApres: r.photosApres,
     lignes: f.lignes,
     motifs: f.lignes.map(l => (l === 'realisee' ? '' : f.motif)),
     conso: f.conso,
-    supps: [],
+    supps: (f.supps ?? []).map((x): SuppRapport => ({ photo: '', piece: x.piece, lot: '', nature: '', description: x.description, duree: x.duree, suite: x.suite, suiteLabel: SUITES_SUPP.find(([k]) => k === x.suite)?.[1] ?? x.suite })),
     obs: f.obs,
     signature: '',
     signataire: f.signataire,

@@ -1,5 +1,6 @@
 import { dureeST, logAdr, shortLot } from '@/helpers/domain'
 import { TODAY, fd, fday, fdur, fdy, ftime, toMin, toTime } from '@/helpers/dates'
+import { CHECKS_FIN } from '@/helpers/mission'
 import { Dots } from './constants'
 import type { BoxProps, FakeQrProps, PagesProps } from './types'
 
@@ -33,7 +34,7 @@ const Blank = () => <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
 
 /** Recto (fiche d'intervention) et verso (compte rendu) d'une demande. */
 const Pages = ({ m }: PagesProps) => {
-  const { d, log, r, imp, o, rp, lignes, photos, supps, motifsAcces } = m
+  const { d, log, r, imp, o, equipe, rp, lignes, photos, supps, motifsAcces } = m
   const urgColor = d.urgence === 'urgent' ? '#B42318' : '#111'
 
   return (
@@ -57,7 +58,7 @@ const Pages = ({ m }: PagesProps) => {
             <dt>Établissement</dt><dd>{log?.etab} · {log?.section}</dd>
             <dt>Demandeur</dt><dd>{d.auteur}, {d.fonction.toLowerCase()} · {d.tel || '[téléphone]'}</dd></dl></div>
           <div><h3>Planification</h3><dl className="mt-2">
-            <dt>Ouvrier</dt><dd>{o ? o.nom : Dots}</dd>
+            <dt>{equipe.length > 1 ? 'Équipe' : 'Ouvrier'}</dt><dd>{equipe.length ? equipe.join(', ') : Dots}</dd>
             <dt>Date</dt><dd>{r ? fday(r.date) : Dots}</dd>
             <dt>Créneau</dt><dd>{r ? `${r.debut} – ${toTime(toMin(r.debut) + r.duree)}` : Dots}</dd>
             <dt>Durée est.</dt><dd>{fdur(dureeST(d))}</dd></dl></div>
@@ -96,14 +97,16 @@ const Pages = ({ m }: PagesProps) => {
           <span><Box on={r?.etat === 'done'} />Intervention réalisée</span><span><Box on={!!imp} />Report nécessaire</span>
           {motifsAcces.map(mo => <span key={mo}><Box on={!!imp && imp.motifImp === mo} />{mo}</span>)}</div></div>
         <div><h3>Main d'œuvre</h3><table className="mt-2"><thead><tr><th>Ouvrier</th><th>Début</th><th>Fin</th><th>Heures</th><th>Déplacements</th></tr></thead><tbody>
-          {rp && r && o ? <tr><td>{o.nom}</td><td>{ftime(r.debutReel) || r.debut}</td><td>{ftime(r.finReel)}</td><td>{fdur(rp.tempsMin)}</td><td>1</td></tr> : <Blank />}
+          {rp && r && o
+            ? (rp.equipe?.length ? rp.equipe : [o.nom]).map((nom, i) => <tr key={nom}><td>{nom}</td><td>{ftime(r.debutReel) || r.debut}</td><td>{ftime(r.finReel)}</td><td>{fdur(rp.tempsMin)}</td><td>{i === 0 ? rp.deplacements ?? 1 : ''}</td></tr>)
+            : <Blank />}
           <Blank /></tbody></table></div>
         <div><h3>Statut des travaux</h3><table className="mt-2"><thead><tr><th className="w-[30px]">N°</th><th>Ligne</th><th className="w-20">Réalisée</th><th className="w-20">Partielle</th><th className="w-[90px]">Non réalisée</th></tr></thead><tbody>
           {lignes.map((l, i) => { const st = rp ? rp.lignes[i] : ''; return <tr key={i}><td>{i + 1}</td><td>{l.piece} · {l.nature}</td><td><Box on={st === 'realisee'} /></td><td><Box on={st === 'partielle'} /></td><td><Box on={st === 'non_realisee'} /></td></tr> })}
         </tbody></table></div>
         <div><h3>Travaux supplémentaires constatés sur place <span className="font-normal normal-case tracking-normal text-muted">(photo obligatoire sur mobile)</span></h3>
           <table className="mt-2"><thead><tr><th>Pièce</th><th>Travaux</th><th className="w-[70px]">Temps</th><th className="w-[110px]">Fait / à prog.</th></tr></thead><tbody>
-            {supps.map((s, i) => <tr key={i}><td>{s.piece}</td><td>{shortLot(s.lot)} · {s.nature} — {s.description}</td><td>{fdur(s.duree)}</td><td>{s.suiteLabel}</td></tr>)}
+            {supps.map((s, i) => <tr key={i}><td>{s.piece}</td><td>{[shortLot(s.lot), s.nature].filter(Boolean).join(' · ')}{s.lot || s.nature ? ' — ' : ''}{s.description}</td><td>{fdur(s.duree)}</td><td>{s.suiteLabel}</td></tr>)}
             {!supps.length && <><tr><td>&nbsp;</td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td></tr></>}</tbody></table></div>
         {rp && ((rp.photosAvant ?? []).length > 0 || (rp.photosApres ?? []).length > 0) && (
           <div><h3>Photos de l'intervention</h3>
@@ -115,6 +118,7 @@ const Pages = ({ m }: PagesProps) => {
             ))}
           </div>
         )}
+        <div><h3>Contrôles de fin de mission</h3><div className="mt-2.5 grid grid-cols-2 gap-x-[22px] gap-y-1.5">{CHECKS_FIN.map(c => <span key={c}><Box on={!!rp?.checks?.includes(c)} />{c}</span>)}</div></div>
         <div><h3>Matériel utilisé</h3><p className="mb-0 mt-2 min-h-9">{rp ? rp.conso.map(c => `${c.nom} × ${c.qte}`).join(' · ') || 'aucun' : ''}</p></div>
         <div><h3>Observations</h3><p className="mb-0 mt-2 min-h-12">{rp ? rp.obs || '—' : ''}</p></div>
         <div className="grid grid-cols-2 gap-5">

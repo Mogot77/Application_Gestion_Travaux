@@ -30,7 +30,7 @@ export const FinishForm: Story = {
     <div className="grid max-w-xl gap-3">
       <FinishMissionForm
         debut="08:35" lignes={mockDemandes[0].lignes} motifs={mockState.ref.motifsAcces}
-        conso={mockDemandes.flatMap(d => d.consommables).slice(0, 2)}
+        conso={mockDemandes.flatMap(d => d.consommables).slice(0, 2)} equipe={['Karim B.', 'Sophie L.']}
       />
     </div>
   ),
